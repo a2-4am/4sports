@@ -1,0 +1,91 @@
+//sports (counts are approximate)
+baseball (10)
+basketball (3)
+billiards (2)
+boxing (3)
+chess (5)
+football (8)
+golf (6)
+hockey (2)
+karate (4)
+racing (6)
+shuffleboard (1)
+soccer (2)
+wrestling (3)
+collection (8) (e.g. * Games)
+
+//migrate from Total Replay
+Battle Chess
+Bop'n Wrestle
+California Games
+Fight Night
+Formula 1 Racer
+Fuji Crowded Speedway
+Hardball
+International Gran Prix
+Karate Champ
+One on One
+Shuffleboard
+Ski Crazed
+Speedway Classic
+Street Sports Baseball
+Street Sports Basketball
+Street Sports Football
+Street Sports Soccer
+Summer Games
+Summer Games II
+Tag Team Wrestling
+The Games: Summer Edition
+The Games: Winter Edition
+Test Drive
+Track & Field
+Winter Games
+World Games [DHGR]
+World Karate Championship
+
+//ported
+Black Belt
+Championship Baseball
+Championship Wrestling
+GBA Championship Basketball
+Gran Prix Circuit
+
+//TODO
+Autobahn
+Championship Boxing [4am crack]
+Championship Golf [4am crack]
+Colossus Chess IV (Firebird)
+Competition Karate
+Chess 7.0 (Odesta)
+Dave Winfield's Batter Up [4am crack]
+Earl Weaver Baseball
+Fore! [4am crack]
+GFL Championship Football [4am crack]
+Hi-Res Computer Golf [4am crack]
+Hi-Res Computer Golf 2
+Hi-Res Football
+Hi-Res Soccer
+International Hockey
+Joe Thiesman Pro Football
+John Elway's Quarterback
+John Madden Football
+Micro League Baseball
+MicroChess 2.0 (Personal Software)
+Olympic Decathlon
+Pool 1.5
+Professional Tour Golf [4am crack]
+Pure Stat Baseball
+Sargon III (Spinnaker)
+Star League Baseball
+Star Rank Boxing
+Super Sunday [4am crack]
+Superstar Ice Hockey
+Superstar Indoor Sports
+Tuesday Morning Quarterback [4am crack]
+The Fidelity Chessmaster 2100 (Software Toolworks)
+The Sporting News Baseball [4am crack]
+The World's Greatest Baseball Game (Enhanced Version) [4am crack]
+The World's Greatest Football Game [4am crack]
+Trick Shot
+World Class Leader Board
+World Series Baseball
