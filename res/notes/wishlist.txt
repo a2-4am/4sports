@@ -12,7 +12,7 @@ racing (6)
 shuffleboard (1)
 soccer (2)
 wrestling (3)
-collection (8) (e.g. * Games)
+The Games (8)
 
 //migrate from Total Replay
 Battle Chess
@@ -49,6 +49,7 @@ Championship Baseball
 Championship Wrestling
 GBA Championship Basketball
 Gran Prix Circuit
+Superstar Ice Hockey
 
 //TODO
 Autobahn
@@ -79,7 +80,6 @@ Sargon III (Spinnaker)
 Star League Baseball
 Star Rank Boxing
 Super Sunday [4am crack]
-Superstar Ice Hockey
 Superstar Indoor Sports
 Tuesday Morning Quarterback [4am crack]
 The Fidelity Chessmaster 2100 (Software Toolworks)
