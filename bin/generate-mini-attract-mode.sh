@@ -46,19 +46,6 @@ cat res/GAMES.CONF |
         cat res/ATTRACT.CONF |
             grep "^$game=0" >> /tmp/g
 
-        if [ "$game" == "SPARE.CHANGE" ]; then
-            echo "SPCARTOON.1=0" >> /tmp/g
-            echo "SPCARTOON.2=0" >> /tmp/g
-            echo "SPCARTOON.3=0" >> /tmp/g
-            echo "SPCARTOON.4=0" >> /tmp/g
-            echo "SPCARTOON.5=0" >> /tmp/g
-            echo "SPCARTOON.6=0" >> /tmp/g
-        fi
-
-        if [ "$game" == "PRINCEUNP" ]; then
-            echo "ARTWORK.SHR/POP.END=C" >> /tmp/g
-        fi
-
         # add eof
         echo -e "\n[eof]" >> /tmp/g
 
