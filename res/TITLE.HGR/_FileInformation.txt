@@ -2,4 +2,5 @@
 
 BLACK.BELT=Type(06),AuxType(4000),Access(C3)
 SUMMER.GAMES=Type(06),AuxType(4000),Access(C3)
+SUMMER.GAMES.II=Type(06),AuxType(4000),Access(C3)
 _FileInformation.txt=Type(06),AuxType(4000),Access(C3)
