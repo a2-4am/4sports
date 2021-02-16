@@ -1,0 +1,17 @@
+;license:MIT
+;(c) 2019-2020 by 4am/qkumba
+;
+!cpu 6502
+!to "build/FX/MANDELBROT.RIP",plain
+*=$6000
+
+         !source "src/fx/fx.hgr.precomputed.3bit.a"
+
+         +FX_INITONCE_3BIT CoordinatesFile, Start
+         +FX_RIPPLE_3BIT
+Start
+         +FX_PRECOMPUTED_3BIT Coordinates3Bit
+
+CoordinatesFile
+         !byte 18
+         !text "FX/MANDELBROT.DATA"

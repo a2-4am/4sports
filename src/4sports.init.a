@@ -1,0 +1,462 @@
+;license:MIT
+;(c) 2018-2020 by 4am
+;
+; first-run initialization code
+;
+; This file is included directly and is run from $2000/main as soon as the
+; .SYSTEM file is loaded
+;
+
+         +READ_ROM_NO_WRITE
+         sta   PRIMARYCHARSET
+         sta   CLR80VID
+         sta   STOREOFF
+         sta   READMAINMEM
+         sta   WRITEMAINMEM
+         jsr   ROM_TEXT
+         jsr   ROM_HOME
+         jsr   ROM_NORMAL
+         jsr   ROM_IN0
+         jsr   ROM_PR0
+         jsr   Has64K                ; check for 64K (required)
+         bcc   +
+
+         ldy   #@no64Klen
+-        lda   @s_no64K,y
+         sta   $6B6,y
+         dey
+         bpl   -
+@hang    bmi   @hang
+@s_no64K !scrxor $80,"REQUIRES 64K"
+@no64Klen=(*-@s_no64K)-1
+
++
+         lda   #0
+         sta   zpMachineStatus
+         sta   SETC3ROM
+         jsr   HasVidHDCard          ; check for VidHD card (allows super hi-res artwork even on non-IIgs machines)
+         sta   CLRC3ROM
+         ror   zpMachineStatus
+         lda   ROM_MACHINEID
+         cmp   #$06
+         bne   @NotGS
+         sec
+         jsr   $FE1F                 ; check for IIgs (allows super hi-res artwork)
+         bcs   @NotGS
+         sec
+         +HIDE_NEXT_BYTE
+@NotGS   clc
+         ror   zpMachineStatus
+         jsr   Has128K               ; check for 128K (allows DHGR slideshows and 128K games)
+         ror   zpMachineStatus
+         jsr   HasJoystick           ; check for joystick (absence is OK but we filter out some games that require a joystick)
+         ror   zpMachineStatus
+                                     ; now bit 4 = 1 if VidHD
+                                     ;     bit 5 = 1 if IIgs
+                                     ;     bit 6 = 1 if 128K
+                                     ;     bit 7 = 1 if joystick
+                                     ; and all other bits are 0 (we'll set bit 3 after copying it to LC RAM)
+
+         ; accommodate uppercase-only machines (64K ][+ is supported)
+         lda   ROM_MACHINEID
+         cmp   #$A0
+         beq   +                     ; Spectrum ED
+         cmp   #$06
+         beq   +
+         lda   #$DF
+         +HIDE_NEXT_2_BYTES
++        lda   #$FF
+         sta   zpCharMask
+
+         ; print text title in same place as graphical title will appear
+         ldy   #8
+-        lda   TOTAL,y
+         ora   #$80
+         sta   $04B7,y
+         dey
+         bpl   -
+         ldy   #10
+-        lda   REPLAY,y
+         ora   #$80
+         sta   $0536,y
+         dey
+         bpl   -
+
+         ; increase text window width so we can print to the edge of the screen without scrolling
+         inc   $21
+         ; print version or build number in lower right corner
+         ldx   #30
+         ldy   #23
+         jsr   SetCursorPosition
+         +LDADDR LoadingVersion
+         jsr   LoadingPrint
+!ifndef RELEASE {
+         lda   LoadingBuild
+         ldx   LoadingBuild+1
+         ldy   #0
+         jsr   PrintAsDecimal
+}
+
+         ; set up text window so it only covers lower left corner
+         lda   #30
+         sta   $21
+         lda   #19
+         sta   $22
+
+         ; print machine configuration in lower left corner
+         ldx   #0
+         ldy   #23
+         jsr   SetCursorPosition
+
+         ; if zpMachineStatus AND IS_IIGS then print 'IIgs'
+         ; else if zpMachineStatus AND HAS_128K then print '128K'
+         ; else print '64K'
+         lda   zpMachineStatus
+         and   #IS_IIGS
+         beq   +
+         +LDADDR LoadingIIgs
+         bne   @printMem
++        lda   zpMachineStatus
+         and   #HAS_128K
+         beq   +
+         +LDADDR Loading128K
+         bne   @printMem
++
+         +LDADDR Loading64K
+@printMem
+         jsr   LoadingPrint
+
+         ; if zpMachineStatus AND HAS_JOYSTICK then CR & print 'joystick'
+         lda   zpMachineStatus
+         and   #HAS_JOYSTICK
+         beq   +
+         jsr   LoadingCR
+         +LDADDR LoadingJoystick
+         jsr   LoadingPrint
++
+         ; if zpMachineStatus AND HAS_VIDHD then CR & print 'VidHD'
+         lda   zpMachineStatus
+         and   #HAS_VIDHD
+         beq   +
+         jsr   LoadingCR
+         +LDADDR LoadingVidHD
+         jsr   LoadingPrint
++
+
+@Relocate
+         ; if zpMachineStatus AND IS_IIGS then check for CFFA
+         ; before performing any further disk access
+         lda   zpMachineStatus
+         and   #IS_IIGS
+         beq   +
+         jsr   HackThaCFFA
+
++
+         +READ_ROM_WRITE_RAM2
+         jsr   init                  ; initialize and relocate ProRWTS2 to $D400 in RAM bank 2
+                                     ; ProRWTS2 disk-data live at $D000-D3FF
+         ldx   #$00                  ; relocate program code to top of language card
+                                     ; since we end at $0000 now, adjust low offset to avoid destroying zpage
+@FM      lda   FirstMover - (RELBASE & $FF),x
+         sta   RELBASE & $FF00,x
+         inx
+         bne   @FM
+         inc   @FM+2
+         inc   @FM+5
+         bne   @FM
+
+         ldy   #>(255 + EvenLasterMover - LastMover)
+@LM      lda   COPYSRC,x             ; relocate pseudo-ProDOS to RAM bank 2
+         sta   COPYDST,x
+         inx
+         bne   @LM
+         inc   @LM+2
+         inc   @LM+5
+         dey
+         bne   @LM
+
+         ldy   #4
+@ELM     lda   FONTSRC,x
+                                     ; relocate font data to RAM bank 2
+         sta   FONTDST,x
+         inx
+         bne   @ELM
+         inc   @ELM+2
+         inc   @ELM+5
+         dey
+         bne   @ELM
+
+         +READ_ROM_NO_WRITE
+         jsr   BuildAcceleratorFunction
+         +READ_RAM2_WRITE_RAM2
+         +ST16 @accelSrc
+         dex
+-
+@accelSrc=*+1
+         lda   $FDFD,x               ; copy (de)acceleration functions to RAM bank 2
+         sta   DisableAccelerator,x
+         dex
+         bpl   -
+
+         +READ_ROM_WRITE_RAM2
+         jsr   BuildVBLFunction
+         +DISABLE_ACCEL              ; cycle counting in Mockingboard detection requires 1MHz
+
+         +LDADDR FoundMockingboardCallback
+         jsr   GetMockingboardStuff
+         +READ_RAM2_WRITE_RAM2
+         stx   MockingboardStuff     ; save mockingboard slot and type in LC RAM
+         +READ_ROM_NO_WRITE
+
+         ; if Mockingboard AND HAS_SPEECH then print CR & '...and it talks!'
+         txa
+         and   #HAS_SPEECH
+         beq   +
+         jsr   LoadingCR
+         +LDADDR LoadingMockingboardSpeech
+         jsr   LoadingPrint
+
++
+         +READ_RAM2_WRITE_RAM2
+         jsr   EnableAccelerator
+         jmp   OneTimeSetup
+
+         ; ProRWTS2 has its own function to relocate itself
+         !source "src/prorwts2.a"
+ProRWTSBuffer
+         ; these routines will only be called once, from main memory, before relocating to language card
+         !source "src/hw.vidhd.a"
+         !source "src/hw.memcheck.a"
+         !source "src/hw.joystick.a"
+         !source "src/hw.mockingboard.a"
+
+SetCursorPosition
+         stx   HTAB
+         sty   VTAB
+         jmp   $FC22
+
+LoadingPrint
+         +ST16 PTR
+         ldy   #0
+         lda   (PTR),y
+         sta   @max
+         sty   i
+-        inc   i
+         ldy   i
+         lda   (PTR),y
+         ora   #$80
+         +FORCE_UPPERCASE_IF_REQUIRED
+         jsr   ROM_COUT
+         ldy   i
+@max=*+1
+         cpy   #$FD                  ; SMC
+         bne   -
+         rts
+
+LoadingCR
+         lda   #$8D
+         jmp   ROM_COUT
+
+FoundMockingboardCallback
+; in:    zp$81 contains slot number in form $Cx
+         jsr   LoadingCR
+         +LDADDR LoadingMockingboard
+         jsr   LoadingPrint
+         lda   $81
+         and   #$0F
+         ora   #$B0
+         jmp   ROM_COUT
+
+TOTAL
+         !text "T O T A L"
+REPLAY
+         !text "R E P L A Y"
+!ifndef RELEASE {
+LoadingVersion
+         !byte 9
+         !text "build 000"
+LoadingBuild
+         !word BUILDNUMBER
+} else {
+LoadingVersion
+         !byte 10
+         !text "      v1.0"
+}
+Loading64K
+         !byte 3
+         !text "64K"
+Loading128K
+         !byte 4
+         !text "128K"
+LoadingIIgs
+         !byte 4
+         !text "IIgs"
+LoadingJoystick
+         !byte 8
+         !text "joystick"
+LoadingVidHD
+         !byte 5
+         !text "VidHD"
+LoadingMockingboard
+         !byte 21
+         !text "Mockingboard in slot "
+LoadingMockingboardSpeech
+         !byte 16
+         !text "...and it talks!"
+
+!ifndef RELEASE {
+PrintAsDecimal
+         jsr   $FF4A
+
+         lda   $FDE2
+         cmp   #$EA
+         bne   +
+         dec   @addr+1               ; fix for Laser
++
+--       lda   #$00
+         clv
+         ldx   #$18
+-        cmp   #$05
+         bcc   +
+         sbc   #$85
+         sec
++        rol   $45
+         rol   $46
+         rol   $47
+         rol
+         dex
+         bne   -
+         pha
+         lda   #$FD
+         pha
+@addr    lda   #$E1
+         pha
+         bvs   --
+         rts
+}
+
+         !source "src/hw.accel.a"
+         !source "src/hw.vbl.init.a"
+         !source "src/parse.games.a"
+
+OneTimeSetup
+         lda   zpMachineStatus
+         sta   MachineStatus         ; save machine status in LC RAM
+         and   #IS_IIGS
+         beq   @NotGSOS
+!cpu 65816
+         lda   $E100BD               ; Make sure GS/OS was the boot OS
+!cpu 6502
+         beq   @NotGSOS
+         jsr   PrepareGSOS
+@NotGSOS
+
+         ldy   #$0b
+CopyDevs
+         lda   $BF13,y
+         sta   promote + $13,y
+         dey
+         bpl   CopyDevs
+
+         lda   $BF30
+         sta   promote + ProDOS_unit - $bf00
+                                     ; save unit in LC bank 2 while overriding !pseudopc
+
+         lda   hddopendir+1          ; save current directory as 'root'
+         ldy   hddopendir+3
+         jsr   SwitchToBank1
+         +ST16 gRootDirectory
+
+         jsr   LoadFile              ; load preferences file into $8000
+         !word kRootDirectory
+         !word kGlobalPrefsFilename
+-        !word $8000
+         jsr   ParseKeyValueList     ; parse contents into OKVS data structure into LC RAM bank
+         !word gGlobalPrefsStore
+         !word -
+         !byte 16
+         +LD16 SRC                   ; (SRC) points to free space after the OKVS data structure we just created
+         +ST16 gGamesListStore       ; save pointer to free space for next store
+
+         jsr   LoadFile              ; load games list file into $8200
+         !word kRootDirectory
+         !word @kGameListConfFile
+-        !word $8200
+         jsr   ParseGamesList        ; parse games list into OKVS data structure in LC RAM bank
+         !word gGamesListStore
+         !word -
+
+!ifndef RELEASE {
+         +READ_ROM_NO_WRITE
+         lda   #40
+         sta   $21
+         lda   #36
+         sta   $24
+         dec   $25
+         jsr   $FC22
+         lda   SRC+1
+         jsr   $FDDA
+         lda   SRC
+         jsr   $FDDA
+         +READ_RAM1_WRITE_RAM1
+}
+
+         +LDADDR gGamesListStore
+         jsr   okvs_len
+         +LD16 WCOUNT
+         +ST16 GameCount
+         +ST16 SAVE
+
+         jsr   pref_get              ; see if cheats are enabled by default
+         !word kCheat
+         !word 0
+         +ST16 PTR                   ; (PTR) -> cheat pref value as length-prefixed string '1' or '0'
+         ldy   #1
+         lda   (PTR),y               ; A = #$B1 or #$B0
+         and   #1                    ; A = #$01 or #$00
+         asl
+         asl
+         asl                         ; A = #$08 or #$00
+         ora   MachineStatus
+         sta   MachineStatus         ; set bit 3 of MachineStatus
+
+         ; calculate and update visible game count (3-digit decimal number as ASCII string)
+         dey                         ; Y = 0
+@outer
+         lda   #0
+         pha
+@inner
+         lda   SAVE
+         sec
+         sbc   @kPowersOfTen,y
+         sta   SAVE
+         lda   SAVE+1
+         sbc   #0
+         bcc   @digitDone
+         sta   SAVE+1
+         pla
+         adc   #0
+         pha
+         jmp   @inner
+@digitDone
+         lda   SAVE
+         adc   @kPowersOfTen,y
+         sta   SAVE
+         pla
+         ora   #$30
+         sta   VisibleGameCount,y
+         iny
+         cpy   #$03
+         bcc   @outer
+
+         bit   CLEARKBD
+         jmp   Reenter
+
+@kGameListConfFile
+         !byte 10
+         !text "GAMES.CONF"
+
+@kPowersOfTen
+         !byte 100
+         !byte 10
+         !byte 1

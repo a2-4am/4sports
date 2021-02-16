@@ -1,0 +1,153 @@
+;License:MIT
+;(c) 2018-2020 by 4am
+;
+; miscellaneous UI functions
+;
+; Public functions
+; - Home
+; - BlankDHGR
+; - DHGRMode
+; - IsSearchKey
+; - IsUpDownOrRightArrow
+;
+
+;------------------------------------------------------------------------------
+; Home
+; clear and display text screen (HARDER THAN IT SOUNDS)
+;
+; in:    none
+; out:   none
+;------------------------------------------------------------------------------
+Home
+         lda   MachineStatus
+         and   #SUPPORTS_SHR
+         beq   @noSHR
+         lda   #%00000001            ; bit 7 = 0 -> IIgs Apple II-compatible video modes
+                                     ; bit 6 = 0 -> IIgs 128K memory map is the same as the Apple IIe
+                                     ; bit 5 = 0 -> IIgs DHGR is color, not monochrome
+                                     ; bits 1-4 reserved
+                                     ; bit 0 = 1 -> disable bank latch
+         sta   NEWVIDEO
+         ldy   #$F0
+         sty   TBCOLOR               ; white text on black background
+         lsr
+         sta   CLOCKCTL              ; black border
+         sta   CLOCKCTL              ; set twice for VidHD
+@noSHR
+         sta   gMachineInDHGRMode    ; A=0 here
+         ldy   #$2C                  ; BIT
+         sty   PageFrom
+         ldx   #$04
+         stx   PageTo+2
+         lda   #$A0                  ; clear text screen page 1
+         jsr   ClearGR
+         sta   WRITEAUXMEM
+         ldx   #$04
+         stx   PageTo+2
+         jsr   ClearGR
+         sta   WRITEMAINMEM
+
+         jsr   WaitForVBL
+         sta   DHIRESOFF             ; get out of DHGR mode
+         sta   CLR80VID              ; /!\ order of operations matters for RGB card
+         lda   PAGE1
+         lda   TEXTMODE
+         jmp   UnwaitForVBL
+
+;------------------------------------------------------------------------------
+; BlankDHGR
+; clear and show DHGR page 1 without flickering
+;
+; in:    none
+; out:   text page clobbered (but screen holes preserved)
+;        $2000..$3FFF/main and /aux cleared
+;------------------------------------------------------------------------------
+BlankDHGR
+         jsr   Home
+         jsr   ClearHGR1             ; clear hi-res screen 1
+         sta   WRITEAUXMEM
+         jsr   ClearHGR1             ; clear hi-res screen 1 in auxmem
+         sta   WRITEMAINMEM
+
+         ; /!\ execution falls through here to DHGRMode
+;------------------------------------------------------------------------------
+; DHGRMode
+; switch to DHGR mode (HARDER THAN IT SOUNDS)
+;
+; in:    none
+; out:   none
+;------------------------------------------------------------------------------
+DHGRMode
+         ; magic sequence to set colour mode on an RGB card
+         ; SET80VID clears the RGB-card shift-register
+         ; DHIRESON/OFF shifts that bit into the mode register
+         ; we do that twice because the mode register is two bits wide
+         ; we need mode 00 for colour
+
+         jsr   WaitForVBL
+         sta   SET80VID
+         sta   DHIRESON
+         sta   DHIRESOFF
+         sta   DHIRESON
+         sta   DHIRESOFF
+
+         sta   DHIRESON              ; then turn DHGR on
+         bit   PAGE1
+         lda   #1
+         sta   OffscreenPage
+         sta   gMachineInDHGRMode
+         jsr   UnwaitForVBL
+         jmp   HGRMode
+
+;------------------------------------------------------------------------------
+; IsSearchKey
+; test whether accumulator contains a key that might trigger a new textrank
+; search
+;
+; in:    A = key
+; out:   A &= 0x7F
+;        Y preserved
+;        X clobbered
+;        Z = 1 and C = 0 if this is a search key
+;        Z = 0 if this is not a search key
+;------------------------------------------------------------------------------
+IsSearchKey
+         and   #$7F                  ; strip high bit for search characters
+         cmp   #$30                  ; control keys and punctuation ignored
+         bcc   @badkey
+         cmp   #$3A                  ; numbers are good input
+         bcc   @goodkey
+         cmp   #$41                  ; more punctuation (also ignored)
+         bcc   @badkey
+         cmp   #$5B                  ; uppercase letters are good input
+         bcs   +
+         ora   #$20                  ; convert uppercase letters to lowercase
+@goodkey
+         ldx   #0
+         rts
+
++        cmp   #$61                  ; more punctuation (also ignored)
+         bcc   @badkey
+         cmp   #$7B                  ; lowercase letters are good input
+         bcc   @goodkey
+@badkey
+         ldx   #kInputError          ; also #kSoftBell
+         rts
+
+;------------------------------------------------------------------------------
+; IsUpDownOrRightArrow
+; test whether accumulator contains ASCII code for up, down, or right arrow
+; search
+;
+; in:    A = key
+; out:   all registers preserved
+;        Z = 1 if accumulator was one of those 3 keys
+;        Z = 0 otherwise
+;------------------------------------------------------------------------------
+IsUpDownOrRightArrow
+         cmp   #$8B                  ; up arrow
+         beq   @done
+         cmp   #$95                  ; right arrow
+         beq   @done
+         cmp   #$8A                  ; down arrow
+@done    rts

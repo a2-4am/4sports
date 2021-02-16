@@ -1,0 +1,218 @@
+;license:MIT
+;(c) 2018-2020 by 4am & qkumba
+;
+; text rank - an implementation of the Quicksilver search rank algorithm
+;
+; Public functions
+; - BuildSearchStore
+; - ResetTextRank
+; - TextRankCallback (as okvs_iter_values callback)
+;
+; Public variables
+; - InputLength                      ; [byte] number of characters typed in search mode
+; - InputBuffer                      ; [25 bytes] characters typed in search mode
+;
+; Zero page variables
+; - SelectedIndex                    ; [byte] index in gSearchStore of currently selected game in search mode
+; - MatchCount                       ; [byte] number of games that match InputBuffer
+; - BestMatchScore                   ; [byte] raw ranking score (0-100) of current best match (updated during TextRankCallback)
+; - BestMatchIndex                   ; [byte] index in gSearchStore of current best match (updated during TextRankCallback)
+
+MaxInputLength = 26
+InputLength
+         !byte 0
+InputBuffer
+         !text "                         "
+
+;------------------------------------------------------------------------------
+; BuildSearchStore
+; Build a temporary data structure in main memory to support search UI.
+; Now that gGamesListStore no longer contains full game display names, we call
+; this to build a store that does. It's built in main memory and will be
+; clobbered as soon as we enter attract mode (mega- or mini-), run a game,
+; run a demo, or sneeze.
+;
+; in:    none
+; out:   gSearchStore populated
+;------------------------------------------------------------------------------
+BuildSearchStore
+         jsr   SwitchToBank2
+         jsr   EnableAcceleratorAndSwitchToBank1
+         +LDADDR gSearchStore
+         jsr   okvs_init
+
+         jsr   okvs_iter
+         !word gGamesListStore
+         !word @callback
+
+         jsr   SwitchToBank2
+         jmp   DisableAcceleratorAndSwitchToBank1
+@callback
+; callback called by okvs_iter on gGamesListStore
+
+; in:    A/Y contains address of filename
+;        $WINDEX contains 0-based index of the current record in gGamesListStore (word)
+; out:   all registers and flags clobbered
+         +ST16 @key
+         jsr   GetGameDisplayName
+         +ST16 @value
+@append
+         jsr   okvs_append
+         !word gSearchStore
+@key     !word $FDFD                 ; SMC
+@value   !word $FDFD                 ; SMC
+         !byte 0
+         rts
+
+;------------------------------------------------------------------------------
+; ResetTextRank
+; reset the Match variables to allow re-scanning (e.g. because of backspace)
+
+; in:    nothing
+; out:   X, MatchCount, BestMatchScore, BestMatchIndex zeroed
+;------------------------------------------------------------------------------
+ResetTextRank
+         ldx   #0
+         stx   MatchCount
+         stx   BestMatchScore
+         dex
+         stx   BestMatchIndex
+         stx   BestMatchIndex+1
+         rts
+
+;------------------------------------------------------------------------------
+; TextRankCallback
+; callback called by okvs_iter_values on gSearchStore
+; to calculate a ranking score for a single game display name
+; against the current InputBuffer
+
+; in:    A/Y contains address of game display name
+;        $WINDEX contains 0-based index of the current record in gSearchStore (word)
+; out:   all registers and flags clobbered
+;        MatchCount possibly incremented (if this game was a match at all)
+;        BestMatchScore and BestMatchIndex possibly updated (if this game
+;          was the best match so far)
+;------------------------------------------------------------------------------
+TextRankCallback
+         +ST16 zpstring              ; A/Y = address of this game display name
+         +LDADDR InputLength
+         +ST16 zpword
+         ldy   #0
+         lda   (zpstring),y
+         tax
+         dex
+         cpx   InputLength
+         bcc   ++
+         sta   gamelength
+         sty   runningscore
+         sty   runningscore+1
+         iny
+         sty   startat
+-        sty   i
+         lda   (zpword),y
+         jsr   tolower
+         sta   tmp
+         ldy   startat
+--       lda   (zpstring),y
+         jsr   tolower
+         cmp   tmp
+         beq   +
+         cpy   gamelength
+         iny
+         bcc   --
+++       rts                         ; no match :(
++        ldx   #80
+         cpy   startat
+         beq   +
+         ldx   #10
+         cpy   #1
+         beq   +
+         dey
+         lda   (zpstring),y
+         iny
+         cmp   #' '
+         bne   +
+         ldx   #90
++        txa
+         clc
+         adc   runningscore
+         sta   runningscore
+         bcc   +
+         inc   runningscore+1
++        tya
+         ldy   i
+         cpy   InputLength
+         bcs   +
+         iny
+         sta   startat
+         inc   startat
+         cmp   gamelength
+         bcc   -
+         rts                         ; no match :(
++        lda   runningscore
+         ldx   runningscore+1
+         ldy   gamelength
+         jsr   @div
+         sta   tmp
+         lda   runningscore
+         ldx   runningscore+1
+         ldy   InputLength
+         jsr   @div
+         clc
+         adc   tmp
+         lsr
+         adc   #0                    ; round fractions up
+         pha
+         ldy   #1
+         lda   (zpstring),y
+         jsr   tolower
+         sta   firstletter
+         pla
+         ldx   InputBuffer
+         cpx   firstletter
+         bne   +
+         cmp   #85
+         bcs   +
+         adc   #15
++        cmp   BestMatchScore
+         bcc   +
+         beq   +
+         sta   BestMatchScore
+         lda   WINDEX
+         sta   BestMatchIndex
+         lda   WINDEX+1
+         sta   BestMatchIndex+1
+         inc   MatchCount
++        rts
+
+@div
+         sta   num1
+         stx   num1+1
+         sty   num2
+         lda   #0
+         sta   remainder
+         sta   remainder+1
+         ldx   #16
+-        asl   num1
+         rol   num1+1
+         rol   remainder
+         rol   remainder+1
+         lda   remainder
+         sec
+         sbc   num2
+         bcc   +
+         sta   remainder
+         dec   remainder+1
+         inc   num1
++        dex
+         bne   -
+         lda   num1
+         rts
+
+tolower
+         cmp   #$41
+         bcc   +
+         cmp   #$5B
+         bcs   +
+         ora   #$20
++        rts

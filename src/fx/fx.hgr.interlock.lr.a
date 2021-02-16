@@ -1,0 +1,44 @@
+;license:MIT
+;(c) 2018 by 4am
+;
+!cpu 6502
+!to "build/FX/INTERLOCK.LR",plain
+*=$6000
+
+row = $FF
+
+         lda   #$00
+         sta   @h1
+         lda   #$27
+         sta   @h2
+@outerloop
+         lda   #$BF
+         sta   row
+@loop    lda   row
+         jsr   HGRCalc
+@h1=*+1
+         ldy   #$00
+         lda   ($3c),y
+         sta   ($26),y
+         dec   row
+         lda   row
+         jsr   HGRCalc
+@h2=*+1
+         ldy   #$27
+         lda   ($3c),y
+         sta   ($26),y
+         dec   row
+         lda   row
+         cmp   #$FF
+         bne   @loop
+         lda   #$20
+         jsr   WaitForKeyWithTimeout
+         bmi   @exit
+         inc   @h1
+         dec   @h2
+         bpl   @outerloop
+@exit    rts
+
+         !source "src/wait.a"
+         !source "src/fx/fx.hgr.common.a"
+         +HGR_CALC_ROUTINES

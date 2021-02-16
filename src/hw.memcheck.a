@@ -1,0 +1,79 @@
+;------------------------------------------------------------------------------
+; Has64K
+; Checks whether computer has functioning language card (64K)
+;
+; in:    none
+; out:   C clear if 64K detected
+;        C set if 64K not detected
+;        all other flags and registers clobbered
+;        ROM in memory (not LC RAM bank)
+;------------------------------------------------------------------------------
+Has64K
+         +READ_RAM1_WRITE_RAM1
+         lda   #$AA                  ; test #1 for $D0 page
+         sta   $D000
+         eor   $D000
+         bne   @no
+         lsr   $D000                 ; test #2 for $D0 page
+         lda   #$55
+         eor   $D000
+         bne   @no
+         clc
+         +HIDE_NEXT_BYTE
+@no      sec
+         +READ_ROM_NO_WRITE
+         rts
+
+;------------------------------------------------------------------------------
+; Has128K
+; Checks whether computer has functioning auxiliary memory (128K)
+;
+; in:    none
+; out:   C set if 128K detected
+;        C clear if 128K not detected
+;        all other flags and registers clobbered
+;        zp $80-$9F clobbered
+;        ROM in memory (not LC RAM bank)
+;
+; adapted from "Prince of Persia" by Jordan Mechner
+; (c) 1989 Broderbund Software
+; https://github.com/jmechner/Prince-of-Persia-Apple-II/blob/master/01%20POP%20Source/Source/BOOT.S#L119
+;------------------------------------------------------------------------------
+Has128K
+         +READ_ROM_NO_WRITE
+         sta   STOREOFF
+         lda   ROM_MACHINEID
+         cmp   #$A0
+         beq   +                     ; Spectrum ED
+         cmp   #6
+         bne   @no                   ; earlier than //e -> no 128K
++        lda   SLOT3STATUS
+         bmi   @no                   ; no 80-column card -> no 128K
+         ldx   #@checklen
+-        lda   @checker,x
+         sta   $80,x
+         dex
+         bpl   -
+         jmp   $80                   ; check if auxmem actually works
+@checker
+         lda   #$EE
+         sta   WRITEAUXMEM
+         sta   READAUXMEM
+         sta   $0C00
+         sta   $0800
+         lda   $0C00
+         cmp   #$EE
+         bne   @no
+         asl   $0C00
+         asl
+         cmp   $0C00
+         bne   @no
+         cmp   $0800
+         bne   @yes
+@no      clc
+         +HIDE_NEXT_BYTE
+@yes     sec
+@finish  sta   WRITEMAINMEM
+         sta   READMAINMEM
+         rts
+@checklen=*-@checker

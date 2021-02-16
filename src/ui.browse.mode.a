@@ -1,0 +1,182 @@
+;license:MIT
+;(c) 2018-2020 by 4am
+;
+; Browse Mode - main UI
+;
+; Public functions
+; - BrowseMode
+;
+
+;------------------------------------------------------------------------------
+; BrowseMode
+; main entry point for Browse Mode, which allows the user to browse the game
+; catalog in alphabetical order and launch games
+;
+; in:    none
+; out:   never returns to caller (may JMP to other major modes)
+;------------------------------------------------------------------------------
+BrowseMode
+         ldx   #$FF
+         txs
+
+@BrowseModeInputLoop
+         jsr   WaitForKeyFor30Seconds
+         bit   CLEARKBD
+
+; indices into BrowseDispatchTable below
+kBrowseSearch   = 0
+kBrowsePrevious = 1
+kBrowseNext     = 2
+kBrowseExitToSearch = 3
+kBrowseTab      = 4
+kBrowseLaunch   = 5
+kBrowseHelp     = 6
+kBrowseCredits  = 7
+kBrowseCheat    = 8
+kSoftBell       = 9 ; must match kInputError
+kBrowseJoystick = 10
+kBrowseQuit     = 11
+
+         ldy   #kNumBrowseKeys
+-        dey
+         bmi   @noKeyMatch
+         cmp   BrowseKeys,y
+         bne   -
+         ldx   BrowseKeyDispatch,y
+         bne   @BrowseDispatch       ; always branches
+
+@noKeyMatch
+         jsr   IsSearchKey
+         bne   @BrowseDispatch
+         ldx   #kBrowseSearch
+
+         ; execution falls through here
+@BrowseDispatch
+         ldy   BrowseDispatchTableLo,x
+         sty   @j+1
+         ldy   BrowseDispatchTableHi,x
+         sty   @j+2
+@j       jsr   $FDFD                 ; SMC
+         jmp   @BrowseModeInputLoop
+
+OnBrowseSearch
+         sta   InputBuffer
+         lda   #$01
+         sta   InputLength
+         jmp   SearchMode
+
+OnBrowsePrevious
+         +LDX16 gGameToLaunch
+         +CPX16_0
+         bne   @notFirstGame
+         +LDX16 GameCount
+@notFirstGame
+         +DEX16
+         jmp   notLastGame
+
+OnBrowseNext
+         +LDX16 gGameToLaunch
+         +INX16
+         +CPX16ADDR GameCount
+         bne   notLastGame
+         ldx   #0
+         ldy   #0
+notLastGame
+         +STX16 gGameToLaunch
+         jmp   OnBrowseChanged
+
+OnBrowseLaunch
+         jsr   PlayGame
+         jsr   BlankHGR
+         jmp   ForceBrowseChanged
+
+OnBrowseCheat
+         jsr   ToggleCheat
+         beq   ForceBrowseChanged    ; always branches because Z=1 on exit from ToggleCheat
+
+OnBrowseTab
+         jsr   MiniAttractMode
+         cmp   #$8D
+         beq   OnBrowseLaunch
+         ; execution falls through here
+ForceBrowseChanged
+         bit   CLEARKBD
+         ; execution falls through here
+OnBrowseChanged
+; in:    gGameToLaunch = game index (word)
+         jsr   SwitchToBank2
+         jsr   EnableAcceleratorAndSwitchToBank1
+         jsr   LoadGameTitleOffscreen
+         jsr   DrawUIWithoutDots
+         jmp   MaybeAnimateTitle
+BrowseCreditsWrapper
+         jsr   Credits
+         jmp   ForceBrowseChanged
+BrowseHelpWrapper
+         jsr   Help
+         jmp   ForceBrowseChanged
+
+;------------------------------------------------------------------------------
+
+BrowseDispatchTableLo
+         !byte <OnBrowseSearch
+         !byte <OnBrowsePrevious
+         !byte <OnBrowseNext
+         !byte <SearchMode
+         !byte <OnBrowseTab
+         !byte <OnBrowseLaunch
+         !byte <BrowseHelpWrapper
+         !byte <BrowseCreditsWrapper
+         !byte <OnBrowseCheat
+         !byte <SoftBell
+         !byte <Joystick
+         !byte <OnQuit
+BrowseDispatchTableHi
+         !byte >OnBrowseSearch
+         !byte >OnBrowsePrevious
+         !byte >OnBrowseNext
+         !byte >SearchMode
+         !byte >OnBrowseTab
+         !byte >OnBrowseLaunch
+         !byte >BrowseHelpWrapper
+         !byte >BrowseCreditsWrapper
+         !byte >OnBrowseCheat
+         !byte >SoftBell
+         !byte >Joystick
+         !byte >OnQuit
+
+kNumBrowseKeys = 14
+                                     ; number of entries in next 2 tables (each)
+BrowseKeys
+         !byte $83                   ; Ctrl-C = toggle cheat mode
+         !byte $81                   ; Ctrl-A = about
+         !byte $AF                   ; '/' = help
+         !byte $BF                   ; '?' = help
+         !byte $A0                   ; Space = mini attract mode
+         !byte $89                   ; TAB = mini attract mode
+         !byte $8D                   ; ENTER = launch current game
+         !byte $9B                   ; Esc = switch to search mode
+         !byte $8A                   ; down arrow = next
+         !byte $95                   ; right arrow = next
+         !byte $8B                   ; up arrow = previous
+         !byte $88                   ; left arrow = previous
+         !byte $90                   ; Ctrl-P = launch joystick calibration program
+         !byte $91                   ; Ctrl-Q = quit
+BrowseKeyDispatch
+         !byte kBrowseCheat
+         !byte kBrowseCredits
+         !byte kBrowseHelp
+         !byte kBrowseHelp
+         !byte kBrowseTab
+         !byte kBrowseTab
+         !byte kBrowseLaunch
+         !byte kBrowseExitToSearch
+         !byte kBrowseNext
+         !byte kBrowseNext
+         !byte kBrowsePrevious
+         !byte kBrowsePrevious
+         !byte kBrowseJoystick
+         !byte kBrowseQuit
+
+GameCount
+         !word 0

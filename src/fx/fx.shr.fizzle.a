@@ -1,0 +1,49 @@
+;license:MIT
+;(c) 2019-2020 by qkumba/4am/John Brooks
+
+!cpu 6502
+!to "build/FX/SHR.FIZZLE",plain
+*=$A000
+
+addrs=$80                            ; [128 bytes]
+src=addrs-$20                        ; [word]
+
+         lda   #$A0                  ; create address lookup table
+         tax
+         tay
+-        dey
+         sty   addrs-$21, x
+         dex
+         bne   -
+         sta   $C005
+-        lda   $9D00, y              ; pre-copy SHR SCB and palette
+         sta   $9D00, y
+         lda   $9E00, y
+         sta   $9E00, y
+         lda   $9F00, y
+         sta   $9F00, y
+         iny
+         bne   -
+loop     txa
+loop1    eor   #$60                  ; LFSR form 0x6000 with period 32767
+         tax
+loop2    lda   addrs, x
+         sta   src+1
+         lda   (src), y
+         sta   (src), y
+         txa
+         lsr
+         tax
+         tya
+         ror
+         tay
+         bcc   loop2
+         bne   loop
+         bit   $C000
+         bmi   exit
+         txa
+         bne   loop1
+exit     lda   $2000                 ; last lousy byte (because LFSR never hits 0)
+         sta   $2000
+         sta   $C004
+         rts

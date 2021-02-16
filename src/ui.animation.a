@@ -1,0 +1,75 @@
+;License:MIT
+;(c) 2018-2020 by 4am
+;
+; functions for animated title screens
+;
+; Public functions:
+; - MaybeAnimateTitle
+;
+
+         ; /!\ execution falls through from ui.search.mode/FindMatchingTitle
+;------------------------------------------------------------------------------
+; MaybeAnimateTitle
+; slow down to 1 Mhz (always), then check if there is an animation for the
+; title screenshot we just displayed, and if so, load it and call it
+;
+; in:    none
+; out:   C clear
+;        all other flags clobbered
+;        all registers clobbered
+;------------------------------------------------------------------------------
+MaybeAnimateTitle
+         jsr   SwitchToBank2
+         jsr   DisableAcceleratorAndSwitchToBank1
+
+         lda   #$3F
+         ldy   OffscreenPage
+         bne   +
+         eor   #$60
++        sta   DEST+1
+         and   #$60
+         sta   PageFrom+2
+         eor   #$60
+         tax
+         lda   #$FD
+         sta   DEST
+         ldy   #0
+         lda   (DEST),y              ; see if there is a hidden JMP to an
+         cmp   #$4C                  ; animation routine for this screen
+                                     ; at +$1FFD (after the graphics data,
+                                     ; in the last 3 bytes of a $2000 byte
+                                     ; file -- this area part of a 'screen
+                                     ; hole' and is not displayed on screen)
+         bne   @exit                 ; if not, we're done here
+         txa
+         jsr   CopyHGR
+
+         ; load the animation routine, which is stored in a subdirectory by filename
+         jsr   GetGameToLaunch
+         +ST16 +
+         jsr   LoadFile
+         !word kAnimatedTitleDirectory
++        !word $FDFD
+         !word 0
+
+         ldx   #5                    ; copy prelaunch code
+-        lda   @titleAnimPrelaunch,x
+         sta   $106,x
+         dex
+         bpl   -
+
+         bit   $c050                 ; turn on graphics mode (Home set text mode)
+         jsr   Launch                ; execute the animation
+
+         jsr   BuildSearchStore
+         jsr   ResyncPage            ; we don't know which HGR page is showing
+                                     ; when the animation returns, so resync
+                                     ; the current one with our OffscreenPage
+                                     ; variable
+
+@exit    clc                         ; tell caller not to refresh screen
+         rts
+
+@titleAnimPrelaunch                  ; this is executed from $106/main by |Launch|
+         bit   $C082
+         jmp   (DEST)

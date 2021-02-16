@@ -1,0 +1,163 @@
+;license:MIT
+;(c) 2019 by 4am
+;
+!cpu 6502
+!to "build/FX/SOFT.UD.OUT",plain
+*=$6000
+
+maskindex = $fc
+row = $fd
+
+         !source "src/fx/macros.a"
+         !source "src/constants.a"
+
+         lda   #$FA
+         sta   row
+@rowloop
+         lda   #6
+         sta   maskindex
+         jsr   WaitForVBL
+@maskloop
+         lda   row
+         bmi   @skiprow
+         cmp   #12
+         bcs   @skiprow
+         clc
+         adc   #12
+         jsr   do
+         lda   #11
+         sec
+         sbc   row
+         jsr   do
+
+@skiprow
+         inc   row
+         dec   maskindex
+         bpl   @maskloop
+
+         lda   #40
+         jsr   WaitForKeyWithTimeout
+         bmi   @exit
+
+         dec   row
+         dec   row
+         dec   row
+         dec   row
+         dec   row
+         dec   row
+         lda   row
+         bmi   @rowloop
+         cmp   #12
+         bcc   @rowloop
+
+@exit    jmp   UnwaitForVBL
+
+do
+         asl
+         asl
+         asl
+         jsr   HGRCalc
+
+         lda   #<masks
+         sta   @basemaskaddr
+         lda   #>masks
+         sta   @basemaskaddr+1
+         lda   maskindex
+         asl
+         asl
+         asl
+         clc
+         adc   @basemaskaddr
+         sta   @basemaskaddr
+         bcc   +
+         inc   @basemaskaddr+1
++
+         ldx   #7
+         clc
+@blockloop
+@basemaskaddr=*+1
+         lda   $FDFD,x               ; SMC
+         sta   @copymask
+
+         ldy   #39
+@colloop
+         lda   ($26),y
+         eor   ($3c),y
+@copymask=*+1
+         and   #0                    ; SMC
+         eor   ($26),y
+         sta   ($26),y
+         dey
+         bpl   @colloop
+         +HGR_INC_WITHIN_BLOCK
+         dex
+         bpl   @blockloop
+         rts
+
+masks
+         !byte %10000000
+         !byte %10000000
+         !byte %10000000
+         !byte %10001000
+         !byte %10001000
+         !byte %10000000
+         !byte %10000000
+         !byte %10000000
+
+         !byte %10000000
+         !byte %10000000
+         !byte %10010100
+         !byte %10001000
+         !byte %10001000
+         !byte %10010100
+         !byte %10000000
+         !byte %10000000
+
+         !byte %10000000
+         !byte %10000000
+         !byte %10011100
+         !byte %10011100
+         !byte %10011100
+         !byte %10011100
+         !byte %10000000
+         !byte %10000000
+
+         !byte %10000000
+         !byte %10101010
+         !byte %10011100
+         !byte %10111110
+         !byte %10011100
+         !byte %10011100
+         !byte %10101010
+         !byte %10000000
+
+         !byte %10000000
+         !byte %10111110
+         !byte %10111110
+         !byte %10111110
+         !byte %10111110
+         !byte %10111110
+         !byte %10111110
+         !byte %10000000
+
+         !byte %11010101
+         !byte %10111110
+         !byte %11111111
+         !byte %10111110
+         !byte %11111111
+         !byte %10111110
+         !byte %10111110
+         !byte %11010101
+
+         !byte %11111111
+         !byte %11111111
+         !byte %11111111
+         !byte %11111111
+         !byte %11111111
+         !byte %11111111
+         !byte %11111111
+         !byte %11111111
+
+         !source "src/wait.a"
+         !source "src/fx/fx.hgr.common.a"
+         +HGR_CALC_ROUTINES

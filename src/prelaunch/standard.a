@@ -1,0 +1,24 @@
+;license:MIT
+;(c) 2019 by qkumba
+
+!cpu 6502
+!to "build/PRELAUNCH/STANDARD",plain
+*=$106
+
+         ldy   $5A                   ; set up game entry point in stack page
+         ldx   $59                   ; (last ProRWTS load address - 1)
+         bne   +
+         dey
++        dex
+         stx   $1FE
+         sty   $1FF
+
+         !source "src/prelaunch/common.a"
+
+         ldx   #$FD                  ; Jump to game entry point via stack pop.
+         txs
+         rts
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}

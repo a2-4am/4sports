@@ -1,0 +1,137 @@
+;license:MIT
+;(c) 2018-9 by 4am
+;
+; generic key/value text parser
+;
+; Public functions:
+; - ParseKeyValueList
+; - IncAndGetChar
+;
+
+;------------------------------------------------------------------------------
+; ParseKeyValueList
+; parse buffer with KEY=VALUE lines of a text file into an okvs
+; keys and values limited to 127 characters, which should be enough for anyone
+; if '=' is missing, key is kept and value is a 0-length string
+; blank lines are ignored
+; '#' character at beginning of line is a comment, entire line is ignored
+; '[' character at beginning of line exits the parser
+;
+; in:    stack contains 5 bytes of parameters:
+;          +1 [word] handle to storage space for okvs
+;          +3 [word] handle to buffer containing contents of text file
+;          +5 [byte] max length for okvs records (or 0)
+; out:   all registers and flags clobbered
+;        $1F00..$1FFF clobbered
+;        $00/$01 clobbered
+;        $02/$03 clobbered
+;        $04/$05 has the address of the next available byte after the okvs
+;        $FE/$FF clobbered
+;------------------------------------------------------------------------------
+ParseKeyValueList
+         +PARAMS_ON_STACK 5
+
+         +LDPARAM 1
+         +ST16 @store2
+         jsr   SetKeyPtr
+         ldy   #5
+         lda   (PARAM),y
+         sta   @maxLength
+
+         ldy   #$00                  ; index into ($FE) pointing to current character
+@newkey  ldx   #$00                  ; X = index into current key
+         stx   gValLen               ; initialize value length (in case this line has no value)
+         beq   @emptyline            ; always branches
+@skipLine                            ; skip to CR
+         jsr   IncAndGetChar
+         cmp   #$0A                  ; CR
+         bne   @skipLine
+@emptyline
+         jsr   IncAndGetChar
+         cmp   #$0A                  ; CR in first position (blank line) -> no key
+         beq   @emptyline
+         cmp   #$23                  ; '#' starts a comment -> no key, skip to CR
+         beq   @skipLine
+         cmp   #$5B                  ; '[' ends the parsing
+         beq   .parseKeyValueDone
+         bne   @appendToKey
+@gatherKey
+         jsr   IncAndGetChar
+         cmp   #$0A                  ; CR -> finalize key, no value
+         beq   @finalizeKey
+         cmp   #$3D                  ; '=' -> finalize key, start gathering value
+         beq   @finalizeKey
+@appendToKey
+         sta   gKey,x
+         inx
+         bpl   @gatherKey
+@finalizeKey
+         stx   gKeyLen
+         cmp   #$0A
+         beq   @storeInOKVS
+         ldx   #$00                  ; now X = index into the current value
+@gatherValue
+         jsr   IncAndGetChar
+         cmp   #$0A                  ; CR -> finalize value
+         beq   @finalizeValue
+         sta   gVal,x
+         inx
+         bpl   @gatherValue
+@finalizeValue
+         stx   gValLen
+@storeInOKVS
+         tya
+         pha                         ; okvs functions clobber everything but we need Y
+         jsr   okvs_append
+@store2  !word $FDFD                 ; SMC
+         !word gKeyLen
+         !word gValLen
+@maxLength
+         !byte $FD                   ; SMC
+         pla
+         tay
+         clc
+         bcc   @newkey               ; always branches
+
+;------------------------------------------------------------------------------
+; SetKeyPtr
+;
+; in:    PARAM set
+; out:   okvs initialised
+;        ($FE) -> buffer
+;------------------------------------------------------------------------------
+SetKeyPtr
+         jsr   okvs_init             ; reset key/value store
+
+         +LDPARAMPTR 3, $FE
+
+         ldy   #0
+         lda   ($FE),y
+         tax
+         bne   +
+         iny
+         lda   ($FE),y
+         sta   $FF
+         dec   $FF
++        dex
+         stx   $FE
+         rts
+
+;------------------------------------------------------------------------------
+; IncAndGetChar
+;
+; in:    Y = index into ($FE)
+;        ($FE) -> buffer
+; out:   A contains next byte from buffer
+;        Y incremented
+;        $FF possibly incremented
+;------------------------------------------------------------------------------
+IncAndGetChar
+         iny
+         bne   +
+         inc   $FF
++        lda   ($FE),y
+         cmp   #$0D                  ; CR - hide it
+         beq   IncAndGetChar
+.parseKeyValueDone
+         rts

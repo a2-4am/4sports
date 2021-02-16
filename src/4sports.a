@@ -1,0 +1,205 @@
+;license:MIT
+;(c) 2018-2021 by 4am
+;
+!cpu 6502
+!to "build/LAUNCHER.SYSTEM",plain
+*=$2000
+
+!ifndef RELBASE {
+RELBASE=$2000
+}
+
+         !source "src/constants.a"   ; no code in these
+         !source "src/macros.a"
+
+         ; first-run initialization, relocates code to language card and jumps
+         ; to |Reenter|
+         !source "src/4sports.init.a"
+         !source "src/4sports.init.cffa.a"
+         !source "src/4sports.init.gs.a"
+
+FirstMover
+!pseudopc RELBASE {
+;------------------------------------------------------------------------------
+; Reenter
+; This is the primary entry point for returning to the launcher from anywhere.
+; - Self-running demos call this when the user presses a key or when the demo
+;   cycles ends naturally.
+; - It is set as the reset vector, so the user can play a game then press
+;   Ctrl-Reset to return to the launcher and choose another.
+; - It also functions as a reset vector while the launcher is running.
+; - It is also called on program startup, after the first-run initialization.
+;
+; When execution reaches this point, we may have previously backed up the stack
+; and stack pointer, in which case it is now our job to restore it and return
+; to the caller. This allows magic like 'JSR PlayGame' then continuing once the
+; JSR returns.
+;
+; If there is no stack to restore, this exits via SearchMode.
+;
+; in:    none
+; out:   see above
+;------------------------------------------------------------------------------
+Reenter
+         cld
+         ldx   #$ff
+         txs                         ; so that we never trash the reset vector
+         jsr   SwitchToBank2
+         jsr   DisableAccelerator    ; back to 1 MHz (especially important on IIgs
+                                     ; which restores default speed on Ctrl-Reset)
+         jsr   CloseHandles          ; close any open handles to restore ProRWTS
+         ldx   #(end_promote-promote-1)
+-        lda   promote,x             ; copy ProDOS shim to main memory for GS/OS exit
+         sta   $bf00,x
+         dex
+         bpl   -
+         ldx   #5
+-        lda   ResetVector,x         ; copy reentry wrapper to bottom of stack
+         sta   $100,x                ; (used as reset vector because //e always
+         dex                         ; switches to ROM on Ctrl-Reset)
+         bpl   -
+         inx
+         stx   $3F2                  ; page 3 reset vector to ($100)
+         sei
+         stx   $3FE                  ; page 3 IRQ vector to ($100)
+         inx
+         stx   $3FF
+         cli
+         stx   $3F3
+         ldx   #$A4
+         stx   $3F4
+RestoreStackNextTime
+         bne   SearchMode            ; (SMC) not an unconditional branch because code
+                                     ; might change the branch target to the next opcode
+         ; If we fall through to here, it's because we backed up the stack and
+         ; stack pointer and wanted this routine to restore it and return to
+         ; caller.
+         lda   #(SearchMode - RestoreStackNextTime) - 2
+                                     ; reset to branch so we don't try to
+         sta   RestoreStackNextTime + 1
+                                     ; restore the same stack twice
+         ldx   #$F1
+-        lda   STACKBASE - $EF,x     ; restore stack
+         sta   $100,x
+         inx
+         bne   -
+STACKPTR
+         ldx   #$D1                  ; SMC, restore stack pointer
+         txs
+SwitchToBank1
+         +READ_RAM1_WRITE_RAM1
+         rts
+ResetVector                          ; 6 bytes, copied to $100
+         +READ_RAM1_NO_WRITE
+         jmp   Reenter
+
+         ; these routines will only be called after relocating to language card
+         !source "src/ui.search.mode.a"         ; \__ execution falls through
+         !source "src/ui.animation.a"           ; /
+
+         !source "src/ui.browse.mode.a"
+         !source "src/ui.attract.mode.a"
+         !source "src/ui.attract.hgr.a"
+         !source "src/ui.attract.dhgr.a"
+         !source "src/ui.attract.shr.a"
+         !source "src/ui.attract.gr.a"
+         !source "src/ui.offscreen.a"
+         !source "src/ui.cheats.a"
+         !source "src/ui.credits.a"
+         !source "src/ui.reboot.a"
+         !source "src/ui.common.a"
+         !source "src/ui.font.a"
+         !source "src/ui.overlay.a"
+         !source "src/parse.prefs.a"
+         !source "src/parse.common.a"
+         !source "src/glue.launch.a"
+         !source "src/glue.prorwts2.a"
+         !source "src/glue.decompress.a"
+         !source "src/textrank.a"
+         !source "src/okvs.a"
+         !source "src/wait.a"
+
+         ; add new files above here
+         !source "src/hw.vbl.a"
+         !source "src/ui.wait.a"
+gAttractModeStore
+gFXStore
+gDFXStore
+         !word $6000
+gSearchStore
+         !word $8200
+gSlideshowStore
+         !word $0800
+gGlobalPrefsStore
+         !word $D001                 ; leave $D000 alone because FastChip accelerator
+                                     ; flips out if it has certain values (it will
+                                     ; be set to $55 as part of the 64K memory test,
+                                     ; which is apparently one of the acceptable values)
+gGamesListStore
+         !word $FDFD                 ; SMC
+SwitchToBank2
+         +READ_RAM2_WRITE_RAM2
+         rts
+         !source "src/prodos.path.a" ; paths end up on the same page
+
+; WaitForVBL (label is in constants.a)
+         jmp   WaitForVBL_iie        ; SMC to RTS on a II+
+
+; UnwaitForVBL (label is in constants.a)
+         rts                         ; SMC to JMP on a IIc
+         !word iUnwaitForVBL
+
+; MockingboardStuff (label is in constants.a)
+;      slot number where Mockingboard was detected and type of board
+;      #$00 if no Mockingboard detected
+         !byte $FD                   ; MockingboardStuff ($FFF8)
+; MachineStatus (label is in constants.a so prelaunchers can use it)
+;      7 6 5 4 3 2 1 0
+;      | | | | | | | +- bit 0 reserved
+;      | | | | | | +--- bit 1 reserved
+;      | | | | | +----- bit 2 reserved
+;      | | | | +------- bit 3 = 1 if cheats are enabled
+;      | | | +--------- bit 4 = 1 if VidHD
+;      | | +----------- bit 5 = 1 if IIgs
+;      | +------------- bit 6 = 1 if 128K
+;      +--------------- bit 7 = 1 if joystick
+; Use the bit masks defined in constants.a
+         !byte $FD                   ; MachineStatus ($FFF9)
+         !word Reenter               ; NMI vector ($FFFA-B)
+         !word Reenter               ; reset vector ($FFFC-D)
+         !word Ignore                ; IRQ vector ($FFFE-F)
+}
+LastMover
+COPYSRC = *
+!pseudopc hdddataend {
+  COPYDST = *
+         !source "src/prodos.impl.lc2.a"
+         !source "src/ui.font.lc2.a"
+         !source "src/glue.prorwts2.lc2.a"
+         !source "src/glue.launch.lc2.a"
+         !source "src/hw.accel.lc2.a"
+  STACKBASE = *
+  LCRAM2_END = STACKBASE + 15
+  !if LCRAM2_END >= DisableAccelerator {
+    !error "code is too large: ends at ", LCRAM2_END
+  }
+  FONTDST = (LCRAM2_END + 255) and -256
+}
+EvenLasterMover
+  FONTSRC = *
+!pseudopc FONTDST {
+         !source "src/ui.font.data.lc2.a"
+  !if * > $E000 {
+      !error "code is too large: ends at ", *
+  }
+}
+!if RELBASE = $2000 {
+  !ifdef PASS2 {
+  } else { ;PASS2
+    !set PASS2=1
+    !warn "ProRWTS ends at ", hdddataend - 1
+    !warn "STACK at ", STACKBASE
+    !warn "LCRAM2 ends at ", LCRAM2_END
+    !warn "RELBASE = ", $10000 - (LastMover - FirstMover)
+  }
+}

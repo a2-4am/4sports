@@ -1,0 +1,171 @@
+;license:MIT
+;(c) 2018-2020 by 4am
+;
+; ProDOS - functions for constructing and passing around ProDOS pathnames
+;
+; Public functions
+; - SetPath
+; - AddToPath
+;
+
+;------------------------------------------------------------------------------
+; SetPath/AddToPath
+; append a length-prefixed string to gPathname
+; SetPath will reset the path first
+;
+; in:    A contains low byte of address of length-prefixed string to append
+;        Y contains high byte of address of length-prefixed string to append
+; out:   all registers and flags clobbered
+;        $02/$03 (PTR/PTR+1) clobbered
+;        gPathname updated with concatenated length-prefixed string
+;------------------------------------------------------------------------------
+SetPath
+kRootDirectory=*+1
+         ldx   #0
+         stx   gPathname
+         ; execution falls through here
+!if RELBASE != $2000 {
+  !ifdef PASS2 {
+  } else { ;PASS2
+    !if * != iAddToPath {
+      !error "iAddToPath=",*, ", fix constants.a"
+    }
+  }
+}
+AddToPath
+         +ST16 PTR
+         ldy   #0
+         lda   (PTR),y               ; length of this segment
+         beq   @done
+         tay
+         iny
+         sty   @max
+         ldx   gPathname             ; current pathname length
+         ldy   #$01
+-        lda   (PTR),y
+         sta   gPathname+1,x
+         inx
+         iny
+@max = *+1
+         cpy   #$D1                  ; SMC
+         bcc   -
+         stx   gPathname
+@done
+         rts
+
+kHGRTitleDirectory
+         !byte 10
+         !raw  "TITLE.HGR/"
+
+kDHGRTitleDirectory
+         !byte 11
+         !raw  "TITLE.DHGR/"
+
+kAnimatedTitleDirectory
+         !byte 15
+         !raw  "TITLE.ANIMATED/"
+
+kHGRActionDirectory
+         !byte 11
+         !raw  "ACTION.HGR/"
+
+kDHGRActionDirectory
+         !byte 12
+         !raw  "ACTION.DHGR/"
+
+kGRActionDirectory
+         !byte 10
+         !raw  "ACTION.GR/"
+
+kSHRArtworkDirectory
+         !byte 12
+         !raw  "ARTWORK.SHR/"
+
+kMiniAttractDirectory
+         !byte 8
+         !raw  "ATTRACT/"
+
+kAttractModeSlideshowDirectory
+         !byte 3
+         !raw  "SS/"
+
+kDemoDirectory
+         !byte 5
+         !raw  "DEMO/"
+
+kGameDirectory
+         !byte 2
+         !raw  "X/"
+kGameDirectoryLen = 3 ; we need this elsewhere
+
+kFXDirectory
+         !byte 3
+         !raw  "FX/"
+
+kPrelaunchDirectory
+         !byte 10
+         !raw  "PRELAUNCH/"
+
+kGameHelpDirectory
+         !byte 9
+         !raw  "GAMEHELP/"
+
+kStandardPrelaunch
+         !byte 8
+         !raw  "STANDARD"
+
+kGlobalPrefsFilename
+         !byte 10
+         !raw  "PREFS.CONF"
+
+kAttractModeConfFile
+         !byte 12
+         !raw  "ATTRACT.CONF"
+
+kFXConfFile
+         !byte 7
+         !raw  "FX.CONF"
+
+kDFXConfFile
+         !byte 8
+         !raw  "DFX.CONF"
+
+kCreditsFile
+         !byte 7
+         !raw  "CREDITS"
+
+kHelpBackgroundFile
+         !byte 4
+         !raw  "HELP"
+
+kHelpTextFile
+         !byte 8
+         !raw  "HELPTEXT"
+
+kTitleFile
+         !byte 5
+         !raw  "TITLE"
+
+kCoverFile
+         !byte 5
+         !raw  "COVER"
+
+kCoverFadeFile
+         !byte 9
+         !raw  "COVERFADE"
+
+kGRFizzleFile
+         !byte 9
+         !raw  "GR.FIZZLE"
+
+kSFXFizzleFile
+         !byte 10
+         !raw  "SHR.FIZZLE"
+
+kDecrunchFile
+         !byte 8
+         !raw  "DECRUNCH"
+
+kJoystickFile
+         !byte 8
+         !raw  "JOYSTICK"

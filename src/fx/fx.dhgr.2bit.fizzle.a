@@ -1,0 +1,121 @@
+;license:MIT
+;(c) 2017-2020 by qkumba/4am/John Brooks
+
+!cpu 6502
+!to "build/FX/DHGR.FIZZLE2BIT",plain
+*=$6000
+
+addrs     = $6100                    ; [256 bytes, page-aligned, duplicated in auxmem]
+copymasks = $6200                    ; [256 bytes, page-aligned, duplicated in auxmem]
+
+         ldx   #(end-start)          ; copy LFSR code to zero page
+-        lda   start-1, x
+         sta   $FF, x
+         dex
+         bne   -
+--       ldy   #$40                  ; create identical copymask tables in main and aux memory
+         ora   #%10000000
+-        sta   copymasks, x
+         sta   $C005
+         sta   copymasks, x
+         sta   $C004
+         inx
+         dey
+         bne   -
+         asl
+         asl
+         bne   --
+         clc
+--       ldy   #$20                  ; create identical address tables in main and aux memory
+         tya
+-        sta   addrs, x
+         sta   $C005
+         sta   addrs, x
+         sta   $C004
+         eor   #$A0
+         sta   addrs+1, x
+         sta   $C005
+         sta   addrs+1, x
+         sta   $C004
+         eor   #$A0
+         adc   #1
+         inx
+         inx
+         dey
+         bne   -
+         txa
+         bne   --
+         jmp   copyaux              ; exit via LFSR code on zero page
+
+start
+!pseudopc 0 {
+         !byte %00000011
+copyaux  sta   $C003                 ; copy $4000/aux to $8000/main
+         ldx   #$20
+         ldy   #$00
+a        lda   $4000, y
+b        sta   $8000, y
+         iny
+         bne   a
+         inc   a+2
+         inc   b+2
+         dex
+         bne   a
+         sta   $C002
+         sta   $C001                 ; 80STORE mode
+; X,Y=0 on entry to LFSR
+loop     txa
+loop1    eor   #$B4                  ; LFSR form 0xB400 with period 65535
+         tax                         ; X is LFSR high byte, Y is LFSR low byte
+loop2    lda   addrs, x              ; which means X is the index into the base address lookup table
+         bmi   aux                   ; and Y is the offset from the base address
+         sta   $C054                 ; switch $2000 access to main memory
+         sta   <dst+2
+         eor   #$60
+         sta   <src+2
+         lda   (<dst+1), y
+src      eor   $FD00, y              ; merge source and destination bits
+         and   copymasks, x          ; isolate the bits to replace, zero the rest
+         eor   (<dst+1), y           ; unmerge source and destination bits, leaves 'to keep' destination bits intact
+dst      sta   $FD00, y              ; write the result
+         txa
+         lsr
+         tax
+         tya
+         ror
+         tay
+         bcc   loop2                 ; C modified by ror
+         bne   loop                  ; Z modified by tay
+         lda   $C000
+         bmi   exit
+         txa
+         bne   loop1
+exit     lda   $4000                 ; last lousy byte (because LFSR never hits 0)
+         sta   $2000
+         sta   $C000                 ; 80STORE mode off
+         rts
+
+aux      sta   $C055                 ; switch $2000 access to aux memory (read/write!)
+         sta   <auxsrc+2
+         eor   #$A0
+         sta   <auxdst+2
+         lda   (<auxdst+1), y
+auxsrc   eor   $FD00, y
+         and   copymasks, x
+         eor   (<auxdst+1), y
+auxdst   sta   $FD00, y
+         txa
+         lsr
+         tax
+         tya
+         ror
+         tay
+         bcc   loop2
+         bne   loop
+         lda   $C000
+         bmi   exit
+         txa
+         bne   loop1
+         beq   exit
+}
+end

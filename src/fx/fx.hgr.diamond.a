@@ -1,0 +1,150 @@
+;license:MIT
+;(c) 2019 by 4am
+;
+!cpu 6502
+!to "build/FX/DIAMOND",plain
+*=$6000
+
+y = $fc
+row = $fd
+col = $fe
+counter = $ff
+
+         !source "src/fx/macros.a"
+         !source "src/constants.a"
+
+         lda   #32
+         sta   counter
+
+         lda   #39
+         sta   col
+@colloop
+         lda   #23
+         sta   row
+         ldy   col
+         sty   y
+         jsr   WaitForVBL
+@rowloop
+         ; check if this column is visible
+         ldy   y
+         bpl   +
+-        jmp   @skip1
++        cpy   #40
+         bcs   -
+         ; do corner 1
+         +SWITCH_TO_MASKS copymasks1
+         lda   row
+         jsr   HGRBlockCopyWithMask
+         ; do corner 2 (same row, opposing col)
+         +SWITCH_TO_MASKS copymasks2
+         lda   #39
+         sec
+         sbc   y
+         tay
+         lda   row
+         jsr   HGRBlockCopyWithMask
+         ; do corner 3 (opposing row, opposing col)
+         +SWITCH_TO_MASKS copymasks3
+         lda   #39
+         sec
+         sbc   y
+         tay
+         lda   #23
+         sec
+         sbc   row
+         jsr   HGRBlockCopyWithMask
+         ; do corner 4 (opposing row, same col)
+         +SWITCH_TO_MASKS copymasks4
+         ldy   y
+         lda   #23
+         sec
+         sbc   row
+         jsr   HGRBlockCopyWithMask
+         ; reset y for looping
+         ldy   y
+@skip1
+         iny
+         sty   y
+         ; now check if *this* column is visible
+         bpl   +
+-        jmp   @skip2
++        cpy   #40
+         bcs   -
+         ; do corner 1
+         lda   row
+         jsr   HGRBlockCopy
+         ; do corner 2
+         lda   #39
+         sec
+         sbc   y
+         tay
+         lda   #23
+         sec
+         sbc   row
+         jsr   HGRBlockCopy
+         ; do corner 3
+         lda   #39
+         sec
+         sbc   y
+         tay
+         lda   row
+         jsr   HGRBlockCopy
+         ; do corner 4
+         ldy   y
+         lda   #23
+         sec
+         sbc   row
+         jsr   HGRBlockCopy
+@skip2
+         dec   row
+         bmi   +
+         jmp   @rowloop
++        lda   $c000
+         bmi   @exit
+         dec   col
+         dec   counter
+         beq   @exit
+         jmp   @colloop
+@exit    jmp   UnwaitForVBL
+
+copymasks1
+         !byte %11111111
+         !byte %11111110
+         !byte %11111100
+         !byte %11111000
+         !byte %11110000
+         !byte %11100000
+         !byte %11000000
+         !byte %10000000
+copymasks2
+         !byte %11111111
+         !byte %10111111
+         !byte %10011111
+         !byte %10001111
+         !byte %10000111
+         !byte %10000011
+         !byte %10000001
+         !byte %10000000
+copymasks3
+         !byte %10000000
+         !byte %10000001
+         !byte %10000011
+         !byte %10000111
+         !byte %10001111
+         !byte %10011111
+         !byte %10111111
+         !byte %11111111
+copymasks4
+         !byte %10000000
+         !byte %11000000
+         !byte %11100000
+         !byte %11110000
+         !byte %11111000
+         !byte %11111100
+         !byte %11111110
+         !byte %11111111
+
+         !source "src/wait.a"
+         !source "src/fx/fx.hgr.common.a"
+         +HGR_COPY_MASK_ROUTINES
+         +HGR_BLOCK_COPY_ROUTINES

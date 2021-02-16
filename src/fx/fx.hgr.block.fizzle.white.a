@@ -1,0 +1,62 @@
+;license:MIT
+;(c) 2018 by 4am
+;
+!cpu 6502
+!to "build/FX/BLOCK.MOSAIC",plain
+*=$6000
+
+         !source "src/fx/fx.hgr.block.fizzle.common.a"
+
+         +BUILD_BLOCK_FIZZLE_DATA
+
+         +LDADDR Coordinates
+         +ST16 coord
+@whiteloop
+         ldy   #0
+         lda   (coord),y
+         bmi   @endwhite
+         tax
+         iny
+         lda   (coord),y
+         tay
+         txa
+         jsr   HGRBlockToWhite
+         lda   #$03
+         jsr   WaitForKeyWithTimeout
+         bmi   @exit
+         inc   coord
+         bne   +
+         inc   coord+1
++        inc   coord
+         bne   +
+         inc   coord+1
++        bne   @whiteloop
+@endwhite
+         +LDADDR Coordinates
+         +ST16 coord
+@copyloop
+         ldy   #0
+         lda   (coord),y
+         bmi   @exit
+         tax
+         iny
+         lda   (coord),y
+         tay
+         txa
+         jsr   HGRBlockCopy
+         lda   #$03
+         jsr   WaitForKeyWithTimeout
+         bmi   @exit
+         inc   coord
+         bne   +
+         inc   coord+1
++        inc   coord
+         bne   +
+         inc   coord+1
++        bne   @copyloop
+@exit    rts
+
+         !source "src/wait.a"
+         !source "src/fx/fx.hgr.common.a"
+         +HGR_WHITE_ROUTINES
+         +HGR_BLOCK_COPY_ROUTINES

@@ -1,0 +1,113 @@
+;license:MIT
+;(c) 2018-2020 by 4am & qkumba
+;
+; ProRWTS2 glue functions
+;
+; Public functions
+; - LoadFile
+; - LoadDHRFile
+;
+; Public variables
+; - gRootDirectory
+;
+; A general note about paths:
+;
+; LoadFile, LoadDHRFile, and SaveSmallFile support subdirectories.
+; Directories are delimited by '/' like ProDOS. At program startup, we get the
+; current directory and save it; that is the PROGRAM ROOT DIRECTORY. All
+; pathnames are relative to the PROGRAM ROOT DIRECTORY. There is no concept of
+; setting or changing the 'current' directory.
+;
+; The PROGRAM ROOT DIRECTORY is not guaranteed to be the root directory of the
+; underlying ProDOS disk (although it can be). But it doesn't matter, because
+; these functions provide no access to any directory above the PROGRAM ROOT
+; DIRECTORY. You can't use '..' to access the parent directory, and you can't
+; start a pathname with '/' to access the root directory of the underlying
+; ProDOS disk.
+;
+; Examples:
+; 'PREFS.CONF' points to a file named 'PREFS.CONF' in the PROGRAM ROOT
+; DIRECTORY.
+;
+; 'FX/RIPPLE' points to a file named 'RIPPLE' in a directory named 'FX' in the
+; PROGRAM ROOT DIRECTORY.
+
+;------------------------------------------------------------------------------
+; LoadFile
+; Load a file into memory all at once, using ProRWTS2
+;
+; supports paths, see note
+;
+; in:    stack contains 6 bytes of parameters:
+;          +1 [word] address of length-prefixed pathname
+;          +3 [word] address of length-prefixed filename
+;          +5 [word] address to load file, or 0 to use file's default address
+; out:   all flags clobbered
+;        all registers clobbered
+;        gPathname clobbered
+;------------------------------------------------------------------------------
+LoadFile
+         +PARAMS_ON_STACK 6
+         +LDPARAM 1
+         jsr   SetPath
+         +LDPARAM 3
+         jsr   AddToPath
+         +LDPARAMPTR 5, ldrlo        ; set load address
+         jsr   SwitchToBank2
+         jsr   LoadFileInternal
+         jmp   SwitchToBank1
+
+;------------------------------------------------------------------------------
+; LoadAuxFile
+; Load a file into aux memory all at once, using ProRWTS2
+;
+; supports paths, see note
+;
+; in:    stack contains 6 bytes of parameters:
+;          +1 [word] address of length-prefixed pathname
+;          +3 [word] address of length-prefixed filename
+;          +5 [word] address to load file, or 0 to use file's default address
+; out:   all flags clobbered
+;        all registers clobbered
+;        gPathname clobbered
+;------------------------------------------------------------------------------
+LoadAuxFile
+         +PARAMS_ON_STACK 6
+         +LDPARAM 1
+         jsr   SetPath
+         +LDPARAM 3
+         jsr   AddToPath
+         +LDPARAMPTR 5, ldrlo        ; set load address
+         jsr   SwitchToBank2
+         lda   #1                    ; request aux memory
+         jsr   LoadFileAuxInternal
+         jmp   SwitchToBank1
+
+;------------------------------------------------------------------------------
+; LoadDHRFile
+; load .A2FC file (uncompressed double hi-res graphics) into memory
+; all at once, using ProRWTS2
+; first $2000 bytes of file are loaded into auxiliary memory $4000..$5FFF
+; second $2000 bytes of file are loaded into main memory $4000..$4FFF
+;
+; supports paths, see note
+;
+; in:    stack contains 4 bytes of parameters:
+;          +1 [word] address of length-prefixed pathname
+;          +3 [word] address of length-prefixed filename
+; out:   all flags clobbered
+;        all registers clobbered
+;        stack set to next instruction after parameters
+;------------------------------------------------------------------------------
+LoadDHRFile
+         +PARAMS_ON_STACK 4
+         +LDPARAM 1
+         jsr   SetPath
+         +LDPARAM 3
+         jsr   AddToPath
+         jsr   SwitchToBank2
+         jsr   LoadDHRFileInternal
+         jmp   SwitchToBank1
+
+gRootDirectory
+         !word $FDFD

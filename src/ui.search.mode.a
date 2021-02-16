@@ -1,0 +1,263 @@
+;license:MIT
+;(c) 2018-2020 by 4am
+;
+; Search Mode - main UI
+;
+; Public functions
+; - SearchMode
+; - SoftBell
+;
+
+; indices into InputDispatchTable
+kInputSearch   = 0
+kInputClear    = 1
+kInputBack     = 2
+kInputBrowse   = 3
+kInputTab      = 4
+kInputLaunch   = 5
+kInputHelp     = 6
+kInputCredits  = 7
+kInputCheat    = 8
+kInputError    = 9
+kInputJoystick = 10
+kInputQuit     = 11
+
+InputDispatchTableLo
+         !byte <OnSearch
+         !byte <OnClear
+         !byte <OnBack
+         !byte <BrowseMode
+         !byte <OnTab
+         !byte <OnLaunch
+         !byte <Help
+         !byte <Credits
+         !byte <OnCheat
+         !byte <OnError
+         !byte <Joystick
+         !byte <OnQuit
+InputDispatchTableHi
+         !byte >OnSearch
+         !byte >OnClear
+         !byte >OnBack
+         !byte >BrowseMode
+         !byte >OnTab
+         !byte >OnLaunch
+         !byte >Help
+         !byte >Credits
+         !byte >OnCheat
+         !byte >OnError
+         !byte >Joystick
+         !byte >OnQuit
+
+kNumInputKeys = 12
+                                     ; number of entries in next 2 tables (each)
+InputKeys
+         !byte $83                   ; Ctrl-C = toggle cheat mode
+         !byte $81                   ; Ctrl-A = about
+         !byte $AF                   ; '/' = help
+         !byte $BF                   ; '?' = help
+         !byte $A0                   ; Space = mini attract mode
+         !byte $89                   ; TAB = mini attract mode
+         !byte $88                   ; left arrow = delete (may as well, since
+                                     ;   popular emulators remap this anyway)
+         !byte $FF                   ; backspace = delete
+         !byte $8D                   ; ENTER = launch current game (if any)
+         !byte $9B                   ; Esc = clear input buffer (if any)
+                                     ;   or switch to mega attract mode
+         !byte $90                   ; Ctrl-P = launch joystick calibration program
+         !byte $91                   ; Ctrl-Q = quit
+InputKeyDispatch
+         !byte kInputCheat
+         !byte kInputCredits
+         !byte kInputHelp
+         !byte kInputHelp
+         !byte kInputTab
+         !byte kInputTab
+         !byte kInputBack
+         !byte kInputBack
+         !byte kInputLaunch
+         !byte kInputClear
+         !byte kInputJoystick
+         !byte kInputQuit
+
+.noKeyMatch
+         jsr   IsSearchKey
+!if kInputSearch > 0 {
+         +HIDE_NEXT_2_BYTES
+.foundSearchKey
+         ldx   #kInputSearch
+} else {
+.foundSearchKey
+}
+         ; execution falls through here to .InputDispatch
+.InputDispatch
+         ldy   InputDispatchTableLo,x
+         sty   .j+1
+         ldy   InputDispatchTableHi,x
+         sty   .j+2
+.j       jsr   $FDFD                 ; SMC
+         bcc   .SearchModeInputLoop  ; if carry is clear, we're done
+         ; fall through to force full redraw
+
+;------------------------------------------------------------------------------
+; SearchMode
+; main entry point for Search Mode, which allows the user to search the game
+; catalog and launch games
+;
+; in:    none
+; out:   never returns to caller (may JMP to other major modes)
+;------------------------------------------------------------------------------
+SearchMode
+         ldx   #$FF
+         txs
+         stx   gGameToLaunch         ; $FFFF = no game selected
+         stx   gGameToLaunch+1
+         jsr   BuildSearchStore
+         jsr   Home                  ; clear screen (switches to text mode)
+         stx   OffscreenPage         ; don't show text page 2 by accident
+         jsr   OnInputChanged        ; draw UI offscreen
+         jsr   HGRMode               ; show HGR screen
+         jsr   ResyncPage
+         lda   KBD
+         jsr   IsSearchKey
+         lda   CLEARKBD - kInputError,X
+                                     ; clear strobe if key was bad
+
+.SearchModeInputLoop
+         jsr   WaitForKeyFor30Seconds
+
+         ; Don't clear keyboard strobe yet. If the user pressed an arrow key,
+         ; we want to switch to Browse Mode with the keyboard still hot so
+         ; that mode finds and dispatches the arrow key.
+
+         ldx   #kInputBrowse
+         jsr   IsUpDownOrRightArrow
+         beq   .InputDispatch
+         bit   CLEARKBD
+
+         ldy   #kNumBrowseKeys
+-        dey
+         bmi   .noKeyMatch
+         cmp   InputKeys,y
+         bne   -
+         ldx   InputKeyDispatch,y
+         bne   .InputDispatch        ; always branches
+
+OnClear
+         ldx   #1                    ; Esc with input clears the input
+         ldy   InputLength
+         bne   +
+         jmp   CoverFade             ; Esc with no input transitions to
+                                     ; mega attract mode
+OnBack
+         ldx   InputLength
+         beq   OnError
++        dex
+         stx   InputLength
+         bpl   OnInputChanged        ; always branches
+
+OnTab
+         jsr   AnyGameSelected
+         bcs   OnError
+         jsr   MiniAttractMode
+         cmp   #$8D                  ; if we exited mini attract mode
+         bne   .req_redraw           ; by pressing Enter, launch the game
+
+OnLaunch
+         ldx   gGameToLaunch+1
+         inx
+         beq   OnError
+         jsr   PlayGame
+
+.req_redraw
+         sec                         ; tell caller to redraw UI
+         rts
+
+OnCheat
+         dec   gGameToLaunch         ; force reload (will be reset to correct value in OnInputChanged)
+         jsr   ToggleCheat
+         beq   OnInputChanged        ; always branches because Z=1 on exit from ToggleCheat
+
+OnSearch
+         ldx   InputLength
+         cpx   #MaxInputLength
+         beq   OnError
+         sta   InputBuffer,x
+         inc   InputLength
+         ; execution falls through here to OnInputChanged
+OnInputChanged
+         ldx   InputLength
+         bne   FindMatchingTitle
+                                     ; no input, reset params and UI
+         dex
+         stx   gGameToLaunch         ; $FFFF = no game selected
+         stx   gGameToLaunch+1
+         jsr   LoadTitleOffscreen
+         jmp   DrawUIWithoutDots
+
+FindMatchingTitle
+         jsr   SwitchToBank2
+         jsr   EnableAcceleratorAndSwitchToBank1
+
+         jsr   ResetTextRank
+
+         jsr   okvs_iter_values      ; iterate through all game display names
+         !word gSearchStore          ; and rank them for the best match
+         !word TextRankCallback      ; to the current input buffer
+
+         lda   MatchCount            ; any matches at all?
+         bne   +
+                                     ; no matches for this input buffer
+         dec   InputLength           ; ignore the last key typed
+
+OnError
+         jsr   SwitchToBank2
+         jsr   DisableAcceleratorAndSwitchToBank1
+         ; /!\ execution falls through to SoftBell
+;------------------------------------------------------------------------------
+; SoftBell
+; yell at the user, but, like, gently
+;
+; in:    none
+; out:   C clear
+;        Y preserved
+;        A=0
+;        X=0
+;        all flags preserved
+;------------------------------------------------------------------------------
+SoftBell
+         ldx   #32
+-        lda   #2
+         jsr   WaitForKeyWithTimeout
+         bit   SPEAKER
+         lda   #33
+         jsr   WaitForKeyWithTimeout
+         bit   SPEAKER
+         dex
+         bne   -
+         clc
+         rts
+
++
+         lda   BestMatchIndex        ; check if the new best match is the same
+         cmp   gGameToLaunch         ; as the current best match
+         bne   @load
+         lda   BestMatchIndex+1
+         cmp   gGameToLaunch+1
+         bne   @load
+
+         jsr   ToggleOffscreenPage   ; Since we're not loading a new screenshot
+                                     ; we fake switching the 'offscreen' page
+                                     ; in order to draw on the visible page.
+         lda   #1
+         bne   @noload               ; always branches
+@load
+         +LD16 BestMatchIndex
+         +ST16 gGameToLaunch
+         jsr   LoadGameTitleOffscreen
+         lda   #0
+@noload
+         sta   gDrawingOnscreen      ; will minimize flicker in case we're
+         jsr   DrawUI                ; drawing directly onscreen
+
+         ; /!\ execution falls through to ui.animation/MaybeAnimateTitle

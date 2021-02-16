@@ -1,0 +1,166 @@
+;license:MIT
+;(c) 2018-2020 by 4am
+;
+; HGR title and action slideshows
+;
+; Public functions
+; - HGRTitleSlideshow
+; - HGRActionSlideshow
+; - HGRSingle
+;
+
+;------------------------------------------------------------------------------
+; HGRTitleSlideshow
+; execute a slideshow of hi-res title screenshots
+;
+; in:    none
+; out:   everything clobbered
+;        graphics mode still displaying hi-res screen with last picture visible
+;------------------------------------------------------------------------------
+HGRTitleSlideshow
+         jsr   LoadHGRTransition     ; load transition effect code at $6000
+         jsr   okvs_iter             ; cycle through all listed HGR files
+         !word gSlideshowStore
+         !word HGRTitleCallback      ; address of callback (called on each file)
+         rts                         ; exit with last picture still visible
+
+;------------------------------------------------------------------------------
+; HGRActionSlideshow
+; execute a slideshow of hi-res action screenshots
+;
+; in:    none
+; out:   everything clobbered
+;        graphics mode still displaying hi-res screen with last picture visible
+;------------------------------------------------------------------------------
+HGRActionSlideshow
+         jsr   LoadHGRTransition     ; load transition effect code at $6000
+         jsr   okvs_iter             ; cycle through all listed HGR files
+         !word gSlideshowStore
+         !word HGRActionCallback     ; address of callback (called on each file)
+         rts                         ; exit with last picture still visible
+
+;------------------------------------------------------------------------------
+; HGRSingle
+; display a single hi-res screenshot, with transition effect
+;
+; in:    none
+; out:   everything clobbered
+;        graphics mode still displaying hi-res screen with last picture visible
+;------------------------------------------------------------------------------
+HGRSingle
+         +ST16 @fname
+         jsr   LoadFile              ; load compressed HGR screenshot at $3FF8
+         !word kRootDirectory
+@fname   !word $FDFD                 ; SMC
+         !word $3FF8
+         jsr   DecompressHGR
+         jsr   LoadHGRTransition     ; load transition effect code at $6000
+         jmp   ExecuteTransitionAt6000AndWait
+
+;------------------------------------------------------------------------------
+; LoadHGRTransition [private]
+; looks up name of next HGR transition effect in FX.CONF and loads that file
+; at $6000
+
+; in:    gGlobalPrefsStore has been initialized
+; out:   all registers and flags clobbered
+;        $6000..$BFFF contains transition effect code
+;------------------------------------------------------------------------------
+LoadHGRTransition
+         jsr   LoadFile              ; load HGR transition effects list into $8000
+         !word kRootDirectory
+         !word kFXConfFile
+-        !word $8000
+         jsr   ParseKeyValueList     ; parse HGR transition effects list into $6000
+         !word gFXStore
+         !word -
+         !byte 0
+
+         jsr   pref_get              ; get HGR transition effect from prefs
+         !word kNextFX
+         !word gFXStore
+         +ST16 ++                    ; A/Y = filename (don't load file yet)
+                                     ; $WINDEX = index of the transition in FX store
+         +LDADDR gFXStore
+         jsr   okvs_next             ; get transition after this one
+         +ST16 +
+
+         jsr   pref_set              ; update prefs store and save to disk
+         !word kNextFX
++        !word $FDFD                 ; SMC
+
+         jsr   LoadFile              ; now load transition effect code into $6000
+         !word kFXDirectory
+++       !word $FDFD                ; SMC
+         !word $6000
+HGRRTS   rts
+
+;------------------------------------------------------------------------------
+; HGRTitleCallback [private]
+; callback called by okvs_iter on gSlideshowStore
+; to load and display a single HGR title screenshot
+
+; in:    A/Y contains address of filename (name only, path is always /TITLE.HGR/)
+;        $WINDEX contains 0-based index of the current record in gSlideshowStore (word)
+; out:   all registers and flags clobbered
+;        $0800..$1EFF preserved (this contains the gSlideshowStore OKVS data)
+;        $2000..$BFFF clobbered by graphics data and transition code
+;------------------------------------------------------------------------------
+HGRTitleCallback
+         bit   KBD
+         bmi   HGRRTS
+
+         +ST16 +
+
+         jsr   FindGame
+         ; if game is not found (C will be set here), it means it can't be played on
+         ; this machine due to memory or joystick requirements, so we don't display
+         ; it in slideshows
+         bcs   HGRRTS
+
+         +LD16 WINDEX                ; save game index in case user hits RETURN
+         +ST16 gGameToLaunch         ; while it's visible (we'll launch it)
+
+         jsr   LoadFile              ; load HGR screenshot at $4000
+         !word kHGRTitleDirectory
++        !word $FDFD                 ; SMC
+         !word $4000
+
+         jmp   ExecuteTransitionAt6000AndWait
+
+;------------------------------------------------------------------------------
+; HGRActionCallback [private]
+; callback called by okvs_iter on gSlideshowStore
+; to load and display a single HGR action screenshot
+
+; in:    A/Y contains address of filename (name only, path is always /ACTION.HGR/)
+;        $WINDEX contains 0-based index of the current record in gSlideshowStore (word)
+;        gGamesListStore must be initialized
+; out:   all registers and flags clobbered
+;        $0800..$1EFF preserved (this contains the gSlideshowStore OKVS data)
+;        $2000..$BFFF clobbered by graphics data and transition code
+;------------------------------------------------------------------------------
+HGRActionCallback
+         bit   KBD
+         bmi   HGRRTS
+
+         +ST16 +
+
+         jsr   FindGameInActionSlideshow
+         ; if game name is not found (C will be set here), it means the game
+         ; can't be played due to memory or joystick requirements, so we hide
+         ; it from slideshows
+         bcs   HGRRTS
+
+         ; found the game
+         +ST16 SAVE                  ; (SAVE) -> game display name + game info bitfield
+
+         +LD16 WINDEX                ; save game index in case user hits RETURN
+         +ST16 gGameToLaunch         ; while it's visible (we'll launch it)
+
+         jsr   LoadFile              ; load compressed HGR screenshot at $3FF8
+         !word kHGRActionDirectory
++        !word $FDFD                 ; SMC
+         !word $3FF8
+         jsr   DecompressHGR
+         jmp   DrawGameTitleInActionSlideshow

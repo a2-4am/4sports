@@ -1,0 +1,16 @@
+;license:MIT
+;(c) 2019-2020 by 4am/qkumba
+;
+!cpu 6502
+!to "build/FX/APPLE",plain
+*=$6000
+
+         !source "src/fx/fx.hgr.precomputed.3bit.a"
+
+         +FX_INITONCE_3BIT CoordinatesFile, Start
+Start
+         +FX_PRECOMPUTED_3BIT Coordinates3Bit
+
+CoordinatesFile
+         !byte 13
+         !text "FX/APPLE.DATA"

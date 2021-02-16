@@ -1,0 +1,24 @@
+;license:MIT
+;(c) 2020 by qkumba/4am
+;
+; reboot system
+;
+; Public functions
+; - OnQuit
+;
+
+;------------------------------------------------------------------------------
+; OnQuit
+; reboot system
+;
+; in:    none
+; out:   nothing
+;------------------------------------------------------------------------------
+OnQuit
+         jsr   SwitchToBank2
+         jsr   EnableAcceleratorAndSwitchToBank1
+PatchQuit
+         inc   $101       ; bank in ROM
+         +LDADDR ROM_REBOOT
+         +ST16 $104
+         jmp   $100

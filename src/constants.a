@@ -1,0 +1,161 @@
+;license:MIT
+;(c) 2018-2020 by 4am
+;
+
+;------------------------------------------------------------------------------
+; YE OLDE GRAND UNIFIED MEMORY MAP
+;
+; LC RAM BANK 1
+; D000..E92C - persistent data structures (gGlobalPrefsStore, gGamesListStore)
+; E92D..FFF1 - main program code
+; FFF2..FFF9 - API functions and global constants available for main program
+;              code, prelaunchers, transition effects, &c.
+;              (Wait/UnwaitForVBL, MockingboardStuff, MachineStatus)
+; FFFA..FFFF - NMI, reset, IRQ vectors
+;
+; LC RAM BANK 2
+; D000..D3FF - ProRWTS data
+; D400..D677 - ProRWTS code
+; D678..DB9D - HGR font code & ProRWTS glue code
+; DB9E..DBAD - backup of stack (during gameplay and self-running demos)
+; ...unused...
+; DBB4..DBFF - (de)acceleration function
+; DC00..DFFF - HGR font data
+;------------------------------------------------------------------------------
+
+!ifndef _CONSTANTS_ {
+
+; soft switches
+KBD =          $C000      ; last key pressed (if any)
+CLEARKBD =     $C010      ; clear last key pressed
+STOREOFF =     $C000      ; STA then use the following 4 flags:
+READMAINMEM =  $C002      ; STA to read from main mem
+READAUXMEM =   $C003      ; STA to read from aux mem
+WRITEMAINMEM = $C004      ; STA to write to main mem
+WRITEAUXMEM =  $C005      ; STA to write to aux mem
+CLRC3ROM =     $C00A      ; STA to use internal Slot 3 ROM (required to use 128K and DHGR)
+SETC3ROM =     $C00B      ; STA to use external Slot 3 ROM (required to detect VidHD in slot 3)
+CLR80VID =     $C00C      ; 40 columns (also used to get out of DHGR mode)
+SET80VID =     $C00D      ; 80 columns (also used to get into DHGR mode)
+PRIMARYCHARSET= $C00E     ; no mousetext for you
+SLOT3STATUS =  $C017      ; bit 7 only
+TBCOLOR =      $C022      ; IIgs text foreground and background colors (also VidHD)
+NEWVIDEO =     $C029      ; IIgs graphics modes (also VidHD)
+SPEAKER =      $C030      ; chirp chirp
+CLOCKCTL =     $C034      ; bits 0-3 are IIgs border color (also VidHD)
+SHADOW =       $C035      ; IIgs auxmem-to-bank-E1 shadowing (also VidHD)
+TEXTMODE =     $C051
+PAGE1 =        $C054      ; page 1 (affects text, HGR, DHGR)
+PAGE2 =        $C055      ; page 2 (affects text, HGR, DHGR)
+DHIRESON =     $C05E      ; double hi-res on switch
+DHIRESOFF =    $C05F      ; double hi-res off switch
+
+; ROM routines and addresses
+; (prefixed because so much of the program runs from LC RAM, so don't call
+; these without thinking about memory banks first)
+ROM_TEXT2COPY =$F962      ; turn on alternate display mode on IIgs
+ROM_REBOOT =   $FAA6
+ROM_TEXT =     $FB2F
+ROM_MACHINEID =$FBB3
+ROM_HOME =     $FC58
+ROM_COUT =     $FDED
+ROM_NORMAL =   $FE84      ; NORMAL text (instead of INVERSE or FLASH)
+ROM_IN0 =      $FE89      ; SETKBD
+ROM_PR0 =      $FE93      ; SETVID
+
+; zero page during init ONLY
+zpMachineStatus= $F0      ; bit 7 = 1 if machine has joystick
+                          ; bit 6 = 1 if machine has 128K
+                          ; bit 5 = 1 if machine has a VidHD card
+                          ; bit 4 = 1 if machine is a IIgs
+                          ; only used during init, then copied to MachineStatus in LC RAM
+zpCharMask   = $F1        ; only used during init, then clobbered
+
+; zero page
+PARAM        = $00        ; word (used by PARAMS_ON_STACK macro, so basically everywhere)
+PTR          = $02        ; word
+SRC          = $04        ; word
+DEST         = $06        ; word
+SAVE         = $08        ; word
+WINDEX       = $0A        ; word
+WCOUNT       = $0C        ; word
+HTAB         = $24        ; byte
+VTAB         = $25        ; byte
+RNDSEED      = $4E        ; word
+; textrank
+BestMatchIndex = $E5      ; word
+tmpx         = $E7        ; byte
+remainder    = $E8        ; word
+num1         = $EA        ; word
+num2         = $EC        ; byte
+Timeout      = $ED        ; 3 bytes (used by SearchMode)
+zpword   =     $F0        ; word
+zpstring =     $F2        ; word
+runningscore=  $F4        ; word
+startat  =     $F6        ; byte
+i        =     $F7        ; byte
+tmp      =     $F8        ; byte
+gamelength=    $F9        ; byte
+firstletter=   $FA        ; byte
+MatchCount =   $FB        ; byte
+BestMatchScore = $FC      ; byte
+
+;              $FE        ; used by ParseGamesList
+;              $FF        ; used by ParseGamesList
+
+; main memory
+gPathname    = $BFD0      ; used by SetPath/AddToPath
+gKeyLen      = $1F00      ; used by ParseGamesList
+gKey         = $1F01
+UILine1      = $1FB0
+UILine2      = $1FD8
+UI_ToPlay    = $1FF7
+
+gValLen      = $1F80
+gVal         = $1F81
+
+; LC RAM 1
+WaitForVBL         = $FFF2
+UnwaitForVBL       = $FFF5
+
+MockingboardStuff  = $FFF8  ; bit 7 = 1 if speech chip present (Mockingboard "C")
+                            ; bit 6 = 1 if Mockingboard "B" (stereo) found (else Mockingboard "A")
+                            ; bit 4-5 unused
+                            ; bits 0-3: slot number
+MachineStatus      = $FFF9
+
+; LC RAM 2
+DisableAccelerator = $DBB4
+EnableAccelerator  = DisableAccelerator+3
+
+; AND masks for MockingboardStuff
+MOCKINGBOARD_SLOT = %00001111
+HAS_SPEECH        = %10000000
+
+; AND masks for game info bitfield (after game display name in gGamesListStore)
+HAS_DHGR_TITLE    = %10000000        ; this one is hard-coded via BMI instead of AND/BNE
+CHEAT_CATEGORY    = %00001111
+
+; AND masks for MachineStatus
+HAS_JOYSTICK   = %10000000
+HAS_128K       = %01000000
+IS_IIGS        = %00100000           ; /!\ do not use this to gate SHR, use SUPPORTS_SHR instead
+HAS_VIDHD      = %00010000
+SUPPORTS_SHR   = %00110000
+CHEATS_ENABLED = %00001000
+
+; shared symbols for prelaunch and effects to call ProRWTS2 functions
+iCurBlockLo    = $D401
+iCurBlockHi    = $D403
+iProDOS_enter  = $D678
+LoadFileDirect = $DB01
+iAuxReq        = $DB27
+launchpatch    = $D616
+iAddToPath     = $FEC3
+itraverse      = $D8E0
+ldrhi          = $56
+namlo          = $57
+namhi          = $58
+
+_CONSTANTS_=*
+}

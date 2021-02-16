@@ -1,0 +1,38 @@
+;license:MIT
+;(c) 2018-2020 by 4am/qkumba
+;
+!cpu 6502
+!to "build/FX/HALF.FIZZLE",plain
+*=$6000
+
+         !source "src/fx/fx.hgr.halfblock.fizzle.common.a"
+
+         +BUILD_HALFBLOCK_FIZZLE_DATA
+
+         +LDADDR Coordinates
+         +ST16 coord
+@loop2
+         ldy   #0
+         lda   (coord),y
+         bmi   @exit
+         tax
+         iny
+         lda   (coord),y
+         tay
+         txa
+         jsr   HGRHalfBlockCopy
+         lda   #$07
+         jsr   WaitForKeyWithTimeout
+         bmi   @exit
+         inc   coord
+         bne   +
+         inc   coord+1
++        inc   coord
+         bne   +
+         inc   coord+1
++        bne   @loop2
+@exit    rts
+
+         !source "src/wait.a"
+         !source "src/fx/fx.hgr.common.a"
+         +HGR_HALF_BLOCK_COPY_ROUTINES

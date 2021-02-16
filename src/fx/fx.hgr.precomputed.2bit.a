@@ -1,0 +1,321 @@
+;license:MIT
+;(c) 2019-2020 by 4am
+;
+copymasks      = $0200    ; $100 bytes but sparse, index is 0..4 but in high 3 bits, so $00, $20, $40, $60, $80
+mirror_copymasks = $0201
+hgrlo          = $0301    ; $C0 bytes
+hgrlomirror    = $BD40    ; $C0 bytes
+mirror_cols    = $BE00    ; $28 bytes
+hgr1hi         = $BE40    ; $C0 bytes
+hgr1himirror   = $BF40    ; $C0 bytes
+Coordinates2Bit= $8100    ; $3C01 bytes ($3C00 on disk + 1 byte as EOF)
+
+         !source "src/fx/macros.a"
+
+!macro BUILD_MIRROR_COLS .mirror_cols {
+         ; build lookup table to get $27-y for y in $00..$27
+         ldx   #$27
+         ldy   #$00
+-        tya
+         sta   .mirror_cols, x
+         iny
+         dex
+         bpl   -
+}
+
+!macro BUILD_SPARSE_BITMASKS_2BIT .copymasks, .mirror_copymasks {
+         ; build sparse lookup tables for bitmasks
+         lda   #%10000011
+         sta   .copymasks
+         sta   .mirror_copymasks+$E0
+
+         lda   #%10001100
+         sta   .copymasks+$20
+         sta   .mirror_copymasks+$C0
+
+         lda   #%10110000
+         sta   .copymasks+$40
+         sta   .mirror_copymasks+$A0
+
+         lda   #%11000000
+         sta   .copymasks+$60
+         sta   .mirror_copymasks+$80
+
+         lda   #%10000001
+         sta   .copymasks+$80
+         sta   .mirror_copymasks+$60
+
+         lda   #%10000110
+         sta   .copymasks+$A0
+         sta   .mirror_copymasks+$40
+
+         lda   #%10011000
+         sta   .copymasks+$C0
+         sta   .mirror_copymasks+$20
+
+         lda   #%11100000
+         sta   .copymasks+$E0
+         sta   .mirror_copymasks
+}
+
+!macro ROW_X_TO_2BIT_BASE_ADDRESSES {
+         ; X = $01..$C0, mapping to row 0..191
+         lda   hgrlo-1, x
+         sta   <dest1
+         sta   <src1
+         lda   hgr1hi-1, x
+         sta   <dest1+1
+         eor   #$60
+         sta   <src1+1
+         lda   hgrlo, x
+         sta   <dest2
+         sta   <src2
+         lda   hgr1hi, x
+         sta   <dest2+1
+         eor   #$60
+         sta   <src2+1
+}
+
+!macro HIGH_3_LOW_5 .input {
+         and   #%11100000            ; second value: high 3 bits = index into tables to find bitmasks
+         tax
+         eor   (.input), y           ; second value: low 5 bits = byte offset within the row (implicitly "and #%00011111")
+         tay
+}
+
+!macro FX_INITONCE_2BIT .CoordinatesFile, .Start {
+InitOnce
+         bit   .Start
+         lda   #$4C
+         sta   InitOnce
+         +READ_RAM2_WRITE_RAM2
+         +LOAD_FILE_AT .CoordinatesFile, Coordinates2Bit
+         +READ_RAM1_WRITE_RAM1
+         lda   #$00
+         sta   Coordinates2Bit + $3C00
+}
+
+!macro FX_REVERSE_2BIT {
+         ldy   #0                    ; <Coordinates2Bit
+         sty   $f0
+         lda   #>Coordinates2Bit
+         sta   $f1
+         lda   #<(Coordinates2Bit + $3C00 - 2)
+         sta   $f2
+         lda   #>(Coordinates2Bit + $3C00 - 2)
+         sta   $f3
+
+         ldx   #$1E                  ; #$3C/2
+         clc
+         !byte $24
+-        sec
+--       lda   ($f0), y
+         pha
+         lda   ($f2), y
+         sta   ($f0), y
+         pla
+         sta   ($f2), y
+         iny
+         bcc   -
+         ldy   #0
+         !byte $24
+-        clc
+         inc   $f0
+         bne   +
+         inc   $f1
+         dex
+         beq   ++
++        lda   $f2
+         bne   +
+         dec   $f3
++        dec   $f2
+         bcs   -
+         bcc   --                    ; always branches
+++
+}
+
+!macro FX_RIPPLE_2BIT {
+         ldy   #0
+
+         ldx   #$33
+-        lda   ptrtbl, x
+         sta   $c0, x
+         dex
+         bpl   -
+
+         lda   #$9b
+         sta   $fe
+         iny
+         sty   $ff
+
+         ldx   #6
+-        lda   Coordinates2Bit + 1, x
+         sta   $7f, x
+         lda   Coordinates2Bit + 9, x
+         sta   $85, x
+         lda   Coordinates2Bit + 17, x
+         sta   $8b, x
+         lda   Coordinates2Bit + 65, x
+         sta   $9b, x
+         dex
+         bne   -
+         lda   Coordinates2Bit + 28
+         sta   $92
+         lda   Coordinates2Bit + 29
+         sta   $93
+         ldx   #4
+-        lda   Coordinates2Bit + 33, x
+         sta   $93, x
+         lda   Coordinates2Bit + 41, x
+         sta   $97, x
+         lda   Coordinates2Bit + 83, x
+         sta   $a1, x
+         dex
+         bne   -
+         ldx   #2
+-        lda   Coordinates2Bit + 125, x
+         sta   $a5, x
+         lda   Coordinates2Bit + 131, x
+         sta   $a7, x
+         lda   Coordinates2Bit + 139, x
+         sta   $a9, x
+         lda   Coordinates2Bit + 169, x
+         sta   $ab, x
+         lda   Coordinates2Bit + 237, x
+         sta   $ad, x
+         lda   Coordinates2Bit + 2193, x
+         sta   $af, x
+         lda   Coordinates2Bit + 6581, x
+         sta   $b1, x
+         dex
+         bne   -
+
+---      ldx   #$34
+--       lda   $be, x
+         tay
+         ora   $bf, x
+         beq   +
+         lda   $bf, x
+         jsr   aslmod
+         sty   $be, x
+         sta   $bf, x
+         sty   $fc
+         clc
+         adc   #>Coordinates2Bit
+         sta   $fd
+         ldy   #0
+         !byte $24
+-        sec
+         lda   ($fc), y
+         pha
+         lda   $7e, x
+         sta   ($fc), y
+         pla
+         sta   $7e, x
+         inx
+         iny
+         bcc   -
+         dex
+         dex
++        dex
+         dex
+         bne   --
+         ldy   #1
+         lda   $fe
+         eor   #<(411 - 2)
+         beq   +
+         ldy   #9
+         eor   #<(411 - 2) xor <(411 - 136)
+         bne   ++
++
+-        ldx   zerotbl, y
+         sta   $0, x
+         sta   $1, x
+         dey
+         bpl   -
+++       dec   $fe
+         bne   ---
+         dec   $ff
+         bpl   ---
+         bmi   ++                    ; always branches
+aslmod
+         jsr   +
++        cmp   #$1E
+         bcc   +
+         iny
++        pha
+         tya
+         asl
+         tay
+         pla
+         rol
+         cmp   #$3C
+         bcc   +
+         sbc   #$3C
++        rts
+ptrtbl   !word 2, 4, 6, 10, 12, 14, 18, 20
+         !word 22, 28, 34, 36, 42, 44, 66, 68
+         !word 70, 84, 86, 126, 132, 140, 170, 238
+         !word 2194, 6582
+zerotbl  !byte $f0, $f2, $ca, $d2, $d8, $e0, $e2, $e6, $ea, $ee
+++
+}
+
+!macro FX_PRECOMPUTED_2BIT .coords {
+         +BUILD_HGR_LOOKUP_TABLES hgrlo, hgr1hi
+         +BUILD_MIRROR_COLS mirror_cols
+         +BUILD_SPARSE_BITMASKS_2BIT copymasks, mirror_copymasks
+         ldx   #(end-start-1)        ; copy InputLoop code to zero page
+-        lda   start, x
+         sta   $0, x
+         dex
+         bpl   -
+         jmp   InputLoop
+start
+!pseudopc 0 {
+Exit2Bit rts
+InputLoop
+         ldy   #0
+input=*+1
+         ldx   .coords, y            ; first value: HGR row + 1
+         beq   Exit2Bit              ; if 0 then we're done
+         +ROW_X_TO_2BIT_BASE_ADDRESSES
+
+         inc   <input
+         lda   (<input), y
+         +HIGH_3_LOW_5 input
+
+         ; main 2x2 block in left half
+src1=*+1
+         lda   $FDFD, y
+         eor   (<dest1), y
+         and   copymasks, x
+         eor   (<dest1), y
+dest1=*+1
+         sta   $FDFD, y
+src2=*+1
+         lda   $FDFD, y
+         eor   (<dest2), y
+         and   copymasks, x
+         eor   (<dest2), y
+dest2=*+1
+         sta   $FDFD, y
+
+         ; corresponding 2x2 block in right half (same row, opposite column)
+         lda   mirror_cols, y
+         tay
+         +COPY_BIT src1, dest1, mirror_copymasks
+         +COPY_BIT src2, dest2, mirror_copymasks
+
+         inc   <input
+         bne   InputLoop
+         bit   $c000
+         bmi   Exit2Bit
+         inc   <input+1
+         bne   InputLoop             ; always branches
+}
+end
+!if * and 1 {
+         !byte 0 ;align 2 but avoids the fake allocation bug if it was aligned already
+}
+}

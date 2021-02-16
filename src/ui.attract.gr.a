@@ -1,0 +1,112 @@
+;license:MIT
+;(c) 2018-2020 by 4am
+;
+; GR action slideshows
+;
+; Public functions
+; - GRActionSlideshow
+; - GRSingle
+;
+
+;------------------------------------------------------------------------------
+; GRActionSlideshow
+; display a slideshow of lo-res action screenshots
+;
+; in:    none
+; out:   everything clobbered
+;        graphics mode set to display hi-res screen
+;------------------------------------------------------------------------------
+GRActionSlideshow
+         jsr   LoadGRTransition      ; load transition effect code at $6000
+         jsr   BlankGR               ; switch GR mode with initial blank screen
+         jsr   okvs_iter             ; cycle through all listed GR files
+         !word gSlideshowStore
+         !word GRActionCallback      ; address of callback (called on each file)
+         jmp   BlankHGR              ; switch back to HGR mode with initial blank screen on exit
+
+;------------------------------------------------------------------------------
+; GRSingle
+; display a single lo-res screenshot, with transition effect
+;
+; in:    none
+; out:   everything clobbered
+;        graphics mode set to display hi-res screen
+;------------------------------------------------------------------------------
+GRSingle
+         +ST16 @fname
+         jsr   BlankGR               ; switch to GR mode with initial blank screen
+         jsr   LoadFile              ; load GR screenshot into $6000
+         !word kRootDirectory
+@fname   !word $FDFD                 ; SMC
+         !word $6000
+         jsr   LoadGRTransition      ; load transition effect code at $6400
+         jsr   ExecuteTransitionAt6400AndWait
+         jmp   BlankHGR              ; switch back to HGR mode with initial blank screen on exit
+
+;------------------------------------------------------------------------------
+; BlankGR [private]
+; clear and show GR page 1 without flickering
+;
+; in:    none
+; out:   text page clobbered
+;        graphics mode set to display lo-res screen
+;------------------------------------------------------------------------------
+BlankGR
+         ldy   #$2C                  ; BIT
+         sty   PageFrom
+         ldx   #$04
+         stx   PageTo+2
+         lda   #0
+         jsr   ClearGR
+         bit   PAGE1
+         bit   $C056                 ; set GR mode
+         jmp   GRMode
+
+;------------------------------------------------------------------------------
+; LoadGRTransition [private]
+;
+; in:    none
+; out:   all registers and flags clobbered
+;        $6400..$BFFF/main contains transition effect code (probably not all
+;        of that, but no promises)
+;------------------------------------------------------------------------------
+LoadGRTransition
+         jsr   LoadFile
+         !word kFXDirectory
+         !word kGRFizzleFile
+         !word $6400
+GRRTS    rts
+
+;------------------------------------------------------------------------------
+; GRActionCallback [private]
+; callback called by okvs_iter on gSlideshowStore
+; to load and display a single GR action screenshot
+
+; in:    A/Y contains address of filename (name only, path is always /ACTION.GR/)
+;        $WINDEX contains 0-based index of the current record in gSlideshowStore (word)
+;        gGamesListStore must be initialized
+; out:   all registers and flags clobbered
+;        $0800..$1EFF preserved (this contains the gSlideshowStore OKVS data)
+;        $2000..$BFFF clobbered by graphics data and transition code
+;------------------------------------------------------------------------------
+GRActionCallback
+         bit   KBD
+         bmi   GRRTS
+
+         +ST16 +
+
+         jsr   FindGameInActionSlideshow
+         ; if game name is not found (C will be set here), it means the game
+         ; can't be played due to memory or joystick requirements, so we hide
+         ; it from slideshows
+         bcs   GRRTS
+
+         +LD16 WINDEX                ; save game index in case user hits RETURN
+         +ST16 gGameToLaunch         ; while it's visible (we'll launch it)
+
+         jsr   LoadFile              ; load GR screenshot into $6000
+         !word kGRActionDirectory
++        !word $FDFD                 ; SMC
+         !word $6000
+
+         jmp   ExecuteTransitionAt6400AndWait

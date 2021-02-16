@@ -1,0 +1,68 @@
+;license:MIT
+;(c) 2018-2020 by 4am
+;
+; credits page
+;
+; Public functions
+; - Credits
+; - Help
+;
+
+;------------------------------------------------------------------------------
+; Credits
+; display credits page and wait
+;
+; in:    none
+; out:   C clear
+;        all other flags and registers clobbered
+;------------------------------------------------------------------------------
+Credits
+         jsr   LoadFile              ; load credits text into $8000
+         !word kRootDirectory
+         !word kCreditsFile
+         !word $8000
+--       jsr   ForceHGRMode
+         jsr   ClearOffscreen
+         ldx   #0
+-        lda   OffscreenPage
+         ror                         ; draw on offscreen page
+         +LDADDR $8000
+         jsr   DrawPage              ; draw credits
+         jsr   ShowOtherPage         ; show credits
+         jsr   WaitForKeyFor30Seconds; wait
+         bit   CLEARKBD              ; don't care about key
+         cmp   #$81                  ; Ctrl-A = about
+         beq   Credits
+         cmp   #$90                  ; Ctrl-P = launch joystick calibration program
+         bne   +
+         jmp   Joystick
++        cmp   #$83                  ; Ctrl-C = toggle cheat mode
+         bne   +
+         jsr   ToggleCheat
++        sec                         ; if called from search mode, tell caller to refresh
+         rts
+
+;------------------------------------------------------------------------------
+; Help
+; display per-game or global help page and wait
+;
+; in:    none
+; out:   see above
+;------------------------------------------------------------------------------
+Help
+         jsr   GetGameToLaunch
+         bcs   @global
+         +ST16 @fname
+         jsr   LoadFile
+         !word kGameHelpDirectory
+@fname   !word $FDFD                 ; SMC
+         !word $8000
+         clc
+         bcc   --                    ; always branches
+@global  jsr   LoadFile              ; load help text into $8000
+         !word kRootDirectory
+         !word kHelpTextFile
+         !word $8000
+         jsr   LoadHelpOffscreen     ; load fancy backdrop
+         ldx   #7
+         bne   -                     ; always branches

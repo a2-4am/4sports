@@ -1,0 +1,62 @@
+;license:MIT
+;(c) 2018 by 4am
+;
+!cpu 6502
+!to "build/FX/HALF.MOSAIC",plain
+*=$6000
+
+         !source "src/fx/fx.hgr.halfblock.fizzle.common.a"
+
+         +BUILD_HALFBLOCK_FIZZLE_DATA
+
+         +LDADDR Coordinates
+         +ST16 coord
+@whiteloop
+         ldy   #0
+         lda   (coord),y
+         bmi   @endwhite
+         tax
+         iny
+         lda   (coord),y
+         tay
+         txa
+         jsr   HGRHalfBlockToWhite
+         lda   #$02
+         jsr   WaitForKeyWithTimeout
+         bmi   @exit
+         inc   coord
+         bne   +
+         inc   coord+1
++        inc   coord
+         bne   +
+         inc   coord+1
++        bne   @whiteloop
+@endwhite
+         +LDADDR Coordinates
+         +ST16 coord
+@copyloop
+         ldy   #0
+         lda   (coord),y
+         bmi   @exit
+         tax
+         iny
+         lda   (coord),y
+         tay
+         txa
+         jsr   HGRHalfBlockCopy
+         lda   #$02
+         jsr   WaitForKeyWithTimeout
+         bmi   @exit
+         inc   coord
+         bne   +
+         inc   coord+1
++        inc   coord
+         bne   +
+         inc   coord+1
++        bne   @copyloop
+@exit    rts
+
+         !source "src/wait.a"
+         !source "src/fx/fx.hgr.common.a"
+         +HGR_WHITE_ROUTINES
+         +HGR_HALF_BLOCK_COPY_ROUTINES

@@ -1,0 +1,198 @@
+;license:MIT
+;(c) 2019 by 4am
+;
+!cpu 6502
+!to "build/FX/SOFT.R",plain
+*=$6000
+
+y = $fc
+row = $fd
+col = $fe
+counter = $ff
+
+         !source "src/fx/macros.a"
+         !source "src/constants.a"
+
+         lda   #(40+7-1)  ; columns + blocks per row - 1
+         sta   counter
+
+         lda   #0
+         sta   col
+ColLoop
+         lda   #23
+         sta   row
+RowLoop
+         ; [speedopt] calculate HGR base addresses once per row
+         lda   row
+         asl
+         asl
+         asl
+         +HGR_CALC
+
+         ldy   col
+         +IS_Y_OFFSCREEN
+         bcs   @block2
+
+         ; [speedopt] HGRBlockCopyWithMask but hardcoded for this block's masks
+         ldx   #7
+         clc
+-
+         +COPY_BIT $3c, $26, copymasks1
+         +HGR_INC_WITHIN_BLOCK
+         dex
+         bpl   -
+
+         ; [speedopt] reset HGR base addresses instead of recalculating them from scratch
+         +RESET_HGR_CALC
+@block2
+         dey
+         +IS_Y_OFFSCREEN
+         bcs   @block3
+
+         ldx   #7
+         clc
+-
+         +COPY_BIT $3c, $26, copymasks2
+         +HGR_INC_WITHIN_BLOCK
+         dex
+         bpl   -
+
+         +RESET_HGR_CALC
+@block3
+         dey
+         +IS_Y_OFFSCREEN
+         bcs   @block4
+
+         ldx   #7
+         clc
+-
+         +COPY_BIT $3c, $26, copymasks3
+         +HGR_INC_WITHIN_BLOCK
+         dex
+         bpl   -
+
+         +RESET_HGR_CALC
+@block4
+         dey
+         +IS_Y_OFFSCREEN
+         bcs   @block5
+
+         ldx   #7
+         clc
+-
+         +COPY_BIT $3c, $26, copymasks4
+         +HGR_INC_WITHIN_BLOCK
+         dex
+         bpl   -
+
+         +RESET_HGR_CALC
+@block5
+         dey
+         +IS_Y_OFFSCREEN
+         bcs   @block6
+
+         ldx   #7
+         clc
+-
+         +COPY_BIT $3c, $26, copymasks5
+         +HGR_INC_WITHIN_BLOCK
+         dex
+         bpl   -
+
+         +RESET_HGR_CALC
+@block6
+         dey
+         +IS_Y_OFFSCREEN
+         bcs   @block7
+
+         ldx   #7
+         clc
+-
+         +COPY_BIT $3c, $26, copymasks6
+         +HGR_INC_WITHIN_BLOCK
+         dex
+         bpl   -
+
+         +RESET_HGR_CALC
+@block7
+         dey
+         +IS_Y_OFFSCREEN
+         bcs   @nextrow
+
+         ; [speedopt] HGRBlockCopy but inlined
+         ldx   #7
+         clc
+-        lda   ($3c),y
+         sta   ($26),y
+         +HGR_INC_WITHIN_BLOCK
+         dex
+         bpl   -
+
+         ; don't need RESET_HGR_CALC here because we're done with this row
+@nextrow
+         dec   row
+         +LBPL RowLoop
+         lda   $c000
+         bmi   @exit
+         inc   col
+         dec   counter
+         +LBNE ColLoop
+@exit    rts
+
+copymasks1
+         !byte %10000000
+         !byte %10000000
+         !byte %10000000
+         !byte %10001000
+         !byte %10001000
+         !byte %10000000
+         !byte %10000000
+         !byte %10000000
+copymasks2
+         !byte %10000000
+         !byte %10000000
+         !byte %10010100
+         !byte %10001000
+         !byte %10001000
+         !byte %10010100
+         !byte %10000000
+         !byte %10000000
+copymasks3
+         !byte %10000000
+         !byte %10000000
+         !byte %10011100
+         !byte %10011100
+         !byte %10011100
+         !byte %10011100
+         !byte %10000000
+         !byte %10000000
+copymasks4
+         !byte %10000000
+         !byte %10101010
+         !byte %10011100
+         !byte %10111110
+         !byte %10011100
+         !byte %10011100
+         !byte %10101010
+         !byte %10000000
+copymasks5
+         !byte %10000000
+         !byte %10111110
+         !byte %10111110
+         !byte %10111110
+         !byte %10111110
+         !byte %10111110
+         !byte %10111110
+         !byte %10000000
+copymasks6
+         !byte %11010101
+         !byte %10111110
+         !byte %11111111
+         !byte %10111110
+         !byte %11111111
+         !byte %10111110
+         !byte %10111110
+         !byte %11010101
+
+         !source "src/wait.a"
+         !source "src/fx/fx.hgr.common.a"

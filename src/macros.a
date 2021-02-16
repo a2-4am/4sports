@@ -1,0 +1,392 @@
+;license:MIT
+;(c) 2018-2020 by 4am
+;
+; common assembler macros (6502 compatible)
+;
+
+!ifndef _MACROS_ {
+         !source "src/constants.a"
+
+; for functions that take parameters on the stack
+; set (PARAM) to point to the parameters and
+; move the stack pointer to the first byte after the parameters
+; clobbers A,X,Y
+!macro   PARAMS_ON_STACK .bytes {
+         pla
+         sta   PARAM
+         clc
+         adc   #.bytes
+         tay
+         pla
+         sta   PARAM+1
+         adc   #0
+         pha
+         tya
+         pha
+}
+
+; for functions that take parameters on the stack
+; load a 16-bit value from the parameters on the stack into A (low) and Y (high)
+; (assumes PARAMS_ON_STACK was used first)
+!macro   LDPARAM .offset {
+         ldy   #.offset
+         lda   (PARAM),y
+         pha
+         iny
+         lda   (PARAM),y
+         tay
+         pla
+}
+
+; for functions that take parameters on the stack
+; load a 16-bit value from the parameters on the stack into A (low) and Y (high)
+; then store it as new source
+; (assumes PARAMS_ON_STACK was used first)
+!macro   LDPARAMPTR .offset,.dest {
+         ldy   #.offset
+         lda   (PARAM),y
+         sta   .dest
+         iny
+         lda   (PARAM),y
+         sta   .dest+1
+}
+
+; load the address of .ptr into A (low) and Y (high)
+!macro   LDADDR .ptr {
+         lda   #<.ptr
+         ldy   #>.ptr
+}
+
+; load a 16-bit value into A (low) and Y (high)
+!macro   LD16 .ptr {
+         lda   .ptr
+         ldy   .ptr+1
+}
+
+; load a 16-bit value into X (low) and Y (high)
+!macro   LDX16 .ptr {
+         ldx   .ptr
+         ldy   .ptr+1
+}
+
+; store a 16-bit value from A (low) and Y (high)
+!macro   ST16 .ptr {
+         sta   .ptr
+         sty   .ptr+1
+}
+
+; store a 16-bit value from X (low) and Y (high)
+!macro   STX16 .ptr {
+         stx   .ptr
+         sty   .ptr+1
+}
+
+; decrement a 16-bit value in A (low) and Y (high)
+!macro   DEC16 {
+         sec
+         sbc   #1
+         bcs   +
+         dey
++
+}
+
+; decrement a 16-bit value in X (low) and Y (high)
+; destroys A!
+!macro   DEX16 {
+         txa
+         bne   +
+         dey
++        dex
+}
+
+; increment a 16-bit value in A (low) and Y (high)
+!macro   INC16 {
+         clc
+         adc   #1
+         bne   +
+         iny
++
+}
+
+; increment a 16-bit value in X (low) and Y (high)
+!macro   INX16 {
+         inx
+         bne   +
+         iny
++
+}
+
+; compare a 16-bit value in A (low) and Y (high) to an absolute address
+; zeroes A!
+!macro   CMP16ADDR .addr {
+         eor   .addr
+         bne   +
+         cpy   .addr+1
++
+}
+
+; compare a 16-bit value in X (low) and Y (high) to an absolute address
+!macro   CPX16ADDR .addr {
+         cpx   .addr
+         bne   +
+         cpy   .addr+1
++
+}
+
+; compare a 16-bit value in A (low) and Y (high) to an immediate value
+!macro   CMP16 .val {
+         cmp   #<.val
+         bne   +
+         cpy   #>.val
++
+}
+
+; compare a 16-bit value in X (low) and Y (high) against zero
+; requires LDX16 immediately prior, since Y comparison is implicit!
+; destroys A!
+!macro   CPX16_0 {
+         bne   +
+         txa
++
+}
+
+!macro   LBPL .target {
+         bmi   +
+         jmp   .target
++
+}
+
+!macro   LBMI .target {
+         bpl   +
+         jmp   .target
++
+}
+
+!macro   LBNE .target {
+         beq   +
+         jmp   .target
++
+}
+
+!macro   LBCS .target {
+         bcc   +
+         jmp   .target
++
+}
+
+; use BIT to swallow the following 1-byte opcode
+!macro   HIDE_NEXT_BYTE {
+         !byte $24
+}
+
+; use BIT to swallow the following 2-byte opcode
+!macro   HIDE_NEXT_2_BYTES {
+         !byte $2C
+}
+
+; debugging
+!macro   DEBUGWAIT {
+         bit   $c010
+-        bit   $c000
+         bpl   -
+         bit   $c010
+}
+
+; various language card configurations
+!macro   READ_RAM1_NO_WRITE {
+         bit   $C088
+}
+
+!macro   READ_RAM1_WRITE_RAM1 {
+         bit   $C08B
+         bit   $C08B
+}
+
+!macro   READ_RAM2_NO_WRITE {
+         bit   $C080
+}
+
+!macro   READ_RAM2_WRITE_RAM2 {
+         bit   $C083
+         bit   $C083
+}
+
+!macro   READ_ROM_WRITE_RAM1 {
+         bit   $C089
+         bit   $C089
+}
+
+!macro   READ_ROM_WRITE_RAM2 {
+         bit   $C081
+         bit   $C081
+}
+
+!macro   READ_ROM_NO_WRITE {
+         bit   $C082
+}
+
+; requires setting zpCharMask in zero page to #$FF or #$DF before use
+!macro   FORCE_UPPERCASE_IF_REQUIRED {
+         cmp   #$E1
+         bcc   +
+         and   zpCharMask
++
+}
+
+!macro   HGR_BYTE_TO_DHGR_BYTES {
+;1GFEDCBA ->
+;1GGFFEED (main) +
+;1DCCBBAA (aux)
+;
+; in:    A = HGR byte
+; out:   A = DHGR byte in mainmem
+;        X = DHGR byte in auxmem
+;        preserves Y
+;        clobbers zero page $00,$01,$02
+         sty   $02
+         ldy   #$02
+--       stx   $01
+         ldx   #$04
+-        ror   $00                   ; duplicate previous bit
+         lsr                         ; fetch bit
+         php
+         ror   $00                   ; insert bit
+         plp
+         dex
+         bne   -
+         ldx   $00
+         dey
+         bne   --
+         txa
+         sec
+         ror   $01                   ; set bit 7 explicitly on auxmem value
+         ldx   $01
+         ldy   $02
+}
+
+; these are mostly for prelaunchers -- code in the main program should keep track of which bank is active to minimize code size
+!macro   ENABLE_ACCEL {
+         +READ_RAM2_NO_WRITE
+         jsr   EnableAccelerator
+         +READ_ROM_NO_WRITE
+}
+
+!macro   DISABLE_ACCEL {
+         +READ_RAM2_NO_WRITE
+         jsr   DisableAccelerator
+         +READ_ROM_NO_WRITE
+}
+
+!macro   GET_MACHINE_STATUS {
+         +READ_RAM2_NO_WRITE
+         lda   MachineStatus
+         +READ_ROM_NO_WRITE
+}
+
+!macro   GET_MOCKINGBOARD_SPEECH { ;carry set if present
+         +READ_RAM2_NO_WRITE
+         lda   MockingboardStuff
+         asl
+         +READ_ROM_NO_WRITE
+}
+
+!macro   GET_MOCKINGBOARD_SPEECH_AND_MACHINE_STATUS { ;carry set if present
+         +READ_RAM2_NO_WRITE
+         lda   MockingboardStuff
+         asl
+         lda   MachineStatus
+         +READ_ROM_NO_WRITE
+}
+
+!macro   GET_MOCKINGBOARD_SLOT { ;carry set if present
+         +READ_RAM2_NO_WRITE
+         lda   MockingboardStuff
+         cmp   #1
+         ora   #$C0
+         +READ_ROM_NO_WRITE
+}
+
+!macro   GET_MOCKINGBOARD_SLOT_AND_MACHINE_STATUS { ;carry set if present
+         +READ_RAM2_NO_WRITE
+         lda   MockingboardStuff
+         cmp   #1
+         ora   #$C0
+         tax
+         lda   MachineStatus
+         +READ_ROM_NO_WRITE
+}
+!macro   USES_TEXT_PAGE_2 {
+         lda   ROM_MACHINEID
+         cmp   #$06
+         bne   +
+         sec
+         jsr   $FE1F                 ; check for IIgs
+         bcs   +
+         jsr   ROM_TEXT2COPY         ; set alternate display mode on IIgs (required for some games)
+         cli                         ; enable VBL interrupts
++
+}
+
+!macro   RESET_VECTOR .addr {
+         lda   #<.addr
+         sta   $3F2
+         lda   #>.addr
+         sta   $3F3
+         eor   #$A5
+         sta   $3F4
+}
+
+; for games that clobber $100-$105, the prelaunch code constructs a new reset vector
+; somewhere else and sets its
+!macro   NEW_RESET_VECTOR .addr {
+         lda   #$2C
+         sta   .addr
+         lda   #$88
+         sta   .addr+1
+         lda   #$C0
+         sta   .addr+2
+         lda   #$6C       ; JMP ($FFFC) points to 'Reenter'
+         sta   .addr+3
+         lda   #$FC
+         sta   .addr+4
+         lda   #$FF
+         sta   .addr+5
+         +RESET_VECTOR .addr
+}
+
+; for 64k games on ][+ which either hang or restart
+; updates reset hook to reboot on ctrl-reset
+!macro   LC_REBOOT {
+         inc   $101       ; (assumes LC is switched in)
+         lda   #$A6
+         sta   $104
+         lda   #$FA
+         sta   $105       ; update reset hook to reboot
+         lda   #1
+         sta   $FFFD
+         lsr
+         sta   $FFFC      ; LC reset vector fix
+}
+
+; load an external file by pathname
+; LC RAM 2 MUST BE BANKED IN
+; LOW BYTE OF .addr MUST BE $00
+!macro   LOAD_FILE_AT .filepath, .addr {
+         lda   #0
+         sta   iAuxReq    ; read to main memory
+         lda   #>.addr
+         sta   ldrhi
+         lda   iCurBlockLo
+         pha
+         lda   iCurBlockHi
+         pha
+         +LDADDR .filepath
+         jsr   LoadFileDirect
+         pla
+         sta   iCurBlockHi
+         pla
+         sta   iCurBlockLo
+}
+
+_MACROS_=*
+}

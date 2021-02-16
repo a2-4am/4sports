@@ -1,0 +1,39 @@
+;license:MIT
+;(c) 2018-9 by 4am
+;
+; VidHD support functions
+;
+
+;------------------------------------------------------------------------------
+; HasVidHDCard
+; detect VidHD card by searching for magic bytes across all slots
+;
+; in:    none
+; out:   C set if VidHD card found in any slot
+;        if card was found, X = #$Cn where n is the slot number of the card
+;        C clear if no VidHD card found
+;        other flags clobbered
+;        A/Y clobbered
+;------------------------------------------------------------------------------
+HasVidHDCard
+         ldx   #$C7
+@slotLoop
+         stx   @byteLoop+2
+         ldy   #$02
+@byteLoop
+         lda   $FD00, y              ; SMC (high byte)
+         cmp   @kVidHDMagicBytes, y
+         bne   @nextSlot
+         dey
+         bpl   @byteLoop
+@found
+         sec                         ; found
+         rts
+@nextSlot
+         dex
+         cpx   #$C0
+         bne   @slotLoop
+         clc                         ; not found
+         rts
+@kVidHDMagicBytes
+         !byte $24, $EA, $4C
