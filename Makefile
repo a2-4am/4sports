@@ -50,7 +50,7 @@ dsk: asm
 	bin/buildfileinfo.sh build/PRELAUNCH "06" "0106" >>build/log
 	$(CADIUS) ADDFOLDER build/"$(DISK)" "/$(VOLUME)/PRELAUNCH" "build/PRELAUNCH" >>build/log
 	rsync -aP --exclude=STANDARD res/GAMEHELP build/ >>build/log
-	for f in res/TITLE.HGR/*; do rsync --ignore-existing res/GAMEHELP/STANDARD build/GAMEHELP/$$(basename $$f); done
+	for f in res/TITLE.HGR/* res/TITLE.DHGR/*; do rsync --ignore-existing res/GAMEHELP/STANDARD build/GAMEHELP/$$(basename $$f); done
 	bin/buildfileinfo.sh build/GAMEHELP "04" "8000" >>build/log
 	$(CADIUS) ADDFOLDER build/"$(DISK)" "/$(VOLUME)/GAMEHELP" "build/GAMEHELP" >>build/log
 	bin/changebootloader.sh build/"$(DISK)" res/proboothd
@@ -67,14 +67,14 @@ asmfx: md
 
 asmprelaunch: md
 	for f in src/prelaunch/*.a; do grep "^\!to" $${f} >/dev/null && $(ACME) $${f} >> build/log; done
-	for f in res/TITLE.HGR/*; do rsync --ignore-existing build/PRELAUNCH/STANDARD build/PRELAUNCH/$$(basename $$f); done
+	for f in res/TITLE.HGR/* res/TITLE.DHGR/*; do rsync --ignore-existing build/PRELAUNCH/STANDARD build/PRELAUNCH/$$(basename $$f); done
 
 chd:	dsk
 	chdman createhd -c none -i build/"$(DISK)" -o build/"$(DISK)".chd >>build/log
 
 compress: md
 	for f in res/ACTION.HGR.UNCOMPRESSED/*; do  o=res/ACTION.HGR/$$(basename $$f);  [ -f "$$o" ] || ${EXOMIZER} "$$f"@0x4000 -o "$$o" >>build/log; done
-	#for f in res/ACTION.DHGR.UNCOMPRESSED/*; do o=res/ACTION.DHGR/$$(basename $$f); [ -f "$$o" ] || ${EXOMIZER} "$$f"@0x4000 -o "$$o" >>build/log; done
+	for f in res/ACTION.DHGR.UNCOMPRESSED/*; do o=res/ACTION.DHGR/$$(basename $$f); [ -f "$$o" ] || ${EXOMIZER} "$$f"@0x4000 -o "$$o" >>build/log; done
 	for f in res/ARTWORK.SHR.UNCOMPRESSED/*; do o=res/ARTWORK.SHR/$$(basename $$f); [ -f "$$o" ] || ${EXOMIZER} "$$f"@0x2000 -o "$$o" >>build/log; done
 
 attract: compress
