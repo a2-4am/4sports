@@ -2,6 +2,10 @@
 
 BATTLE.CHESS=Type(06),AuxType(4000),Access(C3)
 CALI.GAMES=Type(06),AuxType(4000),Access(C3)
+SS.BASEBALL=Type(06),AuxType(4000),Access(C3)
+SS.BASKETBALL=Type(06),AuxType(4000),Access(C3)
+SS.FOOTBALL=Type(06),AuxType(4000),Access(C3)
+SS.SOCCER=Type(06),AuxType(4000),Access(C3)
 SUMMER.EDITION=Type(06),AuxType(4000),Access(C3)
 TEST.DRIVE=Type(06),AuxType(4000),Access(C3)
 WINTER.EDITION=Type(06),AuxType(4000),Access(C3)

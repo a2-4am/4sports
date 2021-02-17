@@ -14,12 +14,6 @@ soccer (2)
 skiing (2)
 wrestling (3)
 
-//migrate from Total Replay
-Street Sports Baseball
-Street Sports Basketball
-Street Sports Football
-Street Sports Soccer
-
 //ported
 Championship Baseball
 Championship Wrestling
