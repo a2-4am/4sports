@@ -15,8 +15,6 @@ skiing (2)
 wrestling (3)
 
 //migrate from Total Replay
-One on One
-Ski Crazed
 Street Sports Baseball
 Street Sports Basketball
 Street Sports Football
