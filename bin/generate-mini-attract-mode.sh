@@ -1,5 +1,7 @@
 #!/bin/bash
 
+shopt -s extglob  # Enables extglob
+
 # run from project root directory
 
 cat res/GAMES.CONF |
@@ -25,7 +27,7 @@ cat res/GAMES.CONF |
             uniq >> /tmp/g
 
         # add HGR action screenshots, if any
-        cat res/SS/ACTION*.CONF |
+        cat res/SS/ACT!(*DHGR*).CONF |
             egrep "(^|=)""$game""$" |
             cut -d"=" -f1 |
             sed -e "s/^/ACTION.HGR\//g" |
