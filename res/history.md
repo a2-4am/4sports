@@ -10,4 +10,5 @@
  - Summer Games
  - Summer Games II
  - The Games: Summer Edition
+ - The Games: Winter Edition
  - World Games
