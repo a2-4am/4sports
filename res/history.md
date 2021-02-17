@@ -11,6 +11,7 @@
  - California Games
  - Fight Night
  - Formula 1 Racer
+ - Fuji Crowded Speedway
  - Karate Champ
  - Speedway Classic
  - Summer Games
