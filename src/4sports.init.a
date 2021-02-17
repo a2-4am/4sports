@@ -273,8 +273,8 @@ REPLAY
          !text "R E P L A Y"
 !ifndef RELEASE {
 LoadingVersion
-         !byte 9
-         !text "build 000"
+         !byte 8
+         !text "build 00"
 LoadingBuild
          !word BUILDNUMBER
 } else {

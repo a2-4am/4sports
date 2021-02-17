@@ -17,7 +17,6 @@ The Games (8)
 //migrate from Total Replay
 Battle Chess
 Bop'n Wrestle
-California Games
 Fight Night
 Formula 1 Racer
 Fuji Crowded Speedway
@@ -32,19 +31,15 @@ Street Sports Baseball
 Street Sports Basketball
 Street Sports Football
 Street Sports Soccer
-Summer Games
-Summer Games II
 Tag Team Wrestling
 The Games: Summer Edition
 The Games: Winter Edition
 Test Drive
 Track & Field
 Winter Games
-World Games [DHGR]
 World Karate Championship
 
 //ported
-Black Belt
 Championship Baseball
 Championship Wrestling
 GBA Championship Basketball
