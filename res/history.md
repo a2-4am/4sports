@@ -7,6 +7,7 @@
 ## Migrated from Total Replay
 
  - California Games
+ - Karate Champ
  - Summer Games
  - Summer Games II
  - The Games: Summer Edition

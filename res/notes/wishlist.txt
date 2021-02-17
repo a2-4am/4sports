@@ -12,7 +12,7 @@ racing (6)
 shuffleboard (1)
 soccer (2)
 wrestling (3)
-The Games (8)
+compilation (10)
 
 //migrate from Total Replay
 Battle Chess
@@ -22,7 +22,6 @@ Formula 1 Racer
 Fuji Crowded Speedway
 Hardball
 International Gran Prix
-Karate Champ
 One on One
 Shuffleboard
 Ski Crazed
