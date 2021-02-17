@@ -15,7 +15,6 @@ wrestling (3)
 compilation (10)
 
 //migrate from Total Replay
-Battle Chess
 Bop'n Wrestle
 Fight Night
 Formula 1 Racer

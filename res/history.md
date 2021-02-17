@@ -6,6 +6,7 @@
 
 ## Migrated from Total Replay
 
+ - Battle Chess
  - California Games
  - Karate Champ
  - Summer Games
