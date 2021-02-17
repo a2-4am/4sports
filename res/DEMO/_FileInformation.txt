@@ -1,1 +1,4 @@
 # This file is maintained by hand
+
+FORMULA.1.RACER=Type(06),AuxType(0300),Access(C3)
+FORMULA.2=Type(F1),AuxType(0000),Access(C3)

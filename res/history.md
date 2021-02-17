@@ -10,6 +10,7 @@
  - Bop'n Wrestle
  - California Games
  - Fight Night
+ - Formula 1 Racer
  - Karate Champ
  - Summer Games
  - Summer Games II

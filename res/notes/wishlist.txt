@@ -15,7 +15,6 @@ wrestling (3)
 compilation (10)
 
 //migrate from Total Replay
-Formula 1 Racer
 Fuji Crowded Speedway
 Hardball
 International Gran Prix
