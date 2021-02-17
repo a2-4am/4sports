@@ -14,3 +14,4 @@
  - The Games: Winter Edition
  - Winter Games
  - World Games
+ - World Karate Championship
