@@ -15,7 +15,6 @@ wrestling (3)
 
 //migrate from Total Replay
 Hardball
-International Gran Prix
 One on One
 Shuffleboard
 Ski Crazed
