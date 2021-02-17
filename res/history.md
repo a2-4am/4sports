@@ -14,6 +14,7 @@
  - Fuji Crowded Speedway
  - International Gran Prix
  - Karate Champ
+ - Shuffleboard
  - Speedway Classic
  - Summer Games
  - Summer Games II

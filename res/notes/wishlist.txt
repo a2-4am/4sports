@@ -17,7 +17,6 @@ wrestling (3)
 //migrate from Total Replay
 Hardball
 One on One
-Shuffleboard
 Ski Crazed
 Street Sports Baseball
 Street Sports Basketball
