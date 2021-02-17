@@ -1,18 +1,17 @@
-//sports (counts are approximate)
+//categories (counts are approximate)
 baseball (10)
-basketball (3)
-billiards (2)
-boxing (3)
+basketball (4)
+boxing (4)
 chess (5)
+compilation (10) [e.g. The Games, Decathlon]
 football (8)
-golf (6)
+golf (12)
 hockey (2)
 karate (4)
+lounge (4) [billiards, shuffleboard, foosball]
 racing (6)
-shuffleboard (1)
 soccer (2)
 wrestling (3)
-compilation (10)
 
 //migrate from Total Replay
 Fuji Crowded Speedway
@@ -25,7 +24,6 @@ Street Sports Baseball
 Street Sports Basketball
 Street Sports Football
 Street Sports Soccer
-Tag Team Wrestling
 Test Drive
 Track & Field
 
@@ -42,10 +40,13 @@ Championship Boxing [4am crack]
 Championship Golf [4am crack]
 Colossus Chess IV (Firebird)
 Competition Karate
+Computer Foosball (Sirius)
 Chess 7.0 (Odesta)
 Dave Winfield's Batter Up [4am crack]
 Earl Weaver Baseball
 Fore! [4am crack]
+Golf Course (Main Street Publishing)
+Golf's Best
 GFL Championship Football [4am crack]
 Hi-Res Computer Golf [4am crack]
 Hi-Res Computer Golf 2
@@ -55,13 +56,18 @@ International Hockey
 Joe Thiesman Pro Football
 John Elway's Quarterback
 John Madden Football
+Maxi Golf
+Micro Golf (from file, not ProDOS 2.0.3 remake)
 Micro League Baseball
 MicroChess 2.0 (Personal Software)
 Olympic Decathlon
-Pool 1.5
+Pool 1.5 (IDSI)
+Pro Golf (Home-Computer Software)
 Professional Tour Golf [4am crack]
 Pure Stat Baseball
+Pure Stat College Basketball
 Sargon III (Spinnaker)
+Sierra Championship Boxing
 Star League Baseball
 Star Rank Boxing
 Super Sunday [4am crack]
@@ -71,6 +77,6 @@ The Fidelity Chessmaster 2100 (Software Toolworks)
 The Sporting News Baseball [4am crack]
 The World's Greatest Baseball Game (Enhanced Version) [4am crack]
 The World's Greatest Football Game [4am crack]
-Trick Shot
-World Class Leader Board
+Trick Shot (IDSI)
+World Class Leader Board (Access Software)
 World Series Baseball
