@@ -2,6 +2,7 @@
 
 BLACK.BELT=Type(04),AuxType(8000),Access(C3)
 CALI.GAMES=Type(04),AuxType(8000),Access(C3)
+SUMMER.EDITION=Type(04),AuxType(8000),Access(C3)
 SUMMER.GAMES=Type(04),AuxType(8000),Access(C3)
 SUMMER.GAMES.II=Type(04),AuxType(8000),Access(C3)
 WORLD.GAMES=Type(04),AuxType(8000),Access(C3)

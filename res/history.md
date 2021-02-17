@@ -6,6 +6,8 @@
 
 ## Migrated from Total Replay
 
+ - California Games
  - Summer Games
  - Summer Games II
+ - The Games: Summer Edition
  - World Games
