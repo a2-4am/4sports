@@ -11,6 +11,7 @@ karate (4)
 lounge (4) [billiards, shuffleboard, foosball]
 racing (6)
 soccer (2)
+skiing (2)
 wrestling (3)
 
 //migrate from Total Replay
@@ -22,7 +23,6 @@ Street Sports Baseball
 Street Sports Basketball
 Street Sports Football
 Street Sports Soccer
-Test Drive
 
 //ported
 Championship Baseball
@@ -32,6 +32,7 @@ Gran Prix Circuit
 Superstar Ice Hockey
 
 //TODO
+3-D Skiing (Continential Software)
 Autobahn
 Championship Boxing [4am crack]
 Championship Golf [4am crack]
