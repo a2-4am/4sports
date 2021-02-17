@@ -7,6 +7,7 @@
 ## Migrated from Total Replay
 
  - Battle Chess
+ - Bop'n Wrestle
  - California Games
  - Karate Champ
  - Summer Games

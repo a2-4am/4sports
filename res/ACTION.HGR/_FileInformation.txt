@@ -2,6 +2,8 @@
 
 BLACK.BELT=Type(06),AuxType(3FF8),Access(C3)
 BLACK.BELT2=Type(06),AuxType(3FF8),Access(C3)
+BOP.N.WRESTLE=Type(06),AuxType(3FF8),Access(C3)
+BOP.N.WRESTLE2=Type(06),AuxType(3FF8),Access(C3)
 KARATE.CHAMP=Type(06),AuxType(3FF8),Access(C3)
 SUM.GAMES.II01=Type(06),AuxType(3FF8),Access(C3)
 SUM.GAMES.II02=Type(06),AuxType(3FF8),Access(C3)
