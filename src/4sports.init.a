@@ -69,10 +69,17 @@
          sta   zpCharMask
 
          ; print text title in same place as graphical title will appear
-         ldy   #8
--        lda   TOTAL,y
+         ldy   #14
+-        lda   II,y
          ora   #$80
-         sta   $04B7,y
+         +FORCE_UPPERCASE_IF_REQUIRED
+         sta   $070C,y
+         dey
+         bpl   -
+         ldy   #12
+-        lda   INSTANT,y
+         ora   #$80
+         sta   $04B5,y
          dey
          bpl   -
          ldy   #10
@@ -267,8 +274,10 @@ FoundMockingboardCallback
          ora   #$B0
          jmp   ROM_COUT
 
-TOTAL
-         !text "T O T A L"
+II
+         !text "Total Replay II"
+INSTANT
+         !text "I N S T A N T"
 REPLAY
          !text "R E P L A Y"
 !ifndef RELEASE {
