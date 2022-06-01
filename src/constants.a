@@ -153,9 +153,11 @@ iAuxReq        = $DB27
 launchpatch    = $D616
 iAddToPath     = $FEC3
 itraverse      = $D8E0
-ldrhi          = $56
-namlo          = $57
-namhi          = $58
+ldrhi          = $56                 ; constant
+namlo          = $57                 ; constant
+namhi          = $58                 ; constant
+ldrlo2         = $59                 ; constant
+ldrhi2         = $5A                 ; constant
 
 _CONSTANTS_=*
 }

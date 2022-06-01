@@ -2,17 +2,17 @@
 ;(c) 2022 by qkumba
 
 !cpu 6502
-!to "build/PRELAUNCH/CMPTR.FOOSBALL",plain
+!to "build/PRELAUNCH/POOL",plain
 *=$106
 
     !source "src/prelaunch/common.a"
 
          +ENABLE_ACCEL
          lda   #$60
-         sta   $2026
-         jsr   $2000      ; decompress
+         sta   $1F5B
+         jsr   $1F24      ; decompress
          +DISABLE_ACCEL
-         jmp   $800
+         jmp   $A003
 
 !if * > $1C0 {
   !error "code is too large, ends at ", *
