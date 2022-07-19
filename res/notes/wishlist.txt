@@ -15,20 +15,20 @@ skiing (2)
 wrestling (3)
 
 //ported
+Autobahn
 Championship Baseball
 Championship Wrestling
+Computer Foosball (Sirius)
 GBA Championship Basketball
 Gran Prix Circuit
+Pool 1.5 (IDSI)
 Superstar Ice Hockey
 
 //TODO
 3-D Skiing (Continential Software)
-Autobahn
-Championship Boxing [4am crack]
 Championship Golf [4am crack]
 Colossus Chess IV (Firebird)
 Competition Karate
-Computer Foosball (Sirius)
 Chess 7.0 (Odesta)
 Dave Winfield's Batter Up [4am crack]
 Earl Weaver Baseball
@@ -49,14 +49,12 @@ Micro Golf (from file, not ProDOS 2.0.3 remake)
 Micro League Baseball
 MicroChess 2.0 (Personal Software)
 Olympic Decathlon
-Pool 1.5 (IDSI)
 Pro Golf (Home-Computer Software)
 Professional Tour Golf [4am crack]
 Pure Stat Baseball
 Pure Stat College Basketball
-Rack 'Em Up (Roklan)
 Sargon III (Spinnaker)
-Sierra Championship Boxing
+Sierra Championship Boxing [4am crack]
 Sports Spectacular (Keypunch) [unprotected]
 Star League Baseball
 Star Rank Boxing
