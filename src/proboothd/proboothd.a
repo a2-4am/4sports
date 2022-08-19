@@ -2,7 +2,7 @@
 ;minimal open/read binary file in ProDOS filesystem
 ;copyright (c) Peter Ferrie 2016-2019
 !cpu 6502
-!to "proboothd",plain
+!to "build/proboothd",plain
 *=$800
 
                 ;zpage usage, arbitrary selection except for the "ProDOS constant" ones
@@ -22,7 +22,8 @@
                 dirbuf    = $1e00       ;for size-optimisation
 
                 !byte 1
-                tay
+                stx unit
+                ldy #0                  ;Yellowstone support
 -               txa
                 jsr scrn2p2
                 and #7

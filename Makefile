@@ -53,9 +53,12 @@ dsk: asm
 	for f in res/TITLE.HGR/* res/TITLE.DHGR/*; do rsync --ignore-existing res/GAMEHELP/STANDARD build/GAMEHELP/$$(basename $$f); done
 	bin/buildfileinfo.sh build/GAMEHELP "04" "8000" >>build/log
 	$(CADIUS) ADDFOLDER build/"$(DISK)" "/$(VOLUME)/GAMEHELP" "build/GAMEHELP" >>build/log
-	bin/changebootloader.sh build/"$(DISK)" res/proboothd
+	bin/changebootloader.sh build/"$(DISK)" build/proboothd
 
-asm: asmlauncher asmfx asmprelaunch
+asm: asmproboot asmlauncher asmfx asmprelaunch
+
+asmproboot: md
+	$(ACME) -r build/proboothd.lst src/proboothd/proboothd.a
 
 asmlauncher: md
 	$(ACME) -DBUILDNUMBER=`git rev-list --count HEAD` src/4sports.a 2>build/relbase.log

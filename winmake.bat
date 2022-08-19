@@ -25,6 +25,7 @@ set GIT=git
 if "%1" equ "asm" (
 :asm
 call :md
+call :asmproboot
 call :asmlauncher
 call :asmfx
 call :asmprelaunch
@@ -85,7 +86,7 @@ for %%q in (res\title.dhgr\*) do if not exist build\GAMEHELP\%%~nxq 1>nul copy b
 cscript /nologo bin\dumpcr.js "build\GAMEHELP\*"
 cscript /nologo bin\buildfileinfo.js build\GAMEHELP "06" "6000" >>build\log
 %CADIUS% ADDFOLDER "build\%DISK%" "/%VOLUME%/GAMEHELP" "build\GAMEHELP" >>build\log
-cscript /nologo bin\changebootloader.js "build\%DISK%" res\proboothd
+cscript /nologo bin\changebootloader.js "build\%DISK%" build\proboothd
 goto :EOF
 )
 
@@ -133,6 +134,10 @@ for %%q in (src\prelaunch\*.a) do (
 for %%q in (res\title.hgr\*) do if not exist build\PRELAUNCH\%%~nxq 1>nul copy build\PRELAUNCH\STANDARD build\PRELAUNCH\%%~nxq
 for %%q in (res\title.dhgr\*) do if not exist build\PRELAUNCH\%%~nxq 1>nul copy build\PRELAUNCH\STANDARD build\PRELAUNCH\%%~nxq
 cscript /nologo bin\buildfileinfo.js build\PRELAUNCH "06" "0106" >>build\log
+goto :EOF
+
+:asmproboot
+%ACME% -r build\proboothd.lst src\proboothd\proboothd.a >> build\log
 goto :EOF
 
 :compress
