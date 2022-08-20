@@ -23,13 +23,13 @@
          sta   $1C5
 
          lda   #$C0
-         sta   $82A8      ; cloned to $3F2
-         sta   $7D43      ; cloned to $FFFC
+         sta   $82AB      ; cloned to $3F2
+         sta   $7D46      ; cloned to $FFFC
          lda   #$01
-         sta   $82A9      ; cloned to $3F3
-         sta   $7D46      ; cloned to $FFFD
+         sta   $82AC      ; cloned to $3F3
+         sta   $7D49      ; cloned to $FFFD
          lda   #$A4
-         sta   $82A0      ; cloned to $3F4
+         sta   $82A3      ; cloned to $3F4
 
          jmp   $2499
 
