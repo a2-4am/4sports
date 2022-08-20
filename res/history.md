@@ -3,6 +3,7 @@
 ## New games
 
 - Black Belt
+- The American Challenge
 
 ## Migrated from Total Replay
 
