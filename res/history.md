@@ -31,10 +31,12 @@
 - Street Sports Soccer
 - Summer Games
 - Summer Games II
+- Super Huey
 - Tag Team Wrestling
 - Test Drive
 - The Games: Summer Edition
 - The Games: Winter Edition
+- Tomahawk
 - Track & Field
 - Winter Games
 - World Games
