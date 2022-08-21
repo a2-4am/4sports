@@ -9,29 +9,32 @@ golf (12)
 hockey (2)
 karate (4)
 lounge (4) [billiards, shuffleboard, foosball]
+navigator (14) [flight sim, boat sim]
 racing (6)
 soccer (2)
 skiing (2)
 wrestling (3)
 
-//ported
-Autobahn
-Championship Baseball
-Championship Wrestling
-Computer Foosball (Sirius)
-GBA Championship Basketball
-Gran Prix Circuit
-Pool 1.5 (IDSI)
-Superstar Ice Hockey
+//to migrate from TR
+Arcticfox
+Dambusters
+Dive Bomber
+Skyfox
+Solo Flight
+Super Huey
+Tomahawk
 
-//TODO
+//to port
 3-D Skiing (Continential Software)
 Championship Golf [4am crack]
 Colossus Chess IV (Firebird)
 Competition Karate
 Chess 7.0 (Odesta)
+Chuck Yeager's Advanced Flight Simulator
 Dave Winfield's Batter Up [4am crack]
 Earl Weaver Baseball
+F-15 Strike Eagle
+Fathom's 40
 Fore! [4am crack]
 Golf Course (Main Street Publishing)
 Golf's Best
@@ -40,6 +43,7 @@ Hi-Res Computer Golf [4am crack]
 Hi-Res Computer Golf 2
 Hi-Res Football
 Hi-Res Soccer
+Jet
 Joe Thiesman Pro Football
 John Elway's Quarterback
 John Madden Football
@@ -55,9 +59,11 @@ Pure Stat Baseball
 Pure Stat College Basketball
 Sargon III (Spinnaker)
 Sierra Championship Boxing [4am crack]
+Silent Service
 Sports Spectacular (Keypunch) [unprotected]
 Star League Baseball
 Star Rank Boxing
+Sub Battle Simulator
 Super Sunday [4am crack]
 Superstar Indoor Sports
 Tennis (Softdisk) [unprotected]
