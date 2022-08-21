@@ -2,6 +2,7 @@
 
 ## New games
 
+- Autobahn
 - Black Belt
 - The American Challenge
 
