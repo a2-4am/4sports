@@ -3,7 +3,10 @@
 ## New games
 
 - Autobahn
+- Computer Foosball
 - Black Belt
+- International Hockey
+- Pool
 - The American Challenge
 
 ## Migrated from Total Replay
