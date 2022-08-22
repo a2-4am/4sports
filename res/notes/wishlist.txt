@@ -15,17 +15,13 @@ soccer (2)
 skiing (2)
 wrestling (3)
 
-//to migrate from TR
-Arcticfox
-Skyfox
-
 //to port
 3-D Skiing (Continential Software)
 Championship Golf [4am crack]
 Colossus Chess IV (Firebird)
 Competition Karate
 Chess 7.0 (Odesta)
-Chuck Yeager's Advanced Flight Simulator
+Chuck Yeager's Advanced Flight Simulator [priority]
 Dave Winfield's Batter Up [4am crack]
 Earl Weaver Baseball
 F-15 Strike Eagle
@@ -38,7 +34,7 @@ Hi-Res Computer Golf [4am crack]
 Hi-Res Computer Golf 2
 Hi-Res Football
 Hi-Res Soccer
-Jet
+Jet [priority]
 Joe Thiesman Pro Football
 John Elway's Quarterback
 John Madden Football
@@ -64,7 +60,7 @@ Superstar Indoor Sports
 Tennis (Softdisk) [unprotected]
 Tuesday Morning Quarterback [4am crack]
 The Fidelity Chessmaster 2100 (Software Toolworks)
-The Sporting News Baseball [4am crack]
+The Sporting News Baseball [DHGR][4am crack][priority]
 The World's Greatest Baseball Game (Enhanced Version) [4am crack]
 The World's Greatest Football Game [4am crack]
 Trick Shot (IDSI)
