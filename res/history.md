@@ -4,6 +4,7 @@
 
 - Autobahn
 - Championship Baseball
+- Championship Basketball
 - Championship Wrestling
 - Computer Foosball
 - Black Belt
