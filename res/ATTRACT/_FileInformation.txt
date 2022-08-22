@@ -2,6 +2,7 @@
 
 AMER.CHALLENGE=Type(04),AuxType(8000),Access(C3)
 AUTOBAHN=Type(04),AuxType(8000),Access(C3)
+BASEBALL=Type(04),AuxType(8000),Access(C3)
 BATTLE.CHESS=Type(04),AuxType(8000),Access(C3)
 BLACK.BELT=Type(04),AuxType(8000),Access(C3)
 BOP.N.WRESTLE=Type(04),AuxType(8000),Access(C3)

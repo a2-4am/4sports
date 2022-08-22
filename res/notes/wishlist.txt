@@ -17,12 +17,7 @@ wrestling (3)
 
 //to migrate from TR
 Arcticfox
-Dambusters
-Dive Bomber
 Skyfox
-Solo Flight
-Super Huey
-Tomahawk
 
 //to port
 3-D Skiing (Continential Software)
