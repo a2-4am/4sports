@@ -10,6 +10,7 @@
 - Black Belt
 - International Hockey
 - Pool
+- Superstar Ice Hockey
 - The American Challenge
 
 ## Migrated from Total Replay
