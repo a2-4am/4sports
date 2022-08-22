@@ -3,6 +3,7 @@
 ## New games
 
 - Autobahn
+- Championship Baseball
 - Computer Foosball
 - Black Belt
 - International Hockey
