@@ -47,12 +47,14 @@
          cmp   #$06
          beq   +
          lda   #$DF
-         sta   @mask+1
-+        ldy   #15
+         !byte $2C
++        lda   #$FF
+         sta   $F1
+         ldy   #15
 -        lda   II-1,y
          cmp   #$E1
          bcc   +
-@mask    and   #$FF                  ; SMC
+         and   $F1
 +        sta   $070C-1,y
          dey
          bne   -

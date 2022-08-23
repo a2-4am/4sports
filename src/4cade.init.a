@@ -51,7 +51,6 @@
          dey
          bpl   -
 
-         ; TODO make this true again
          ; proboothd duplicates the above code and jumps here,
          ; so if you make any changes before this comment, you
          ; MUST adjust the final JMP in src/proboothd/proboothd.a
