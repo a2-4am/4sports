@@ -1,0 +1,29 @@
+;license:MIT
+;(c) 2021 by Frank M.
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/CHAMP.BSKETBALL",plain
+*=$106
+
+    !source "src/prelaunch/common.a"
+
+         +ENABLE_ACCEL
+
+         lda   #$60
+         sta   $9D2
+         jsr   $800       ; decompress1
+
+         lda   #<hook
+         sta   $B755
+         lda   #>hook
+         sta   $B756
+         jmp   $B700      ; decompress2
+
+hook     inc   $CF4       ; reset vector fix (moved to $3F4)
+
+         +DISABLE_ACCEL
+         jmp   $C00
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}
