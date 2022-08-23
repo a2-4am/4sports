@@ -2,7 +2,7 @@
 ;(c) 2020 by Frank M.
 
 !cpu 6502
-!to "build/PRELAUNCH/WINTER.GAMES",plain
+!to "build/PRELAUNCH.INDEXED/WINTER.GAMES",plain
 *=$106
 
     !source "src/prelaunch/common.a"

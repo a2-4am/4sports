@@ -2,7 +2,7 @@
 ;(c) 2020 by qkumba
 
 !cpu 6502
-!to "build/PRELAUNCH/BOP.N.WRESTLE",plain
+!to "build/PRELAUNCH.INDEXED/BOP.N.WRESTLE",plain
 *=$106
 
     !source "src/prelaunch/common.a"

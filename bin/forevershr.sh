@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # directory of PNG files (assume they are properly sized and named)
-PNGS="$HOME/Dropbox/a2/4cade/artwork/cropped-and-named-320x200/_4sports"
+PNGS="$HOME/Dropbox/a2/4cade/artwork/cropped-and-named-320x200"
 
 # Python 3
 export PYTHON="python"

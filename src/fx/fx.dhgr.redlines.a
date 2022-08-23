@@ -2,7 +2,7 @@
 ;(c) 2020 by 4am
 ;
 !cpu 6502
-!to "build/FX/DHGR.REDLINES",plain
+!to "build/FX.INDEXED/DHGR.REDLINES",plain
 *=$6000
 
 ; for red line:
@@ -14,11 +14,8 @@ hgr1hi   =     $0300                 ; [$C0 bytes, main memory only]
 
          !source "src/fx/macros.a"
 
-         ldx   #(end-start)          ; copy code to zero page
--        lda   start-1, x
-         sta   $FF, x
-         dex
-         bne   -
+         +COPY_TO_0 start, end
+         ;X=0
          +BUILD_HGR_LOOKUP_TABLES_X_IS_ALREADY_0 hgrlo, hgr1hi
          jmp   loop
 

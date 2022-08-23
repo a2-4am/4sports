@@ -5,147 +5,203 @@
 !to "build/proboothd",plain
 *=$800
 
-                ;zpage usage, arbitrary selection except for the "ProDOS constant" ones
-                command   = $42         ;ProDOS constant
-                unit      = $43         ;ProDOS constant
-                adrlo     = $44         ;ProDOS constant
-                adrhi     = $45         ;ProDOS constant
-                bloklo    = $46         ;ProDOS constant
-                blokhi    = $47         ;ProDOS constant
+         ;zpage usage, arbitrary selection except for the "ProDOS constant" ones
+         command   = $42         ;ProDOS constant
+         unit      = $43         ;ProDOS constant
+         adrlo     = $44         ;ProDOS constant
+         adrhi     = $45         ;ProDOS constant
+         bloklo    = $46         ;ProDOS constant
+         blokhi    = $47         ;ProDOS constant
 
-                A2L       = $3e
-                A2H       = $3f
-                sizehi    = $53
+         A2L       = $3e
+         A2H       = $3f
+         sizehi    = $53
 
-                ;constants
-                scrn2p2   = $f87b
-                dirbuf    = $1e00       ;for size-optimisation
+         ;constants
+         scrn2p2   = $f87b
+         dirbuf    = $1e00       ;for size-optimisation
 
-                !byte 1
-                stx unit
-                ldy #0                  ;Yellowstone support
--               txa
-                jsr scrn2p2
-                and #7
-                ora #$c0
-                sta $be30, y
-                sta slot+2
-                sta entry+2
-slot            lda $cfff
-                sta entry+1
+         !byte 1
+         txa
+         pha
 
-                lda fakeMLI_e-$100, y
-                sta $be00+fakeMLI_e-fakeMLI, y
-                iny
-                bne -
-                sty adrlo
-                stx $bf30
-                sty $200
+         ; put machine in a known state, clear screen
+
+         cld
+         bit   $c082
+         sta   $c00e
+         sta   $c00c
+         sta   $c000
+         sta   $c002
+         sta   $c004
+         jsr   $fb2f
+         jsr   $fc58
+         jsr   $fe84
+         jsr   $fe89
+         jsr   $fe93
+
+         ; print title
+         lda   $fbb3
+         cmp   #$A0
+         beq   +                     ; Spectrum ED
+         cmp   #$06
+         beq   +
+         lda   #$DF
+         sta   @mask+1
++        ldy   #15
+-        lda   II-1,y
+         cmp   #$E1
+         bcc   +
+@mask    and   #$FF                  ; SMC
++        sta   $070C-1,y
+         dey
+         bne   -
+         ldy   #13
+-        lda   INSTANT-1,y
+         sta   $04B5-1,y
+         lda   REPLAY-1,y
+         sta   $0535-1,y
+         dey
+         bne   -
+
+         pla
+         sta   unit
+         tax
+         ; X = boot slot x16
+         ; Y = 0
+
+         ; set up ProDOS shim
+
+-        txa
+         jsr   scrn2p2
+         and   #7
+         ora   #$c0
+         sta   $be30, y
+         sta   slot+2
+         sta   entry+2
+slot     lda   $cfff
+         sta   entry+1
+         lda   fakeMLI_e-$100, y
+         sta   $be00+fakeMLI_e-fakeMLI, y
+         iny
+         bne   -
+         sty   adrlo
+         stx   $bf30
+         sty   $200
 
 opendir         ;read volume directory key block
-                ldx #2
+         ldx   #2
 
-                ;include volume directory header in count
+         ;include volume directory header in count
 
-firstent        lda #>dirbuf
-                sta adrhi
-                sta A2H
-                jsr seekread
-                lda #4
-                sta A2L
-nextent         ldy #0
+firstent lda   #>dirbuf
+         sta   adrhi
+         sta   A2H
+         jsr   seekread
+         lda   #4
+         sta   A2L
+nextent  ldy   #0
 
-                ;match name lengths before attempting to match names
+         ;match name lengths before attempting to match names
 
-                lda (A2L), y
-                and #$0f
-                tax
-                inx
--               cmp filename, y
-                beq foundname
+         lda   (A2L), y
+         and   #$0f
+         tax
+         inx
+-        cmp   filename, y
+         beq   foundname
 
-                ;move to next directory in this block
+         ;move to next directory in this block
 
-                clc
-                lda A2L
-                adc #$27
-                sta A2L
-                bcc +
+         clc
+         lda   A2L
+         adc   #$27
+         sta   A2L
+         bcc   +
 
-                ;there can be only one page crossed, so we can increment instead of adc
+         ;there can be only one page crossed, so we can increment instead of adc
 
-                inc A2H
-+               cmp #$ff ;4+($27*$0d)
-                bne nextent
+         inc   A2H
++        cmp   #$ff ;4+($27*$0d)
+         bne   nextent
 
-                ;read next directory block when we reach the end of this block
+         ;read next directory block when we reach the end of this block
 
-                ldx dirbuf+2
-                ldy dirbuf+3
-                bcs firstent
+         ldx   dirbuf+2
+         ldy   dirbuf+3
+         bcs   firstent
 
-foundname       iny
-                lda (A2L), y
-                dex
-                bne -
-                stx $ff
+foundname
+         iny
+         lda   (A2L), y
+         dex
+         bne -
+         stx   $ff
 
-                ;cache KEY_POINTER
+         ;cache KEY_POINTER
 
-                ldy #$11
-                lda (A2L), y
-                tax
-                iny
-                lda (A2L), y
-                tay
-        
-readfile        jsr seekread
-                inc adrhi
-                inc adrhi
+         ldy   #$11
+         lda   (A2L), y
+         tax
+         iny
+         lda   (A2L), y
+         tay
 
-                ;fetch data block and read it
+readfile jsr   seekread
+         inc   adrhi
+         inc   adrhi
 
-blockind        ldy $ff
-                inc $ff
-                ldx dirbuf, y
-                lda dirbuf+256, y
-                tay
-                bne readfile
-                txa
-                bne readfile
+         ;fetch data block and read it
 
-readdone        jmp $2000
+blockind ldy   $ff
+         inc   $ff
+         ldx   dirbuf, y
+         lda   dirbuf+256, y
+         tay
+         bne   readfile
+         txa
+         bne   readfile
 
-seekread        stx bloklo
-                sty blokhi
-                lda #1
-                sta command
-                lda adrhi
-                pha
-entry           jsr $d1d1
-                pla
-                sta adrhi
-                rts
+readdone jmp   $2060
 
-fakeMLI         bne retcall
-readblk         dey
-                dey
-                sty adrhi
-                tay
-                jsr $bf00+seekread-fakeMLI
-retcall         pla
-                tax
-                inx
-                inx
-                inx
-                txa
-                pha
-                rts
+seekread stx   bloklo
+         sty   blokhi
+         lda   #1
+         sta   command
+         lda   adrhi
+         pha
+entry    jsr   $d1d1
+         pla
+         sta   adrhi
+         rts
+
+fakeMLI  bne   retcall
+readblk  dey
+         dey
+         sty   adrhi
+         tay
+         jsr   $bf00+seekread-fakeMLI
+retcall  pla
+         tax
+         inx
+         inx
+         inx
+         txa
+         pha
+-        rts
 fakeMLI_e
 
-filename        !byte filename_e - filename_b
-filename_b      !text "LAUNCHER.SYSTEM" ;your start-up file, file is max 40kb
+filename
+         !byte filename_e - filename_b
+filename_b
+         !text "LAUNCHER.SYSTEM" ;your start-up file, file is max 40kb
 filename_e
+II
+         !byte $D4,$EF,$F4,$E1,$EC,$A0,$D2,$E5,$F0,$EC,$E1,$F9,$A0,$C9,$C9
+INSTANT
+         !byte $C9,$A0,$CE,$A0,$D3,$A0,$D4,$A0,$C1,$A0,$CE,$A0,$D4
+REPLAY
+         !byte $A0,$D2,$A0,$C5,$A0,$D0,$A0,$CC,$A0,$C1,$A0,$D9,$A0
 
 *=$9f8
 !byte $D3,$C1,$CE,$A0,$C9,$CE,$C3,$AE

@@ -1,5 +1,5 @@
 ;license:MIT
-;(c) 2019-2020 by 4am & qkumba
+;(c) 2019-2022 by 4am & qkumba
 ;
 ; Pseudo-ProDOS environment
 ;
@@ -18,16 +18,10 @@
 ipacket = first_zp ;word
 buffer = first_zp+2 ;word
 
-!if RELBASE != $2000 {
-  !ifdef PASS2 {
-  } else { ;PASS2
-    !if * != iProDOS_enter {
-      !error "iProDOS_enter=",*, ", fix constants.a"
-    }
-  }
-}
 ProDOS_enter
 !set CloseHandles = @imp_close
+!set swap_zpg = @swap_zp
+!set SavedZP = @saved_zp
          stx   ProDOS_savedX+1
          sty   ProDOS_savedY+1
          jsr   @swap_zp
@@ -224,42 +218,44 @@ ProDOS_enter
 resetval=$f0
 @imp_seek
          jsr   @set_rdwrbuff
-         ldx   #0
-         stx   blkidx
-         stx   blkofflo
-         stx   blkoffhi
-         stx   reqcmd
          jsr   @reset
-         ldx   sizelo
-         bne   @seek64
-         cmp   ldrhi
-         bcc   @seek64
-         bne   @seek32
-         ldx   ldrlo
-         beq   @seek32
-
-@seek64
-         sta   sizehi
-         sta   sizelo
-         jsr   @seekreset
+         lda   sizelo
+         lsr
+         tay
          lda   ldrhi
-         sbc   #resetval
-         sta   ldrhi
+         ror
+         sta   blkidx
+         ldx   istree
+         beq   @sametree
+         tax
+         beq   @skiptree
+         iny
+         cpy   treeidx
 
-@seek32
-         lda   ldrhi
-         sta   sizehi
+@skiptree
+         sty   treeidx
+         beq   @sametree
+         ldx   hddtreebuf - 1, y
+         lda   hddtreebuf + 255, y
+         jsr   hddreaddirsel
+
+@sametree
+         jsr   @close_reset
          lda   ldrlo
          sta   sizelo
-         jsr   @seekreset
          lda   ldrhi
-         ora   ldrlo
-         bne   @jmp_zp
-         dec   blkidx
+         and   #1
+         sta   sizehi
+         ora   sizelo
+         beq   @link_jmpzp
+         jsr   @seekreset
+
 @link_jmpzp
-         beq   @jmp_zp ;always
+         jmp   @restore_zp
 
 @seekreset
+         lda   #cmdseek
+         sta   reqcmd
          jsr   hddrdwrpart
 @reset
          lda   #resetval
@@ -306,7 +302,7 @@ resetval=$f0
          lda   @handles+1
          beq   @close_ret
          dec   @handles+1
-         bne   @close_ret
+         bne   @close_reset
          lda   #>hddencbuf
 
 @patch_buffer
@@ -323,10 +319,22 @@ resetval=$f0
          stx   dirbufpatch7+2
          stx   dirbufpatch9+2
          stx   dirbufpatch10+1
+         stx   dirbufpatch11+1
          inx
          stx   dirbufpatch5+2
          stx   dirbufpatch8+2
+         inx
+         stx   treebufpatch1+1
+         stx   treebufpatch2+2
+         inx
+         stx   treebufpatch3+2
 @close_ret
+         rts
+
+@close_reset
+         lda   #0
+         sta   blkofflo
+         sta   blkoffhi
          rts
 
 @fetchbyte
@@ -391,6 +399,13 @@ resetval=$f0
 @saved_zp
          !fill (last_zp - first_zp) + 1
 
+resetRoot
+gRootDirectory
+         +LDADDR 0                   ; SMC
+         sta   (reloc + unrhddblocklo - unrelochdd) + 1
+         sty   (reloc + unrhddblockhi - unrelochdd) + 1
+         rts
+
 ;------------------------------------------------------------------------------
 ; traverse [private]
 ;
@@ -401,15 +416,11 @@ resetval=$f0
 !ifdef PASS2 {
 } else { ;PASS2
   !if * != itraverse {
-    !error "itraverse=",*, ", fix constants.a"
+    !error "itraverse=",*, ", fix constants.a, rebuild prelaunch"
   }
 }
 traverse
-         +LD16 gRootDirectory
-         sta   (reloc + unrhddblocklo - unrelochdd) + 1
-         sty   (reloc + unrhddblockhi - unrelochdd) + 1
-         sta   @myreadblock+1
-         sty   @myreadblock+3        ; reset 'root' directory (saved at program start)
+         jsr   resetRoot
 
          ;search for '/' character in filename
 
@@ -419,71 +430,33 @@ traverse
          tay
 -        inx
          dey
-         bmi   @go                   ; no '/', just do the read
+         beq   @go                   ; no '/', just do the read
          lda   (namlo), y
          cmp   #'/'
          bne   -
          sty   sizelo
          txa
          pha
+         lda   #$B1                  ; LDA (), y
+         sta   pathpatch1
+         lda   #$68                  ; PLA
+         sta   pathpatch2
+         lda   #$60                  ; RTS
+         sta   pathpatch2 + 1
 
 @myreadblock
-@myx80_parms
-         ldx   #2
-         lda   #0
-         jsr   hddreaddirsel
-         lda   #NAME_LENGTH
-         sta   bloklo
-         lda   #>(hdddirbuf - 1)
-         sta   blokhi
-
-         ;there can be only one page crossed, so we can increment here
-
-@mynextent1
-         inc   blokhi
-@mynextent
-         ldy   #0
-         lda   (bloklo), y
-         pha
-         and   #$0f
-         tax
---       iny
-         lda   (bloklo), y
-         cmp   (namlo), y
-         beq   @myfoundname
-
-         ;match failed, move to next directory in this block, if possible
-
--        pla
-
-@myskiphdr
-         clc
-         lda   bloklo
-         adc   #ENTRY_SIZE
-         sta   bloklo
-         bcs   @mynextent1
-         cmp   #$ff ;4 + ($27 * $0d)
-         bne   @mynextent
-
-         ;read next directory block when we reach the end of this block
-
-         lda   hdddirbuf + NEXT_BLOCK_LO
-         ldx   hdddirbuf + NEXT_BLOCK_HI
-         bcs   +
-
-@myfoundname
-         dex
-         bne   --
+         jsr   hddopendir
+-        tax
 
          ;parse path until last directory is seen
 
-         iny
          lda   (namlo), y
          cmp   #'/'
-         bne   -
-         pla
-         and   #$20 ;Volume Directory Header XOR subdirectory
-         bne   @myskiphdr
+         beq   +
+--       jsr   pathresume
+         bne   -                     ; always taken
++        txa
+         bmi   --
          tya
          eor   #$ff
          adc   sizelo
@@ -492,22 +465,30 @@ traverse
          tya
          adc   namlo
          sta   namlo
+         bcc   +
+         inc   namhi
++
 
          ;cache block number of current directory
          ;as starting position for subsequent searches
 
          ldy   #(KEY_POINTER + 1)
-         lda   (bloklo), y
+         lda   (scratchlo), y
          tax
          dey
-         lda   (bloklo), y
+         lda   (scratchlo), y
          sta   (reloc + unrhddblocklo - unrelochdd) + 1
          stx   (reloc + unrhddblockhi - unrelochdd) + 1
-+        sta   @myx80_parms + 1
-         stx   @myx80_parms + 3
-++       lda   sizelo
+         lda   sizelo
          bne   @myreadblock
          tay
+
+         lda   #$D1                  ; CMP (), y
+         sta   pathpatch1
+         lda   #$86                  ; STX
+         sta   pathpatch2
+         lda   #$5A
+         sta   pathpatch2 + 1
 
          pla
          sta   (namlo), y

@@ -1,5 +1,5 @@
 ;license:MIT
-;(c) 2018-2020 by 4am
+;(c) 2018-2021 by 4am & qkumba
 ;
 ; common assembler macros (6502 compatible)
 ;
@@ -10,7 +10,8 @@
 ; for functions that take parameters on the stack
 ; set (PARAM) to point to the parameters and
 ; move the stack pointer to the first byte after the parameters
-; clobbers A,X,Y
+; clobbers A,Y
+; preserves X
 !macro   PARAMS_ON_STACK .bytes {
          pla
          sta   PARAM
@@ -117,37 +118,51 @@
 }
 
 ; compare a 16-bit value in A (low) and Y (high) to an absolute address
+; branch to target if no match
 ; zeroes A!
-!macro   CMP16ADDR .addr {
+!macro   CMP16ADDR_NE .addr, .target {
          eor   .addr
-         bne   +
+         bne   .target
          cpy   .addr+1
-+
+         bne   .target
 }
 
 ; compare a 16-bit value in X (low) and Y (high) to an absolute address
-!macro   CPX16ADDR .addr {
+; branch to target if no match
+!macro   CPX16ADDR_NE .addr, .target {
          cpx   .addr
-         bne   +
+         bne   .target
          cpy   .addr+1
+         bne   .target
+}
+
+; compare a 16-bit value in A (low) and Y (high) to an immediate value
+; branch to target if match
+!macro   CMP16_E .val, .target {
+         cmp   #<.val
+         bne   +
+         cpy   #>.val
+         beq   .target
 +
 }
 
 ; compare a 16-bit value in A (low) and Y (high) to an immediate value
-!macro   CMP16 .val {
+; branch to target if no match
+!macro   CMP16_NE .val, .target {
          cmp   #<.val
-         bne   +
+         bne   .target
          cpy   #>.val
-+
+         bne   .target
 }
 
 ; compare a 16-bit value in X (low) and Y (high) against zero
+; branch to target if not zero
 ; requires LDX16 immediately prior, since Y comparison is implicit!
 ; destroys A!
-!macro   CPX16_0 {
-         bne   +
+!macro   CPX16_0_NE .target {
+         bne   .target
          txa
-+
+         bne   .target
 }
 
 !macro   LBPL .target {
@@ -194,7 +209,7 @@
 
 ; various language card configurations
 !macro   READ_RAM1_NO_WRITE {
-         bit   $C088
+         sta   $C088
 }
 
 !macro   READ_RAM1_WRITE_RAM1 {
@@ -203,7 +218,7 @@
 }
 
 !macro   READ_RAM2_NO_WRITE {
-         bit   $C080
+         sta   $C080
 }
 
 !macro   READ_RAM2_WRITE_RAM2 {
@@ -222,7 +237,23 @@
 }
 
 !macro   READ_ROM_NO_WRITE {
-         bit   $C082
+         sta   $C082
+}
+
+!macro   READ_AUX {
+         sta   READMAINMEM
+}
+
+!macro   READ_MAIN {
+         sta   READAUXMEM
+}
+
+!macro   WRITE_AUX {
+         sta   WRITEAUXMEM
+}
+
+!macro   WRITE_MAIN {
+         sta   WRITEMAINMEM
 }
 
 ; requires setting zpCharMask in zero page to #$FF or #$DF before use
@@ -283,18 +314,16 @@
          +READ_ROM_NO_WRITE
 }
 
-!macro   GET_MOCKINGBOARD_SPEECH { ;carry set if present
+!macro   GET_MOCKINGBOARD_SPEECH { ;sign set if SC-01, overflow set if SSI-263
          +READ_RAM2_NO_WRITE
-         lda   MockingboardStuff
-         asl
+         bit   MockingboardStuff
          +READ_ROM_NO_WRITE
 }
 
-!macro   GET_MOCKINGBOARD_SPEECH_AND_MACHINE_STATUS { ;carry set if present
+!macro   GET_MOCKINGBOARD_SPEECH_AND_MACHINE_STATUS { ;sign set if SC-01, overflow set if SSI-263
          +READ_RAM2_NO_WRITE
-         lda   MockingboardStuff
-         asl
          lda   MachineStatus
+         bit   MockingboardStuff
          +READ_ROM_NO_WRITE
 }
 
@@ -302,6 +331,7 @@
          +READ_RAM2_NO_WRITE
          lda   MockingboardStuff
          cmp   #1
+         and   #7
          ora   #$C0
          +READ_ROM_NO_WRITE
 }
@@ -310,11 +340,13 @@
          +READ_RAM2_NO_WRITE
          lda   MockingboardStuff
          cmp   #1
+         and   #7
          ora   #$C0
          tax
          lda   MachineStatus
          +READ_ROM_NO_WRITE
 }
+
 !macro   USES_TEXT_PAGE_2 {
          lda   ROM_MACHINEID
          cmp   #$06
@@ -330,28 +362,80 @@
 !macro   RESET_VECTOR .addr {
          lda   #<.addr
          sta   $3F2
+  !ifndef .addr {
+    !set emitted=1
+         lda   #>.addr
+         sta   $3F3
+         eor   #$A5
+         sta   $3F4
+  } else {
+    !ifdef emitted {
+         lda   #>.addr
+         sta   $3F3
+         eor   #$A5
+         sta   $3F4
+    } else {
+      !if (>.addr != 1) or (.addr = $100) {
+         lda   #>.addr
+         sta   $3F3
+         eor   #$A5
+         sta   $3F4
+      }
+    }
+  }
+}
+
+!macro   RESET_VECTOR_HALF .addr {
          lda   #>.addr
          sta   $3F3
          eor   #$A5
          sta   $3F4
 }
 
+!macro   RESET_AND_IRQ_VECTOR .addr {
+         lda   #<.addr
+         sta   $3F2
+         sta   $3FE
+         lda   #>.addr
+         sta   $3F3
+         sta   $3FF
+         eor   #$A5
+         sta   $3F4
+}
 ; for games that clobber $100-$105, the prelaunch code constructs a new reset vector
 ; somewhere else and sets its
 !macro   NEW_RESET_VECTOR .addr {
+         ldx   #5
+-        lda   $100,x
+         sta   .addr,x
+         dex
+         bpl   -
+         +RESET_VECTOR .addr
+}
+
+!macro   NEW_RESET_VECTOR_64K .addr {
          lda   #$2C
          sta   .addr
-         lda   #$88
+         lda   #$89
          sta   .addr+1
          lda   #$C0
          sta   .addr+2
-         lda   #$6C       ; JMP ($FFFC) points to 'Reenter'
+         lda   #$4C       ; JMP $FAA6 to reboot
          sta   .addr+3
-         lda   #$FC
+         lda   #$A6
          sta   .addr+4
-         lda   #$FF
+         lda   #$FA
          sta   .addr+5
-         +RESET_VECTOR .addr
+         lda   #<.addr
+         sta   $3F2
+         sta   $FFFC
+  !if >.addr != 1 {
+         lda   #>.addr
+         sta   $3F3
+         sta   $FFFD
+         eor   #$A5
+         sta   $3F4
+  }
 }
 
 ; for 64k games on ][+ which either hang or restart
@@ -370,22 +454,77 @@
 
 ; load an external file by pathname
 ; LC RAM 2 MUST BE BANKED IN
-; LOW BYTE OF .addr MUST BE $00
+; set .addr to $0000 to load to any aligned addres in main
+; LOW BYTE OF .addr MUST BE $00 IN THAT CASE
 !macro   LOAD_FILE_AT .filepath, .addr {
-         lda   #0
-         sta   iAuxReq    ; read to main memory
+  !if .addr > 0 {
          lda   #>.addr
          sta   ldrhi
+  }
+  !if <.addr > 0 {
+         lda   #<.addr
+         sta   ldrlo
+  }
          lda   iCurBlockLo
          pha
          lda   iCurBlockHi
          pha
+         ldx   #0         ; read to main memory
+  !if <.addr = 0 {
+         stx   ldrlo
+  }
          +LDADDR .filepath
-         jsr   LoadFileDirect
+         jsr   iLoadFileDirect
          pla
          sta   iCurBlockHi
          pla
          sta   iCurBlockLo
+}
+
+; load an external file by pathname
+; set path to new directory
+; LC RAM 2 MUST BE BANKED IN
+!macro   LOAD_FILE_KEEP_DIR .filepath, .dirlen {
+         ldx   #0         ; read to main memory
+         stx   ldrhi
+         stx   ldrlo
+         +LDADDR .filepath
+         jsr   iLoadFileDirect
+
+         ldx   #.dirlen
+         stx   $BFD0
+-        lda   .filepath,x
+         sta   $BFD0,x
+         dex
+         bne   -
+
+}
+
+!macro   LOAD_FILE_KEEP_DIR .filepath, .addr, .dirlen {
+         lda   #>.addr
+         sta   ldrhi
+         lda   #<.addr
+         sta   ldrlo
+         ldx   #0         ; read to main memory
+         +LDADDR .filepath
+         jsr   iLoadFileDirect
+
+         ldx   #.dirlen
+         stx   $BFD0
+-        lda   .filepath,x
+         sta   $BFD0,x
+         dex
+         bne   -
+}
+
+; Macros for demo launchers that need to check whether they should run
+; on the current machine. Exit demo if the requirements are not met.
+!macro   GAME_REQUIRES_JOYSTICK {
+         +GET_MACHINE_STATUS
+         and   #HAS_JOYSTICK
+         bne   +
+         jmp   $100
++
 }
 
 _MACROS_=*

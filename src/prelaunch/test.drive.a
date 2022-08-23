@@ -2,7 +2,7 @@
 ;(c) 2020 by qkumba/Frank M.
 
 !cpu 6502
-!to "build/PRELAUNCH/TEST.DRIVE",plain
+!to "build/PRELAUNCH.INDEXED/TEST.DRIVE",plain
 *=$106
 
     !source "src/prelaunch/common.a"

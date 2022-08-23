@@ -1,12 +1,49 @@
 ;license:MIT
-;(c) 2018-2020 by 4am
+;(c) 2018-2021 by 4am & qkumba
 ;
 ; credits page
 ;
 ; Public functions
-; - Credits
 ; - Help
+; - Credits
 ;
+
+;------------------------------------------------------------------------------
+; Help
+; display per-game or global help page and wait
+;
+; in:    none
+; out:   see above
+;------------------------------------------------------------------------------
+Help
+         jsr   GetGameToLaunch
+         bcs   @global
+         +ST16 @game
+
+         jsr   LoadIndexedFile
+@okvsPtr !word gSearchCache
+         !word kGameHelpIndexRecord
+
+         jsr   okvs_find
+         !word @okvsPtr
+@game    !word $FDFD                 ; SMC
+         +ST16 @indexRecordPtr
+
+         jsr   LoadIndexedFile
+         !word $800
+@indexRecordPtr
+         !word $FDFD                 ; SMC
+
+         clc
+         bcc   .clearAndDisplayHelp  ; always branches
+
+@global  jsr   LoadIndexedFile       ; load help text into $800
+         !word $800
+         !word kHelpTextRecord
+
+         jsr   LoadHelpOffscreen     ; load fancy backdrop
+         ldx   #7
+         bne   .displayHelp          ; always branches
 
 ;------------------------------------------------------------------------------
 ; Credits
@@ -17,17 +54,50 @@
 ;        all other flags and registers clobbered
 ;------------------------------------------------------------------------------
 Credits
-         jsr   LoadFile              ; load credits text into $8000
-         !word kRootDirectory
-         !word kCreditsFile
-         !word $8000
---       jsr   ForceHGRMode
+         jsr   LoadIndexedFile       ; load credits text into $800
+         !word $800
+         !word kCreditsRecord
+.clearAndDisplayHelp
+         jsr   ForceHGRMode
          jsr   ClearOffscreen
-         ldx   #0
--        lda   OffscreenPage
+         ldx   #0                    ; left margin (0 for credits, different for global help)
+.displayHelp
+         lda   OffscreenPage
          ror                         ; draw on offscreen page
-         +LDADDR $8000
-         jsr   DrawPage              ; draw credits
+         +LDADDR $800
+         +ST16 PTR
+;DrawPage inlined here
+;
+; PTR contains address of array of length-prefixed strings
+; length #$FF terminates
+; X contains 0-indexed left margin (HTAB)
+; carry bit clear -> draw on page 1
+; carry bit set   -> draw on page 2
+; drawing starts at VTAB 0
+; each line starts at column X which was passed in (0-indexed)
+; clobbers $FF
+; clobbers A/X/Y
+; preserves C, other flags clobbered
+         stx   $FF
+         ldx   #0
+         stx   VTAB
+         php                         ; save C, but Z=1 because of ldx #0
+@drawLine
+         lda   $FF
+         sta   HTAB
+         jsr   DrawString_PTR_is_already_set
+         bmi   @donePage
+         clc
+         adc   PTR
+         sta   PTR
+         bcc   +
+         inc   PTR+1
++        plp                         ; restore C to whatever it was on entry
+         php
+         beq   @drawLine             ; always branches
+@donePage
+         plp
+;end inline
          jsr   ShowOtherPage         ; show credits
          jsr   WaitForKeyFor30Seconds; wait
          bit   CLEARKBD              ; don't care about key
@@ -41,28 +111,3 @@ Credits
          jsr   ToggleCheat
 +        sec                         ; if called from search mode, tell caller to refresh
          rts
-
-;------------------------------------------------------------------------------
-; Help
-; display per-game or global help page and wait
-;
-; in:    none
-; out:   see above
-;------------------------------------------------------------------------------
-Help
-         jsr   GetGameToLaunch
-         bcs   @global
-         +ST16 @fname
-         jsr   LoadFile
-         !word kGameHelpDirectory
-@fname   !word $FDFD                 ; SMC
-         !word $8000
-         clc
-         bcc   --                    ; always branches
-@global  jsr   LoadFile              ; load help text into $8000
-         !word kRootDirectory
-         !word kHelpTextFile
-         !word $8000
-         jsr   LoadHelpOffscreen     ; load fancy backdrop
-         ldx   #7
-         bne   -                     ; always branches

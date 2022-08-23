@@ -6,12 +6,14 @@
 ; posted on comp.sys.apple2 on 2018-07-11
 ; https://groups.google.com/d/msg/comp.sys.apple2/v2HOfHOmeNQ/zD76fJg_BAAJ
 !macro BUILD_HGR_LOOKUP_TABLES .hgrlo, .hgr1hi {
+; preserves Y
          ldx   #0
          +BUILD_HGR_LOOKUP_TABLES_X_IS_ALREADY_0 .hgrlo, .hgr1hi
 }
 
 ; use this macro instead if you know X is already 0 on entry, to save 2 bytes
 !macro BUILD_HGR_LOOKUP_TABLES_X_IS_ALREADY_0 .hgrlo, .hgr1hi {
+; preserves Y
 -        txa
          and   #$F8
          bpl   +
@@ -157,6 +159,28 @@
          bcc   +
          jmp   .target
 +
+}
+
+!macro COPY_TO_0 .start, .end {
+; out:   X=0
+;        Z=1
+         ldx   #(.end-.start)
+-        lda   .start-1, x
+         sta   $FF, x
+         dex
+         bne   -
+}
+
+!macro OVERCOPY_TO_0 .start, .end {
+; over-copy region to $00
+; clobbers $FF
+; out:   X=0
+;        Y=last byte before start (e.g. 0 if the last instruction is JMP $0000)
+         ldx   #(.end-.start+1)
+-        ldy   .start-2, x
+         sty   $FE, x
+         dex
+         bne   -
 }
 
 _FX_MACROS_=*

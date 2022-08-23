@@ -2,7 +2,7 @@
 ;(c) 2018 by 4am
 ;
 !cpu 6502
-!to "build/FX/DHGR.R.BY.PIXEL",plain
+!to "build/FX.INDEXED/DHGR.R.BY.PIXEL",plain
 *=$6000
 
 hgrlo    =     $0201                 ; [$C0 bytes, main memory only, offset by 1 because lookups will be based on $0200,x]
@@ -11,12 +11,8 @@ copymasks=     $02C1                 ; [$07 bytes, different values in main and 
 
          !source "src/fx/macros.a"
 
-         ldx   #(end-start)          ; copy code to zero page
--        lda   start-1, x
-         sta   $FF, x
-         dex
-         bne   -
-
+         +COPY_TO_0 start, end
+         ;X=0
          +BUILD_HGR_LOOKUP_TABLES_X_IS_ALREADY_0 hgrlo, hgr1hi
 
          ldy   #7                    ; copy copymask arrays into place in main and auxmem
