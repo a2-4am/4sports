@@ -11,6 +11,7 @@
 
          !source "src/fx/macros.a"
 
+         rts
          +READ_ROM_NO_WRITE
 
          ;init RNG
