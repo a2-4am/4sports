@@ -8,14 +8,12 @@ DrawTitle
          +LDADDR TITLETOP
          jsr   DrawString
 
-         inc   VTAB
          lda   #11
          sta   HTAB
          lda   OffscreenPage
          ror
          +LDADDR TITLE1
          jsr   DrawString
-         inc   VTAB
 
          lda   #11
          sta   HTAB
@@ -23,7 +21,6 @@ DrawTitle
          ror
          +LDADDR TITLE2
          jsr   DrawString
-         inc   VTAB
 
          lda   #11
          sta   HTAB
@@ -31,7 +28,6 @@ DrawTitle
          ror
          +LDADDR TITLEBOTTOM
          jsr   DrawString
-         inc   VTAB
 
          rts
 
