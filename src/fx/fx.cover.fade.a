@@ -1,8 +1,7 @@
 ;license:MIT
-;(c) 2019-2020 by 4am/qkumba
+;(c) 2022 by 4am
 ;
-; randomized fade-to-black routine customized for a specific piece of cover art
-; with 75 fill rectangles
+; fade-to-black routine via progressive dithering
 ;
 
 !cpu 6502
