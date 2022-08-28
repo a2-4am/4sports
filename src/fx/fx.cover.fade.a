@@ -9,65 +9,103 @@
 !to "build/COVERFADE",plain
 *=$6000
 
+page1 = $FC
+page2 = $FE
+dithermasks = $6200
+hgrlo = $6301
+hgrhi = $6401
+
          !source "src/fx/macros.a"
 
-         rts
-         +READ_ROM_NO_WRITE
+!macro ROW_X_TO_COVER_BASE_ADDRESSES {
+         ; X = $01..$C0, mapping to row 0..191
+         lda   hgrlo-1, x
+         sta   page1
+         sta   page2
+         lda   hgrhi-1, x
+         sta   page1+1
+         eor   #$60
+         sta   page2+1
+}
 
-         ;init RNG
-
-         lda   $C050
-         and   #$7F
-         bne   +
-         lda   #$01
-+        sta   @rnd+1
-         sta   @exit+1
-
-         lda   #$20
-         sta   $e6
-
-         ;iterate
-
-@loop    ldy   @rnd+1
-         tya
-         lsr
-         bcc   +
-
-         ;feedback polynomial forms #$41 for period of 127
-
-         eor   #$41
-+        sta   @rnd+1
-         cpy   #75+1
-         bcs   +
-
-         lda   width - 1, y
-         sta   $fd
-         lda   height - 1, y
-         sta   $fe
-         lda   startx - 1, y
-         sta   $ff
-         lda   starty - 1, y
-
---       pha
-
-         ldx   #0
-         ldy   #0
-         jsr   $f411   ;hposn
-
+         +BUILD_DITHER_MASKS dithermasks
+         +BUILD_HGR_LOOKUP_TABLES hgrlo, hgrhi
+         ldx   #$80
          lda   #0
-         ldx   $fd
-         ldy   $ff
--        sta   ($26), y
-         iny
-         dex
+-        sta   dithermasks, x
+         inx
          bne   -
-         pla
-         clc
-         adc   #1
-         dec   $fe
+         sta   dithermasks
+         ldx   #$C0
+--
+         +ROW_X_TO_COVER_BASE_ADDRESSES
+         ldy   #$27
+-        lda   (page1), y
+dith     and   dithermasks+2, y
+         sta   (page2), y
+         dey
+         bpl   -
+         lda   dith+1
+         eor   #2
+         sta   dith+1
+         dex
          bne   --
 
-         lda   #80
+         bit   $C055
+
+         ldx   #$C0
+--
+         +ROW_X_TO_COVER_BASE_ADDRESSES
+         ldy   #$27
+-        lda   (page2), y
+dith2    and   dithermasks, y
+         sta   (page1), y
+         dey
+         bpl   -
+         lda   dith2+1
+         eor   #44
+         sta   dith2+1
+         dex
+         bne   --
+
+         bit   $C054
+
+         ldx   #$C0
+--
+         +ROW_X_TO_COVER_BASE_ADDRESSES
+         txa
+         and   #4
+         beq   +
+         lda   #$80
+         !byte $2C
++        lda   #$00
+         sta   dith3+1
+         ldy   #$27
+-        lda   (page1), y
+dith3    and   dithermasks+$80, y
+         sta   (page2), y
+         dey
+         bpl   -
+         dex
+         bne   --
+
+         bit   $C055
+
+         ldx   #$C0
+--
+         +ROW_X_TO_COVER_BASE_ADDRESSES
+         ldy   #$27
+-        lda   (page2), y
+         and   dithermasks+$80, y
+         sta   (page1), y
+         dey
+         bpl   -
+         dex
+         bne   --
+
+         bit   $C054
+
+         lda   #0
          sec
 @wait1   pha
 @wait2   sbc   #1
@@ -76,57 +114,4 @@
          sbc   #1
          bne   @wait1
 
-+
-@rnd     lda   #0
-@exit    cmp   #1
-         bne   @loop
-         +READ_RAM1_WRITE_RAM1
          rts
-
-width
-         !byte 02, 03, 03, 05, 03, 03, 03, 03
-         !byte 03, 03, 03, 03, 04, 04, 03, 02
-         !byte 03, 03, 04, 07, 03, 02, 03, 03
-         !byte 03, 03, 03, 03, 03, 03, 03, 03
-         !byte 02, 03, 07, 04, 05, 03, 05, 05
-         !byte 03, 04, 06, 07, 04, 03, 03, 03
-         !byte 03, 02, 04, 05, 03, 03, 04, 06
-         !byte 03, 02, 04, 06, 03, 03, 03, 03
-         !byte 04, 03, 02, 03, 02, 03, 03, 03
-         !byte 03, 03, 02
-
-height
-         !byte 12, 16, 26, 13, 15, 09, 24, 18
-         !byte 11, 23, 17, 15, 13, 20, 22, 13
-         !byte 16, 12, 21, 18, 10, 15, 10, 21
-         !byte 17, 12, 12, 12, 17, 12, 08, 26
-         !byte 18, 13, 44, 23, 21, 19, 17, 30
-         !byte 11, 10, 25, 18, 07, 14, 13, 15
-         !byte 11, 12, 28, 16, 15, 17, 35, 17
-         !byte 07, 13, 12, 06, 11, 12, 19, 15
-         !byte 11, 08, 13, 07, 16, 12, 24, 16
-         !byte 23, 22, 11
-
-startx
-         !byte 000, 000, 001, 000, 000, 000, 000, 002
-         !byte 003, 001, 004, 003, 003, 003, 006, 007
-         !byte 005, 006, 006, 007, 008, 009, 008, 009
-         !byte 010, 011, 011, 012, 012, 012, 013, 014
-         !byte 015, 015, 014, 016, 017, 018, 017, 018
-         !byte 020, 020, 021, 021, 022, 022, 024, 025
-         !byte 024, 026, 027, 026, 028, 029, 028, 027
-         !byte 030, 031, 031, 032, 034, 033, 033, 033
-         !byte 032, 033, 034, 035, 036, 037, 037, 037
-         !byte 037, 037, 038
-
-starty
-         !byte 000, 016, 042, 076, 103, 153, 167, 003
-         !byte 027, 123, 049, 098, 152, 172, 008, 036
-         !byte 139, 119, 071, 154, 101, 131, 181, 009
-         !byte 040, 070, 115, 134, 091, 177, 008, 030
-         !byte 068, 109, 128, 169, 003, 031, 058, 091
-         !byte 150, 179, 117, 072, 025, 046, 002, 151
-         !byte 178, 095, 008, 046, 069, 094, 118, 173
-         !byte 040, 018, 058, 003, 015, 034, 079, 106
-         !byte 147, 163, 178, 133, 051, 178, 148, 106
-         !byte 073, 022, 000
