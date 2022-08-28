@@ -122,13 +122,4 @@ dith3    and   dithermasks+$80, y
 
          bit   $C055
 
-         lda   #0
-         sec
-@wait1   pha
-@wait2   sbc   #1
-         bne   @wait2
-         pla
-         sbc   #1
-         bne   @wait1
-
          rts
