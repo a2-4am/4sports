@@ -35,18 +35,19 @@ hgrhi = $6401
          inx
          bne   -
          sta   dithermasks
+
          ldx   #$C0
 --
          +ROW_X_TO_COVER_BASE_ADDRESSES
          ldy   #$27
 -        lda   (page1), y
-dith     and   dithermasks+2, y
+dith0    and   dithermasks+44, y
          sta   (page2), y
          dey
          bpl   -
-         lda   dith+1
-         eor   #2
-         sta   dith+1
+         lda   dith0+1
+         eor   #44
+         sta   dith0+1
          dex
          bne   --
 
@@ -57,8 +58,25 @@ dith     and   dithermasks+2, y
          +ROW_X_TO_COVER_BASE_ADDRESSES
          ldy   #$27
 -        lda   (page2), y
-dith2    and   dithermasks, y
+dith     and   dithermasks+2, y
          sta   (page1), y
+         dey
+         bpl   -
+         lda   dith+1
+         eor   #2
+         sta   dith+1
+         dex
+         bne   --
+
+         bit   $C054
+
+         ldx   #$C0
+--
+         +ROW_X_TO_COVER_BASE_ADDRESSES
+         ldy   #$27
+-        lda   (page1), y
+dith2    and   dithermasks, y
+         sta   (page2), y
          dey
          bpl   -
          lda   dith2+1
@@ -67,7 +85,7 @@ dith2    and   dithermasks, y
          dex
          bne   --
 
-         bit   $C054
+         bit   $C055
 
          ldx   #$C0
 --
@@ -80,22 +98,8 @@ dith2    and   dithermasks, y
 +        lda   #$00
          sta   dith3+1
          ldy   #$27
--        lda   (page1), y
-dith3    and   dithermasks+$80, y
-         sta   (page2), y
-         dey
-         bpl   -
-         dex
-         bne   --
-
-         bit   $C055
-
-         ldx   #$C0
---
-         +ROW_X_TO_COVER_BASE_ADDRESSES
-         ldy   #$27
 -        lda   (page2), y
-         and   dithermasks+$80, y
+dith3    and   dithermasks+$80, y
          sta   (page1), y
          dey
          bpl   -
@@ -103,6 +107,20 @@ dith3    and   dithermasks+$80, y
          bne   --
 
          bit   $C054
+
+         ldx   #$C0
+--
+         +ROW_X_TO_COVER_BASE_ADDRESSES
+         ldy   #$27
+-        lda   (page1), y
+         and   dithermasks+$80, y
+         sta   (page2), y
+         dey
+         bpl   -
+         dex
+         bne   --
+
+         bit   $C055
 
          lda   #0
          sec
