@@ -66,3 +66,33 @@ The World's Greatest Football Game [4am crack]
 Trick Shot (IDSI)
 World Class Leader Board (Access Software)
 World Series Baseball
+
+//idea:game shows
+Card Sharks [DHGR]
+Classic Concentration [DHGR]
+Classic Concentration Second Edition [DHGR]
+Classic Concentration New Second Edition [DHGR]
+Double Dare
+Family Feud
+The All New Family Feud [DHGR]
+High Rollers
+Hollywood Squares
+Jeopardy
+Jeopardy First Edition
+Jeopardy 25th Anniversary Edition
+Jeopardy Junior Edition
+Jeopardy New Junior Edition
+Jeopardy Second Edition
+Jeopardy New Second Edition
+Jeopardy Sports Edition
+Jeopardy New Sports Edition
+Super Password [DHGR]
+The $100,000 Pyramid
+Wheel of Fortune [DHGR]
+Wheel of Fortune Second Edition [DHGR]
+Wheel of Fortune New Second Edition [DHGR]
+Wheel of Fortune Third Edition [DHGR]
+Wheel of Fortune Golden Edition [DHGR]
+Win, Lose, or Draw [DHGR]
+Win, Lose, or Draw Junior [DHGR]
+Win, Lose, or Draw Second Edition [DHGR]
