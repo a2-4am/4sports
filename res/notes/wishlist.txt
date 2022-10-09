@@ -44,6 +44,7 @@ Micro Golf (from file, not ProDOS 2.0.3 remake)
 Micro League Baseball
 MicroChess 2.0 (Personal Software)
 Olympic Decathlon
+Pro Football (Systems Design Lab)
 Pro Golf (Home-Computer Software)
 Professional Tour Golf [4am crack]
 Pure Stat Baseball
