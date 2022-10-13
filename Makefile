@@ -33,7 +33,7 @@ PYTHON=python3
 # version 3.1.0 or later
 EXOMIZER=exomizer mem -q -P23 -lnone
 
-dsk: index asmproboot asmlauncher
+dsk: index asmproboot asmlauncher extract
 	cp res/blank.hdv build/"$(DISK)"
 	cp res/_FileInformation.txt build/
 	$(CADIUS) ADDFILE build/"$(DISK)" "/$(VOLUME)/" build/LAUNCHER.SYSTEM -C >>build/log
@@ -56,26 +56,26 @@ dsk: index asmproboot asmlauncher
 	    $(CADIUS) ADDFILE build/"$(DISK)" "/$(VOLUME)/" "$$f" -C >>build/log; \
 	done
 	for f in \
-                res/DEMO \
-                res/TITLE.ANIMATED \
-                res/ICONS \
+		res/TITLE.ANIMATED \
+		res/ICONS \
 		build/FX \
 		build/PRELAUNCH; do \
             rm -f "$$f"/.DS_Store; \
             $(CADIUS) ADDFOLDER build/"$(DISK)" "/$(VOLUME)/$$(basename $$f)" "$$f" -C >>build/log; \
         done
-	for i in 1 2 3 4 5 6; do \
-		$(CADIUS) RENAMEFILE build/"$(DISK)" "/$(VOLUME)/DEMO/SPCARTOON.$${i}$${i}" "SPCARTOON.$${i}." >>build/log; \
-	done
-	$(PARALLEL) '$(CADIUS) EXTRACTVOLUME {} build/X/ >>build/log' ::: res/dsk/*.po
-	rm -f build/X/**/.DS_Store build/X/**/PRODOS* build/X/**/LOADER.SYSTEM*
 	$(CADIUS) CREATEFOLDER build/"$(DISK)" "/$(VOLUME)/X/" -C >>build/log
 	for f in build/X/*; do \
 	    $(CADIUS) ADDFOLDER build/"$(DISK)" "/$(VOLUME)/X/$$(basename $$f)" "$$f" -C >>build/log; \
 	done
 	bin/changebootloader.sh build/"$(DISK)" build/proboothd
 
-index: preconditions md asmfx asmprelaunch compress
+extract: preconditions md
+	$(PARALLEL) '$(CADIUS) EXTRACTVOLUME {} build/X/ >>build/log' ::: res/dsk/*.po
+	rm -f build/X/**/.DS_Store build/X/**/PRODOS* build/X/**/LOADER.SYSTEM*
+	for f in $$(grep '^....1' res/GAMES.CONF | awk '!/^$$|^#/' | awk -F, '/,/ { print $$2 }' | awk -F= '{ print $$1 }'); do mv build/X/"$$(basename $$f)"/"$$(basename $$f)"* build/X.INDEXED/; rm -rf build/X/"$$(basename $$f)"; done
+	(for f in build/X.INDEXED/*; do echo "$$(basename $$f)"; done) | bin/buildindexedfile.sh -a -p build/TOTAL.DATA build/X.INDEXED > build/XSINGLE.IDX
+
+index: preconditions md asmfx asmprelaunch asmdemo compress extract
 #
 # precompute binary data structure for mega-attract mode configuration file
 #
@@ -156,6 +156,19 @@ index: preconditions md asmfx asmprelaunch compress
 #
 	[ -f build/index ] || ((for f in res/ARTWORK.SHR/*; do echo "$$(basename $$f)"; done) | bin/buildindexedfile.sh -a build/TOTAL.DATA res/ARTWORK.SHR > build/ARTWORK.IDX)
 #
+# precompute indexed files for demo launchers
+# note: these can not be padded because some of them are loaded too close to $C000
+#
+	[ -f build/index ] || ((for f in build/DEMO/*; do echo "$$(basename $$f)"; done) | bin/buildindexedfile.sh -a build/TOTAL.DATA build/DEMO > build/DEMO.IDX)
+	[ -f build/index ] || bin/addfile.sh build/DEMO.IDX build/TOTAL.DATA > src/index/demo.idx.a
+
+#
+# precompute indexed files for single-load game binaries
+# note: these can be padded because they are loaded at a time when all of main memory is clobber-able
+#
+	[ -f build/index ] || ((for f in build/X.INDEXED/*; do echo "$$(basename $$f)"; done) | bin/buildindexedfile.sh -a -p build/TOTAL.DATA build/X.INDEXED > build/XSINGLE.IDX)
+	[ -f build/index ] || bin/addfile.sh build/XSINGLE.IDX build/TOTAL.DATA > src/index/xsingle.idx.a
+#
 # create search indexes for each variation of (game-requires-joystick) X (game-requires-128K)
 # in the form of OKVS data structures, plus game counts in the form of source files
 #
@@ -210,9 +223,12 @@ index: preconditions md asmfx asmprelaunch compress
 	[ -f build/index ] || bin/addfile.sh res/JOYSTICK build/TOTAL.DATA > src/index/joystick.idx.a
 	touch build/index
 
-asmlauncher: md
+asmlauncher: preconditions md
 	$(ACME) -DBUILDNUMBER=`git rev-list --count HEAD` src/4cade.a 2>build/relbase.log
 	$(ACME) -r build/4cade.lst -DBUILDNUMBER=`git rev-list --count HEAD` -DRELBASE=`cat build/relbase.log | grep "RELBASE =" | cut -d"=" -f2 | cut -d"(" -f2 | cut -d")" -f1` src/4cade.a
+
+asmdemo: preconditions md
+	$(PARALLEL) 'if grep -q "^!to" "{}"; then $(ACME) "{}"; fi' ::: src/demo/*.a
 
 asmfx: preconditions md
 	$(PARALLEL) 'if grep -q "^!to" "{}"; then $(ACME) "{}"; fi' ::: src/fx/*.a
@@ -254,7 +270,7 @@ mount: dsk
 	osascript bin/V2Make.scpt "`pwd`" bin/4cade.vii build/"$(DISK)"
 
 md:
-	mkdir -p build/X build/FX.INDEXED build/FX build/PRELAUNCH.INDEXED build/PRELAUNCH build/ATTRACT build/SS build/GAMEHELP
+	mkdir -p build/X build/X.INDEXED build/FX build/FX.INDEXED build/PRELAUNCH build/PRELAUNCH.INDEXED build/ATTRACT build/SS build/GAMEHELP build/DEMO
 	touch build/log
 
 clean:

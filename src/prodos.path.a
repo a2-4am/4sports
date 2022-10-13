@@ -59,6 +59,9 @@ kSearchCacheRecord
 kPrelaunchIndexRecord
          !source "src/index/prelaunch.idx.a"
 
+kDemoIndexRecord
+         !source "src/index/demo.idx.a"
+
 kAttractModeIndexRecord
          !source "src/index/attract.idx.a"
 
@@ -149,6 +152,9 @@ kDecrunchRecord
 kJoystickRecord
          !source "src/index/joystick.idx.a"
 
+kXSingleRecord
+         !source "src/index/xsingle.idx.a"
+
 kTotalDataFile
          !byte 10
          !raw  "TOTAL.DATA"
@@ -156,10 +162,6 @@ kTotalDataFile
 kAnimatedTitleDirectory
          !byte 15
          !raw  "TITLE.ANIMATED/"
-
-kDemoDirectory
-         !byte 5
-         !raw  "DEMO/"
 
 kGameDirectory
          !byte 2

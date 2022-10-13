@@ -9,6 +9,9 @@
 ; - FindGame
 ; - PlayGame
 ; - Launch
+; - Joystick
+; - LoadXSingle
+; - LoadStandardPrelaunch
 ;
 ; Public variables:
 ; - gGameToLaunch - 0-based index into gSearchStore (word)
@@ -117,28 +120,44 @@ FindGame
 ;------------------------------------------------------------------------------
 PlayGame
          jsr   GetGameToLaunch
-                                     ; A/Y = address of game filename
+                                     ; A/Y = address of game filename in gSearchIndex
 PlayGameInAY
          +ST16 SAVE
          +ST16 @pfile
+         +ST16 xfile
+         jsr   okvs_next_field
+         jsr   okvs_next_field_PTR_is_already_set
+                                     ; (PTR) -> length-prefixed game info bitfield
+                                     ; Y = 0
+         iny                         ; Y = 1
+         lda   (PTR), y              ; A = game info bitfield
+         and   #IS_SINGLE_LOAD
+         php
 
          jsr   ClearScreens          ; avoid seeing code load into the HGR page
                                      ; (clobbers $106, must do now before loading prelaunch code)
 
          jsr   LoadIndexedFile       ; load prelaunch index file
--        !word gSearchCache
+-        !word gSearchCache          ; clobber gSearchCache which we no longer need
          !word kPrelaunchIndexRecord
 
-         jsr   okvs_find
+         jsr   okvs_find             ; find this game's prelaunch index record
          !word -
 @pfile   !word $FDFD                 ; SMC
-         +ST16 @indexRecordPtr
+         +ST16 @prelaunchIndexRecordPtr
 
-         jsr   LoadIndexedFile
+         jsr   LoadIndexedFile       ; load this game's prelaunch code into $0106
          !word $0106
-@indexRecordPtr
+@prelaunchIndexRecordPtr
          !word $FDFD                 ; SMC
 
+         plp
+         beq   @loadFromSubdirectory
+
+         jsr   LoadXSingle_NameIsAlreadySet
+         jmp   Launch
+
+@loadFromSubdirectory
          ; we start by placing the subdirectory name at gPathname+kGameDirectoryLen
          ; to leave room for the GameDirectory name as the parent
 
@@ -197,6 +216,47 @@ Launch
          sta   launchpatch
          jmp   LaunchInternal
 
+;------------------------------------------------------------------------------
+; LoadXSingle/LoadXSingle_NameIsAlreadySet/LoadXFile
+; load an indexed file via an extended index record that also contains starting
+; address information
+;
+; in:    A/Y points to game filename (must be listed in xsingle OKVS)
+; out:   all flags & registers clobbered
+;------------------------------------------------------------------------------
+LoadXSingle                          ; entry point used by demos to load additional resources
+         +ST16 xfile
+LoadXSingle_NameIsAlreadySet         ; entry point used by PlayGame
+         jsr   LoadIndexedFile       ; load xsingle index file (contains pointers to game binaries)
+-        !word gSearchCache          ; clobber search cache which we no longer need
+         !word kXSingleRecord
+LoadXFile                            ; entry point used by attract mode to load self-running demo
+         jsr   okvs_find             ; find this game's extended index record
+         !word -
+xfile    !word $FDFD                 ; SMC
+         +ST16 @xsingleIndexRecordPtr
+         jsr   okvs_next_field
+         ldy   #5
+         lda   (PTR), y              ; get game load address (stored immediately after index record)
+         sta   @xsingleAddr
+         iny
+         lda   (PTR), y
+         sta   @xsingleAddr+1
+
+         jsr   LoadIndexedFile       ; load this game binary
+@xsingleAddr
+         !word $FDFD                 ; SMC
+@xsingleIndexRecordPtr
+         !word $FDFD                 ; SMC
+         rts
+
+;------------------------------------------------------------------------------
+; Joystick
+; launch joystick calibration program
+;
+; in:    none
+; out:   exits via Launch
+;------------------------------------------------------------------------------
 Joystick
          jsr   LoadStandardPrelaunch
 

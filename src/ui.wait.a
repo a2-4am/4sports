@@ -79,7 +79,7 @@ WaitForKeyFor30Seconds
 ;------------------------------------------------------------------------------
 CoverFade
          jsr   ForceHGRMode
-         jsr   LoadTitleOffscreen
+         jsr   LoadCoverOffscreen
          jsr   ShowOtherPage
          lda   OffscreenPage
          beq   CoverFade
