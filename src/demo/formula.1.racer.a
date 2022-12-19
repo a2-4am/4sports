@@ -2,7 +2,7 @@
 ;(c) 2019, 2022 by Frank M., qkumba
 
 !cpu 6502
-!to "build/PRELAUNCH.INDEXED/FORMULA.1.RACER#060300",plain
+!to "build/DEMO/FORMULA.1.RACER#060300",plain
 *=$300
 
          !source "src/constants.a"   ; no code in these
