@@ -29,7 +29,7 @@ callback
          lda   #>keychk
          sta   $0B42
 
-         lda   $60
+         lda   #$60
          sta   $1BE0      ; kill joystick button
 
          lda   #$D0
