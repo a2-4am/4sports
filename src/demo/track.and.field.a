@@ -49,6 +49,14 @@
          sta   $ED3
          sta   $EDA
          sta   $F02
+         lda   #$D0
+         sta   $18FF
+         sta   $1927
+         sta   $1947
+         sta   $A02D
+         sta   $A037
+         sta   $A1BF
+
          +DISABLE_ACCEL
          jmp   $800
 
