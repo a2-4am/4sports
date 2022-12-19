@@ -1,0 +1,58 @@
+;license:MIT
+;(c) 2022 by Frank M.
+
+!cpu 6502
+!to "build/DEMO/AUTOBAHN#060200",plain
+*=$200
+
+         !source "src/constants.a"   ; no code in these
+         !source "src/macros.a"
+
+         +ENABLE_ACCEL_LC
+         +LOAD_XSINGLE title
+         lda   #<callback
+         sta   $2037
+         lda   #>callback
+         sta   $2038
+         jmp   $2000      ; decompress
+
+callback
+         lda   #<miles
+         sta   $1216
+         lda   #>miles
+         sta   $1217
+
+         lda   #$4C
+         sta   $0B40
+         lda   #<keychk
+         sta   $0B41
+         lda   #>keychk
+         sta   $0B42
+
+         lda   $60
+         sta   $1BE0      ; kill joystick button
+
+         lda   #$D0
+         sta   $BBB
+         sta   $1BBA      ; kill sound
+
+         +DISABLE_ACCEL
+         jmp   $1FD6
+
+keychk   lda   $C000
+         bmi   +
+         jmp   $10E0
+
+miles    lda   $D0
+         cmp   #$15       ; stop at 15 miles/roughly 1.5 minutes/includes tunnel
+         beq   +
+         jmp   $10E0
++        jmp   $100
+
+title    !byte x_e-x_b
+x_b      !text "AUTOBAHN"
+x_e
+
+!if * > $280 {
+  !error "code is too large, ends at ", *
+}
