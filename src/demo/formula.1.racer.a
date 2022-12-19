@@ -1,0 +1,53 @@
+;license:MIT
+;(c) 2019, 2022 by Frank M., qkumba
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/FORMULA.1.RACER#060300",plain
+*=$300
+
+         !source "src/constants.a"   ; no code in these
+         !source "src/macros.a"
+
+         +ENABLE_ACCEL_LC
+         +LOAD_XSINGLE title
+         lda   #$60
+         sta   $818
+         jsr   $800
+
+         ldx   #$10
+         stx   $6DEC
+         inx
+         stx   $6DED
+         lda   #$4C
+         sta   $6DEE
+         sta   $72AE
+         ldx   #0
+         stx   $6DEF
+         stx   $6EBE
+         stx   $72AF
+         inx
+         stx   $6DF0
+         stx   $6EBF
+         stx   $72B0
+         stx   $71D4      ; reset vector patch
+         lda   #$2C
+         sta   $71D0
+         sta   $71D5
+         sta   $715A
+         lda   #$70
+         sta   $71D4
+         lda   #$D0
+         sta   $7307
+         sta   $733F
+         sta   $7356
+
+         +DISABLE_ACCEL
+         jmp   $7000
+
+title    !byte x_e-x_b
+x_b      !text "FORMULA.1.RACER"
+x_e
+
+!if * > $3F0 {
+  !error "code is too large, ends at ", *
+}

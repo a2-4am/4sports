@@ -1,0 +1,73 @@
+;license:MIT
+;(c) 2022 by qkumba
+
+!cpu 6502
+!to "build/DEMO/TRACK.AND.FIELD#060300",plain
+*=$300
+
+         !source "src/constants.a"   ; no code in these
+         !source "src/macros.a"
+
+         +READ_RAM2_WRITE_RAM2
+         jsr   EnableAccelerator
+         +LOAD_FILE_KEEP_DIR track_and_field, 0, track_and_field_dir_e-track_and_field_dir_b
+         +READ_ROM_NO_WRITE
+
+         lda   #$60
+         sta   $861
+         jsr   $800
+         lda   #$60
+         sta   $a648
+         lda   #0
+         jsr   $a600
+         lda   #$0C
+         jsr   $a600
+         lda   #$10
+         jsr   $a600
+         lda   #$11
+         jsr   $a600
+         lda   #$0F
+         jsr   $a600
+         lda   #$0A
+         jsr   $a600
+         ldx   #(patch_e-patch_b)-1
+-        lda   patch_b,x
+         sta   $9975,x
+         dex
+         bpl   -
+         ldx   #4-1
+         bne   +
+-        lda   patch,x
+         sta   $863,x
+         sta   $B00,x    ; set exits
++        lda   patch2,x
+         sta   $AD7,x
+         dex
+         bpl   -
+         lda   #$2C
+         sta   $ECC
+         sta   $ED3
+         sta   $EDA
+         sta   $F02
+         +DISABLE_ACCEL
+         jmp   $800
+
+patch_b
+         !byte 1, 0, 7, 0, 0, 3, $AE, $AE, $AE, 1, 0, 7, 0, 0, 3, $AE, $AE, $AE, 1, 0, 7, 0, 0
+         !byte 3, $AE, $AE, $AE
+patch_e
+patch    !byte $4C,$00,$01
+patch2   !byte $30,$27,$EA,$EA
+
+track_and_field
+         !byte track_and_field_e-track_and_field_b
+track_and_field_b
+track_and_field_dir_b
+         !text "X/TRACK.AND.FIELD"
+track_and_field_dir_e
+         !text "/TRACK.AND.FIELD"
+track_and_field_e
+
+!if * > $3F0 {
+  !error "code is too large, ends at ", *
+}
