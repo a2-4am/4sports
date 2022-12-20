@@ -12,8 +12,10 @@
          sta   $818
          jsr   $800
 
-         lda   #1
-         sta   $71D4      ; reset vector patch
+         lda   #$2C       ; reset vector patch
+         sta   $71D0
+         stx   $71D5
+         sta   $71DA
 
          +DISABLE_ACCEL
          jmp   $7000
