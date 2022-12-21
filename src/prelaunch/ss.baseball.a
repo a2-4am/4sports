@@ -25,11 +25,14 @@
 callback1
          ldx   #$FF
          txs
+         lda   $675A
+         cmp   #$20
+         bne   +
          lda   #<callback2
          sta   $675B
          lda   #>callback2
          sta   $675C
-         jmp   $6000
++        jmp   $6000
 
 callback2
          ; work around IIc+ firmware bug:
