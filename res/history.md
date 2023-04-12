@@ -14,6 +14,7 @@
 
 ## Migrated from Total Replay
 
+- 8-bit Slicks
 - Battle Chess
 - Bop'n Wrestle
 - California Games
