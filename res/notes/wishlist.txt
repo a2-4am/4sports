@@ -70,32 +70,45 @@ Trick Shot (IDSI)
 World Class Leader Board (Access Software)
 World Series Baseball
 
-//idea:game shows
+//idea:game shows (TODO consolidate any that are the same just different publishers)
 Card Sharks [DHGR]
-Classic Concentration [DHGR]
-Classic Concentration Second Edition [DHGR]
-Classic Concentration New Second Edition [DHGR]
+Classic Concentration [DHGR] (+ Second Edition, New Second Edition)
 Double Dare
-Family Feud
-The All New Family Feud [DHGR]
+Family Feud (+ All New Family Feud [DHGR])
+Fun House
 High Rollers
 Hollywood Squares
-Jeopardy
-Jeopardy First Edition
-Jeopardy 25th Anniversary Edition
-Jeopardy Junior Edition
-Jeopardy New Junior Edition
-Jeopardy Second Edition
-Jeopardy New Second Edition
-Jeopardy Sports Edition
-Jeopardy New Sports Edition
+Jeopardy (+ First Edition, 25th Anniversary Edition, Junior Edition, New Junior Edition, Second Edition, New Second Edition, Sports Edition, New Sports Edition)
+Press Your Luck
+Remote Control
 Super Password [DHGR]
 The $100,000 Pyramid
-Wheel of Fortune [DHGR]
-Wheel of Fortune Second Edition [DHGR]
-Wheel of Fortune New Second Edition [DHGR]
-Wheel of Fortune Third Edition [DHGR]
-Wheel of Fortune Golden Edition [DHGR]
-Win, Lose, or Draw [DHGR]
-Win, Lose, or Draw Junior [DHGR]
-Win, Lose, or Draw Second Edition [DHGR]
+The Price is Right
+Wheel of Fortune [DHGR] (+ Second Edition, New Second Edition, Third Edition, Golden Edition)
+Win, Lose, or Draw [DHGR] (+ Junior Edition, Second Edition)
+Wipeout
+
+//idea:Bez collection (these are in woz-a-day)
+Wari
+Kono
+Fox & Geese
+Seega
+Nine Men's Morris
+Mu Torere
+Weights and Treasure
+Brain Machine
+First Encounter
+Rock 'N Scroll
+
+//idea:board games
+A Question of Scruples
+Clue
+Risk v1.4
+Monty Plays Scrabble v4
+Shanghai
+Sorry
+Pensate
+
+//idea:quiz games
+Tic Tac Show
+Quizagon
