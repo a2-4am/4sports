@@ -1,5 +1,5 @@
 ;license:MIT
-;(c) 2019, 2022 by Frank M., qkumba
+;(c) 2019, 2022, 2023 by Frank M., qkumba
 
 !cpu 6502
 !to "build/DEMO/FORMULA.1.RACER#060300",plain
@@ -29,10 +29,12 @@
          stx   $6DF0
          stx   $6EBF
          stx   $72B0
-         lda   #$2C       ; reset vector patch
+         lda   #$2C
          sta   $71D0
          stx   $71D5
-         sta   $71DA
+         sta   $71DA      ; reset vector patch
+         sta   $6584
+         sta   $67CC      ; don't check joystick buttons
          lda   #$D0       ; kill sound
          sta   $7307
          sta   $733F
