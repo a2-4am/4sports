@@ -29,6 +29,7 @@ rem version 3.1.0 or later
 set EXOMIZER=exomizer mem -q -P23 -lnone
 
 if "%1" equ "dsk" (
+call :clean
 call :index
 if "%2". equ "". (
   call :asmproboot
@@ -73,6 +74,7 @@ if "%1" equ "clean" (
 if "%2". neq "". (
 1>nul move build\%DISK%
 )
+:clean
 echo y|1>nul 2>nul rd build /s
 if "%2". neq "". (
 md build
@@ -314,8 +316,7 @@ goto :EOF
 
 :asmlauncher
 2>nul 1>build\buildnum.log %GIT% rev-list --count HEAD
-if errorlevel 1 (set _build=0
-) else for /f "tokens=*" %%q in (build\buildnum.log) do set _build=%%q
+if errorlevel 1 (set _build=0) else for /f "tokens=*" %%q in (build\buildnum.log) do set _build=%%q
 2>build\relbase.log %ACME% -DBUILDNUMBER=%_build% src\4cade.a
 for /f "tokens=*" %%q in (build\relbase.log) do set _make=%%q
 %ACME% -DBUILDNUMBER=%_build% -DRELBASE=$!_make:~-5,4! -r build\4cade.lst src\4cade.a

@@ -1,0 +1,78 @@
+;license:MIT
+;(c) 2023 by qkumba
+
+!cpu 6502
+!to "build/PRELAUNCH/BLACK.BELT.MB",plain
+*=$200
+
+         !source "src/constants.a"   ; no code in these
+         !source "src/macros.a"
+
+         +ENABLE_ACCEL
+         lda   #$4C
+         sta   $85F
+         jsr   $800       ; decompress
+         +DISABLE_ACCEL
+         jsr   $8F00      ; title
+         +ENABLE_ACCEL
+         lda   #$4C
+         sta   $8A0
+         ldy   #0
+         nop
+         nop
+         nop              ; alignment for SMC
+         jsr   $865       ; decompress
+         +READ_RAM2_NO_WRITE
+         lda   MockingboardStuff
+         beq   .nomock
+         pha
+         jsr   $BC0E      ; decompress new Mockingboard support
+         lda   #0         ; SMC
+         pla
+         pha
+         and   #MOCKINGBOARD_NEW
+         bne   .newmock
+         jsr   $BC07      ; decompress old Mockingboard support
+.newmock
+         pla
+         and   #7
+         ora   #$C0
+         ldx   #0
+-        ldy   $15FB, x
+         cpy   #$C4
+         bne   +
+         sta   $15FB, x
++        ldy   $A000, x
+         cpy   #$C4
+         bne   +
+         sta   $A000, x
++        ldy   $A100, x
+         cpy   #$C4
+         bne   +
+         sta   $A100, x
++        inx
+         bne   -
+
+.nomock
+         lda   #$4C
+         sta   $BC12
+         lda   #<callback
+         sta   $BC13
+         lda   #>callback
+         sta   $BC14
+         jsr   DisableAccelerator
+         +READ_ROM_NO_WRITE
+         jmp   $8A3
+
+callback
+         +ENABLE_ACCEL
+         lda   #0
+         sta   $B6
+         jsr   $BC16
+         +DISABLE_ACCEL
+         lda   #0
+         rts
+
+!if * > $2FF {
+  !error "code is too large, ends at ", *
+}

@@ -7,49 +7,15 @@
 
     !source "src/prelaunch/common.a"
 
-         +ENABLE_ACCEL
-         lda   #$4C
-         sta   $85F
-         jsr   $800       ; decompress
-         +DISABLE_ACCEL
-         jsr   $8F00      ; title
-         +ENABLE_ACCEL
-         lda   #$4C
-         sta   $8A0
-         ldy   #0
-         jsr   $865       ; decompress
-         +READ_RAM2_NO_WRITE
-         lda   MockingboardStuff
-         beq   .nomock
-         pha
-         lda   #$a9
-         sta   $1506
-         jsr   $BC0E      ; decompress new Mockingboard support
-         pla
-         and   #$20
-         bne   .newmock
-         jsr   $BC07      ; decompress old Mockingboard support
-.newmock
-
-.nomock
-         lda   #$4C
-         sta   $BC12
-         lda   #<callback
-         sta   $BC13
-         lda   #>callback
-         sta   $BC14
-         jsr   DisableAccelerator
+         +READ_RAM2_WRITE_RAM2
+         jsr   EnableAccelerator
+         +LOAD_FILE_AT blackbelt_mb, $200
          +READ_ROM_NO_WRITE
-         jmp   $8A3
+         jmp   $200
 
-callback
-         +ENABLE_ACCEL
-         lda   #0
-         sta   $B6
-         jsr   $BC16
-         +DISABLE_ACCEL
-         lda   #0
-         rts
+blackbelt_mb
+         !byte 23
+         !text "PRELAUNCH/BLACK.BELT.MB"
 
 !if * > $1C0 {
   !error "code is too large, ends at ", *
