@@ -25,7 +25,7 @@ Chuck Yeager's Advanced Flight Simulator [priority]
 Dave Winfield's Batter Up [4am crack]
 Earl Weaver Baseball
 F-15 Strike Eagle
-Fathom's 40
+Fathom's 40 [4am crack]
 Fore! [4am crack]
 Golf Course (Main Street Publishing)
 Golf's Best
@@ -35,14 +35,14 @@ Hi-Res Computer Golf 2
 Hi-Res Football
 Hi-Res Soccer
 Jet [priority]
-Joe Thiesmann's Pro Football
+Joe Thiesmann's Pro Football [4am crack]
 John Elway's Quarterback
 John Madden Football
 Ken Uston's Professional Blackjack (latest version is 1.23?) [4am crack]
 Maxi Golf
 Micro Golf (from file, not ProDOS 2.0.3 remake)
-Micro League Baseball
-MicroChess 2.0 (Personal Software)
+Micro League Baseball (1984 version, not 1980)
+MicroChess 2.0 (Personal Software) [4am crack]
 Olympic Decathlon
 Pro Football (Systems Design Lab)
 Pro Golf (Home-Computer Software)
@@ -55,8 +55,8 @@ Sierra Championship Boxing [4am crack]
 Silent Service
 Sports Spectacular (Keypunch) [unprotected]
 Star League Baseball
-Star Rank Boxing
-Sub Battle Simulator
+Star Rank Boxing II [4am crack]
+Sub Battle Simulator [4am crack]
 Super Sunday [4am crack]
 Superstar Indoor Sports
 Techo-Sport Racing (K-Tek) [Tom Greene]
