@@ -10,7 +10,7 @@
 
          +ENABLE_ACCEL
          lda   #$4C
-         sta   $85F
+         sta   $159A
          jsr   $800       ; decompress
          +DISABLE_ACCEL
          jsr   $8F00      ; title
@@ -52,6 +52,7 @@
          sta   $A100, x
 +        inx
          bne   -
+         stx   $2000
 
 .nomock
          lda   #$4C
