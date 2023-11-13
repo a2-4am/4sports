@@ -2,7 +2,7 @@
 
                     ~
 
-  revision 01 / serial number 20221109
+  revision 01 / serial number 20231113
 
                     ~
 
@@ -10,9 +10,9 @@ design & interface * * * * * * * * * 4am
 
 ports & rwts * * * * * * * * * * *qkumba
 
+testing & patches* * * * * * * * * * * *
 
-
-
+ Frank M * Tom G * Andrew R * xotmatrix
 
 
 
