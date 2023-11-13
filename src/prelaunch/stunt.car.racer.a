@@ -1,0 +1,19 @@
+;license:MIT
+;(c) 2022 by qkumba
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/STUNT.CAR.RACER",plain
+*=$106
+
+    !source "src/prelaunch/common.a"
+
+         +ENABLE_ACCEL
+         lda   #$60
+         sta   $7AC5
+         jsr   $BFA       ; decompress
+         +DISABLE_ACCEL
+         jmp   $4B82
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}
