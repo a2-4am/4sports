@@ -1,0 +1,43 @@
+;license:MIT
+;(c) 2018-2023 by 4am
+;
+
+PrintBranding
+         ldy   #14
+-        lda   II,y
+         ora   #$80
+         +FORCE_UPPERCASE_IF_REQUIRED
+         sta   $070C,y
+         dey
+         bpl   -
+         ldy   #12
+-        lda   INSTANT,y
+         ora   #$80
+         sta   $04B5,y
+         dey
+         bpl   -
+         ldy   #10
+-        lda   REPLAY,y
+         ora   #$80
+         sta   $0536,y
+         dey
+         bpl   -
+         rts
+
+II
+         !text "Total Replay II"
+INSTANT
+         !text "I N S T A N T"
+REPLAY
+         !text "R E P L A Y"
+!ifndef RELEASE {
+LoadingVersion
+         !byte 9
+         !text "  build 0"
+LoadingBuild
+         !word BUILDNUMBER
+} else {
+LoadingVersion
+         !byte 12
+         !text "v1.0-alpha.1"
+}

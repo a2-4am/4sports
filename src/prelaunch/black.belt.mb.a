@@ -30,7 +30,7 @@
          lda   #0         ; SMC
          pla
          pha
-         and   #MOCKINGBOARD_NEW
+         and   #HAS_STEREO
          bne   .newmock
          jsr   $BC07      ; decompress old Mockingboard support
 .newmock
