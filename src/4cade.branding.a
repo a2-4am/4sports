@@ -39,5 +39,5 @@ LoadingBuild
 } else {
 LoadingVersion
          !byte 12
-         !text "v1.0-alpha.1"
+         !text "v1.0-alpha.2"
 }
