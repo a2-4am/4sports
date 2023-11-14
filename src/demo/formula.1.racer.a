@@ -31,7 +31,7 @@
          stx   $72B0
          lda   #$2C
          sta   $71D0
-         stx   $71D5
+         sta   $71D5
          sta   $71DA      ; reset vector patch
          sta   $6584
          sta   $67CC      ; don't check joystick buttons
