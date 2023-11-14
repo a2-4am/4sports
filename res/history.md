@@ -1,5 +1,9 @@
 # Total Replay II: Instant Replay changelog
 
+## Revision 1.0-alpha.3 / 20231114
+
+- Fix Formula 1 Racer demo crash on IIgs
+
 ## Revision 1.0-alpha.2 / 20231113
 
 ### New games
