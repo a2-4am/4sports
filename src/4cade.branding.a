@@ -3,41 +3,22 @@
 ;
 
 PrintBranding
-         ldy   #14
--        lda   II,y
-         ora   #$80
-         +FORCE_UPPERCASE_IF_REQUIRED
-         sta   $070C,y
+; in:    text screen is showing
+; out:   Y = 0 (important! some callers rely on this!)
+         ldy   #15
+-        lda   II-1, y
+         sta   $070C-1, y
+         lda   INSTANT-1, y
+         sta   $04B4-1, y
+         lda   REPLAY-1, y
+         sta   $0534-1, y
          dey
-         bpl   -
-         ldy   #12
--        lda   INSTANT,y
-         ora   #$80
-         sta   $04B5,y
-         dey
-         bpl   -
-         ldy   #10
--        lda   REPLAY,y
-         ora   #$80
-         sta   $0536,y
-         dey
-         bpl   -
+         bne   -
          rts
 
 II
-         !text "Total Replay II"
+         !scrxor $80,"TOTAL REPLAY II"
 INSTANT
-         !text "I N S T A N T"
+         !scrxor $80," I N S T A N T "
 REPLAY
-         !text "R E P L A Y"
-!ifndef RELEASE {
-LoadingVersion
-         !byte 9
-         !text "  build 0"
-LoadingBuild
-         !word BUILDNUMBER
-} else {
-LoadingVersion
-         !byte 12
-         !text "v1.0-alpha.3"
-}
+         !scrxor $80,"  R E P L A Y  "

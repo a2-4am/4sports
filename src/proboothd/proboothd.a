@@ -5,6 +5,8 @@
 !to "build/proboothd",plain
 *=$800
 
+         !src  "src/macros.a"
+
          ;zpage usage, arbitrary selection except for the "ProDOS constant" ones
          command   = $42         ;ProDOS constant
          unit      = $43         ;ProDOS constant
@@ -25,46 +27,20 @@
          txa
          pha
 
-         ; put machine in a known state, clear screen
+         !src  "src/4cade.init.machine.a"
 
-         cld
-         bit   $c082
-         sta   $c00e
-         sta   $c00c
-         sta   $c000
-         sta   $c002
-         sta   $c004
-         jsr   $fb2f
-         jsr   $fc58
-         jsr   $fe84
-         jsr   $fe89
-         jsr   $fe93
+         lda   KBD
+         cmp   #$D3              ; 'S'
+         beq   @s
+         cmp   #$F3              ; 's'
+         bne   +
+@s
+         jsr   seasons
++
+         !src  "src/4cade.init.screen.a"
 
-         ; print title
-         lda   $fbb3
-         cmp   #$A0
-         beq   +                     ; Spectrum ED
-         cmp   #$06
-         beq   +
-         lda   #$DF
-         !byte $2C
-+        lda   #$FF
-         sta   $F1
-         ldy   #15
--        lda   II-1,y
-         cmp   #$E1
-         bcc   +
-         and   $F1
-+        sta   $070C-1,y
-         dey
-         bne   -
-         ldy   #13
--        lda   INSTANT-1,y
-         sta   $04B5-1,y
-         lda   REPLAY-1,y
-         sta   $0535-1,y
-         dey
-         bne   -
+         ; print text title in same place as graphical title will appear
+         jsr   PrintBranding
 
          pla
          sta   unit
@@ -164,7 +140,7 @@ blockind ldy   $ff
          txa
          bne   readfile
 
-readdone jmp   $2036
+readdone jmp   ProBootEntry
 
 seekread stx   bloklo
          sty   blokhi
@@ -193,17 +169,201 @@ retcall  pla
 -        rts
 fakeMLI_e
 
+; Interactive Seasons demo
+; based on Apple II Seasons -=DESiRE=- 128B Demo for Outline 2020
+; based on the code in Hellmood's 64B x86 demo 'Autumn'
+; by deater (Vince Weaver)
+; adapted by 4am for use within this bootloader
+; /!\ While demo is running, press 1-4 to change color palettes
+;     or Esc to quit demo and continue the boot
+
+HGR2    = $F3D8         ; Set full-screen hi-res mode using page 2 ($4000)
+HPLOT0  = $F457         ; Plot point, (Y,X) = Horizontal, (A=Vertical)
+HCOLOR  = $F6EC         ; Set color in X, must be 0..7
+
+seasons:
+         bit   $c010
+         jsr   HGR2
+         ldx   #(copy_seasons_e-copy_seasons)
+-        lda   copy_seasons-1, x
+         sta   $30, x
+         dex
+         bne   -
+         jmp   seasons_forever
+
+copy_seasons:
+; HGR ROM routines use
+; $1C          mask for color
+; $26/$27      address for plot
+; $30          color value * 17
+; $E0/$E1      X coord of last hplot
+; so code starts at $31 and must end before $E0
+!pseudopc $31 {
+EBP1     !byte 0
+EBP2     !byte 0
+EBP3     !byte 0
+EBP4     !byte 0
+
+color_lookup_lookup:
+         !byte <color_lookup
+         !byte <color_lookup2
+         !byte <color_lookup3
+         !byte <color_lookup4
+
+color_lookup:
+         ; qkumba ora2 white/blue/purple
+         !byte $02,$03,$02,$03, $06,$07,$06,$07
+
+color_lookup2:
+         ; better mixed orange/green/white
+         !byte $01,$03,$03,$03, $05,$05,$07,$07
+
+color_lookup3:
+         ; blue and purple palette
+         !byte $02,$02,$03,$06, $06,$06,$02,$07
+
+color_lookup4:
+         ; colorful palette
+         !byte $01,$01,$02,$03, $05,$05,$06,$07
+
+seasons_forever:
+
+         ; save old Xcoord value to X/Y for later
+XCOORDL=*+1
+         ldx   #0                      ; 2
+XCOORDH=*+1
+         ldy   #0                      ; 2
+
+         ; 16-bit subtraction  x=x-y
+         ; need to set carry before subtraction on 6502
+         txa                           ; 1     (xcoordl in X)
+         sec                           ; 1
+         sbc   <YCOORDL                ; 2
+         sta   <XCOORDL                ; 2
+         tya                           ; 1     (xcoordh in Y)
+YCOORDH=*+1
+         sbc   #0                      ; 2
+
+         ; 16-bit arithmetic shift right of X
+         ; 6502 has no asr instruction
+         ; cmp #$80 sets carry if high bit set
+         cmp   #$80                    ; 2     ; XCOORDH still in A from before
+         ror                           ; 1
+         sta   <XCOORDH                ; 2
+         ror   <XCOORDL                ; 2
+
+         ; 16-bit add, ycoord=ycoord+oldx
+         clc                           ; 1
+         txa                           ; 1
+YCOORDL=*+1
+         adc   #0                      ; 2
+         sta   <YCOORDL                ; 2
+         tya                           ; 1
+         adc   <YCOORDH                ; 2
+
+         ; 16-bit arithmetic shift right of y-coord
+         cmp   #$80                    ; 2     ; YCOORDH still in A from before
+         ror                           ; 1
+         sta   <YCOORDH                ; 2
+         ror   <YCOORDL                ; 2
+
+         ; 32 bit rotate of low bit shifted out of Y-coordinate
+         ror   <EBP1                   ; 2
+         ror   <EBP2                   ; 2
+         ror   <EBP3                   ; 2
+         ror   <EBP4                   ; 2
+
+         ; branch if carry set
+         bcs   label_11f               ; 2
+
+         ; 16-bit increment of color
+         inc   <COLORL                 ; 2
+         bne   no_oflo                 ; 2
+         inc   <COLORH                 ; 2
+no_oflo:
+
+         ; 16-bit add of X-coord by 0x80
+         ; this keeps the drawing roughly to the 280x192 screen
+         ; carry should still be clear (inc doesn't set it)
+         lda   <XCOORDL                ; 2
+         adc   #$80                    ; 2
+         sta   <XCOORDL                ; 2
+         bcc   no_oflo2                ; 2
+         inc   <XCOORDH                ; 2
+no_oflo2:
+
+         ; 16-bit negate of Y-coord
+         sec                           ; 1
+         lda   #0                      ; 2
+         sbc   <YCOORDL                ; 2
+         sta   <YCOORDL                ; 2
+         lda   #0                      ; 2
+         sbc   <YCOORDH                ; 2
+         sta   <YCOORDH                ; 2
+
+label_11f:
+
+         ; 16-bit shift of color
+         ; 2nd is a rotate as asl doesn't shift in carry
+
+COLORL=*+1
+         lda   #0                      ; 2
+         asl                           ; 1     ; shl %ax
+         rol   <COLORH                 ; 2
+COLORH=*+1
+         eor   #0                      ; 2
+         sta   <COLORL                 ; 2
+
+         ; get color mapping
+         and   #7                      ; 2
+         tay                           ; 1
+color_addr=*+1
+         ldx   <color_lookup, y        ; 2
+
+         ; if ycoord negative, loop
+         lda   <YCOORDH                ; 2
+         bmi   seasons_forever         ; 2
+
+         ; if top bits of xcoord, loop
+         lda   <XCOORDH                ; 2
+         and   #$f0                    ; 2
+         bne   seasons_forever         ; 2
+
+put_pixel:
+
+         ; actually set the color
+         jsr   HCOLOR                  ; 3     ; color is in X
+
+         ; set up parameters for HPLOT ROM call
+         ldx   <XCOORDL                ; 2     ; x coord in (y:x)
+         ldy   <XCOORDH                ; 2
+         lda   <YCOORDL                ; 2     ; y coord in A
+         jsr   HPLOT0                  ; 3
+
+         lda   $c000
+-        bpl   seasons_forever
+         cmp   #$9b
+         beq   +
+         and   #3
+         tax
+         lda   <color_lookup_lookup, x
+         sta   <color_addr
+         bpl   -                     ; always branches
++        rts
+}
+copy_seasons_e
+
 filename
          !byte filename_e - filename_b
 filename_b
          !text "LAUNCHER.SYSTEM" ;your start-up file, file is max 40kb
 filename_e
-II
-         !byte $D4,$EF,$F4,$E1,$EC,$A0,$D2,$E5,$F0,$EC,$E1,$F9,$A0,$C9,$C9
-INSTANT
-         !byte $C9,$A0,$CE,$A0,$D3,$A0,$D4,$A0,$C1,$A0,$CE,$A0,$D4
-REPLAY
-         !byte $A0,$D2,$A0,$C5,$A0,$D0,$A0,$CC,$A0,$C1,$A0,$D9,$A0
+
+         !src  "src/4cade.branding.a"
+
+!if (* > $9f7) {
+         !serious "Bootloader is too large"
+}
 
 *=$9f8
 !byte $D3,$C1,$CE,$A0,$C9,$CE,$C3,$AE
