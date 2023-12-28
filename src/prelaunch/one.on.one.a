@@ -1,5 +1,5 @@
 ;license:MIT
-;(c) 2020 by qkumba
+;(c) 2020, 2023 by qkumba
 
 !cpu 6502
 !to "build/PRELAUNCH.INDEXED/ONE.ON.ONE",plain
@@ -11,6 +11,7 @@
          jsr   EnableAccelerator
          lda   MockingboardStuff
          cmp   #1
+         and   #7
          ora   #$C0
          php
          pha
@@ -25,11 +26,8 @@
          plp
          php
          bcc   skipmb
-         plp
-         cli              ; enable MB music on title
-         php
          cmp   #$C4
-         beq   skipmb
+         beq   skipmb1
 
          sta   $E9BC      ; Replace #$C4 with configured slot
          ldy   #00
@@ -39,6 +37,11 @@
          sta   $EAF6,Y    ; Replace #$C4 with configured slot
 +        iny
          bne   -
+
+skipmb1
+         plp
+         cli              ; enable MB music on title
+         php
 
 skipmb
          +READ_RAM2_WRITE_RAM2
