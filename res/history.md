@@ -4,6 +4,7 @@
 
 ### New games
 
+- Fox & Geese
 - Kono
 - Wari
 
