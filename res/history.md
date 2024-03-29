@@ -5,6 +5,7 @@
 ### New games
 
 - Kono
+- Wari
 
 ## Revision 1.0-alpha.3 / 20231114
 
