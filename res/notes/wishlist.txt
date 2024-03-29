@@ -91,7 +91,6 @@ Win, Lose, or Draw [DHGR] (+ Junior Edition, Second Edition)
 Wipeout
 
 //idea:Bez collection (these are in woz-a-day)
-Mu Torere
 Rock 'N Scroll
 Weights and Treasure [has construction kit]
 Brain Machine [has construction kit]

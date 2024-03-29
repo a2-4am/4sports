@@ -6,6 +6,7 @@
 
 - Fox & Geese
 - Kono
+- Mu Torere
 - Nine Men's Morris
 - Seega
 - Wari
