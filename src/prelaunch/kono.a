@@ -10,7 +10,7 @@
          lda   #$4C
          sta   $B9AD
          jsr   $8000
-         jsr   DisableAccelerator
+         +DISABLE_ACCEL
          +RESET_VECTOR $100
          jmp   $B9B0
 
