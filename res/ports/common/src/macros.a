@@ -1,0 +1,27 @@
+!macro INIT_MACHINE {
+         cld
+         bit   $C082
+         sta   PRIMARYCHARSET
+         sta   CLR80VID
+         sta   STOREOFF
+         sta   READMAINMEM
+         jsr   ROM_TEXT
+         jsr   ROM_HOME
+         jsr   ROM_PR0
+         jsr   ROM_IN0
+}
+
+!macro READ_ENTIRE_FILE .parm_open, .parm_read {
+         jsr   PRODOS_MLI
+         !byte CMD_OPEN
+         !word .parm_open
+         jsr   PRODOS_MLI
+         !byte CMD_READ
+         !word .parm_read
+         jsr   PRODOS_MLI
+         !byte CMD_CLOSE
+         !word +
+         !byte $2C
++        !byte 1
+         !byte 0
+}

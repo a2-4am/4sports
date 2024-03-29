@@ -1,0 +1,50 @@
+!cpu 6502
+*=$8000
+!to "build/MU.TORERE#068000",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         jmp   start
+
+compressed_data
+         !bin "src/OBJ.X"
+DECRUNCH_FORWARDS = 1
+SHOW_PROGRESS_DURING_DECRUNCH = 1
+kExoProgressWidth = 18               ; depends on total size, max 38
+         !src  "../common/src/exodecrunch.a"
+
+start
+         +INIT_MACHINE
+!if * != $B75E {
+  !serious "Adjust prelaunch to patch JSR at ", *
+}
+         jsr   decrunch              ; compressed data contains target address
+         bit   GFXMODE
+         bit   PAGE1
+         bit   HIRES
+         bit   FULLGFX
+         jsr   $900
+         ldx   #$20
+         ldy   #$00
+@a       lda   $9000, y
+@b       sta   $2000, y
+         iny
+         bne   @a
+         inc   @a+2
+         inc   @b+2
+         dex
+         bne   @a
+         jsr   $906
+         bit   CLEARKBD
+         jsr   PRODOS_MLI
+         !byte CMD_QUIT
+         !word +
++        !byte 4
+
+get_crunched_byte
+         lda   compressed_data
+         inc   get_crunched_byte+1
+         bne   +
+         inc   get_crunched_byte+2
++        rts

@@ -1,0 +1,37 @@
+BLOAD OBJ.0900 ($0900..$3FFF)
+BLOAD OBJ.5000 ($5000..$8FFF)
+JSR $900
+BLOAD BOARD.PIC ($2000.$3FFF)
+JSR $906
+MLI quit
+
+-=-=-
+
+BLOAD OBJ ($0900..$AFFF)
+JSR $900
+copy $20 pages from $9000 to $2000
+JSR $906
+MLI quit
+
+-=-=-
+
+exomizer mem -q -P23 -lnone -f "OBJ"@0x0900 -o "OBJ.X"
+
+-f means forward decrunching so it'll start at $900 and
+work its way up
+
+use version of exodecrunch that's in Passport with
+DECRUNCH_FORWARDS = 1
+
+that version also supports drawing a progress bar
+
+it's OK if earlier compressed data gets overwritten by
+uncompressed data (decrunch never needs to go back to
+previous data) so just load compressed data high enough
+in memory that it can read and write the final bytes
+i.e. uncompressed data ends at $AFFF so compressed data
+can start before that as long as it ends after $B000
+
+warning: XSingle index pads reads to 512 bytes
+so don't put compressed data TOO high or the padding
+might end up clobbering ProDOS code at $BF00
