@@ -6,6 +6,7 @@
 
 - Fox & Geese
 - Kono
+- Nine Men's Morris
 - Seega
 - Wari
 
