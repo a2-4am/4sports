@@ -81,23 +81,22 @@ Fun House
 High Rollers
 Hollywood Squares
 Jeopardy (+ First Edition, 25th Anniversary Edition, Junior Edition, New Junior Edition, Second Edition, New Second Edition, Sports Edition, New Sports Edition)
-Press Your Luck
+Press Your Luck [DHGR]
 Remote Control
 Super Password [DHGR]
-The $100,000 Pyramid
+The $100,000 Pyramid [DHGR]
 The Price is Right
 Wheel of Fortune [DHGR] (+ Second Edition, New Second Edition, Third Edition, Golden Edition)
 Win, Lose, or Draw [DHGR] (+ Junior Edition, Second Edition)
 Wipeout
 
 //idea:Bez collection (these are in woz-a-day)
-Seega
 Nine Men's Morris
 Mu Torere
-Weights and Treasure
-Brain Machine
-First Encounter
 Rock 'N Scroll
+Weights and Treasure [has construction kit]
+Brain Machine [has construction kit]
+First Encounter [maybe not a good match]
 
 //idea:board games
 A Question of Scruples

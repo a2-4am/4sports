@@ -6,6 +6,7 @@
 
 - Fox & Geese
 - Kono
+- Seega
 - Wari
 
 ## Revision 1.0-alpha.3 / 20231114
