@@ -91,10 +91,8 @@ Win, Lose, or Draw [DHGR] (+ Junior Edition, Second Edition)
 Wipeout
 
 //idea:Bez collection (these are in woz-a-day)
-Rock 'N Scroll
 Weights and Treasure [has construction kit]
 Brain Machine [has construction kit]
-First Encounter [maybe not a good match]
 
 //idea:board games
 A Question of Scruples

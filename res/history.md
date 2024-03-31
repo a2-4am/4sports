@@ -8,6 +8,7 @@
 - Kono
 - Mu Torere
 - Nine Men's Morris
+- Rock & Scroll
 - Seega
 - Wari
 

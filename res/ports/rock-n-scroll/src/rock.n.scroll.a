@@ -1,0 +1,124 @@
+!cpu 6502
+*=$8000
+!to "build/ROCK.N.SCROLL#068000",plain
+!ct "src/lcase.ct"
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         jmp   start
+
+compressed_data
+         !bin "src/OBJ.X"
+DECRUNCH_FORWARDS = 1
+SHOW_PROGRESS_DURING_DECRUNCH = 1
+kExoProgressWidth = 18               ; depends on total size, max 38
+         !src  "../common/src/exodecrunch.a"
+
+start
+         +INIT_MACHINE
+print_loop
+         lda   LoadingText
+         beq   +
+         jsr   ROM_COUT
+         inc   print_loop+1
+         bne   print_loop
+         inc   print_loop+2
+         bne   print_loop
++
+!if * != $B55F {
+  !serious "Adjust prelaunch to patch JSR at ", *
+}
+         jsr   decrunch              ; compressed data contains target address
+         bit   GFXMODE
+         bit   PAGE1
+         bit   HIRES
+         bit   FULLGFX
+         jsr   $900
+         bit   CLEARKBD
+         jsr   PRODOS_MLI
+         !byte CMD_QUIT
+         !word +
++        !byte 4
+
+get_crunched_byte
+         lda   compressed_data
+         inc   get_crunched_byte+1
+         bne   +
+         inc   get_crunched_byte+2
++        rts
+
+LoadingText
+         !scrxor $00,"                                        "
+
+         !scrxor $00," "
+         !text   "                                      "
+         !scrxor $00," "
+
+         !scrxor $00," "
+         !text   "             BEZ PRESENTS             "
+         !scrxor $00," "
+
+         !scrxor $00," "
+         !text   "                                      "
+         !scrxor $00," "
+
+         !scrxor $00," "
+         !text   "           ROCK AND SCROLL            "
+         !scrxor $00," "
+
+         !scrxor $00," "
+         !text   "                                      "
+         !scrxor $00," "
+
+         !scrxor $00," "
+         !text   "                 BY                   "
+         !scrxor $00," "
+
+         !scrxor $00," "
+         !text   "                                      "
+         !scrxor $00," "
+
+         !scrxor $00," "
+         !text   "            JOHN BESNARD              "
+         !scrxor $00," "
+
+         !scrxor $00," "
+         !text   "           COPYRIGHT 1987             "
+         !scrxor $00," "
+
+         !scrxor $00," "
+         !text   "______________________________________"
+         !scrxor $00," "
+
+         !scrxor $00,"                                        "
+
+         !byte   $8D,$8D,$8D
+
+         !text   "     SPECIAL COPY FOR FRIENDS OF BEZ",$8D,$8D,$8D,$8D
+
+         !scrxor $00,"                                        "
+
+         !scrxor $00,"   "
+         !scrxor $40,"GAME"
+         !scrxor $00," & "
+         !scrxor $40,"ROUTINES"
+         !scrxor $00,", "
+         !scrxor $40,"COPYRIGHT"
+         !scrxor $00," "
+         !scrxor $40,"BEZ"
+         !scrxor $00," 1987  "
+
+         !scrxor $00,"   "
+         !scrxor $40,"MOCKINGBOARD"
+         !scrxor $00,", "
+         !scrxor $40,"COPYRIGHT"
+         !scrxor $00," "
+         !scrxor $40,"SWEET"
+         !scrxor $00," "
+         !scrxor $40,"MICRO"
+         !scrxor $00,"  "
+
+         !scrxor $00,"                                        "
+
+         !byte   $00
