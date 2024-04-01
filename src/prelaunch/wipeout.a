@@ -1,0 +1,19 @@
+;license:MIT
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/WIPEOUT",plain
+*=$106
+
+    !source "src/prelaunch/common.a"
+
+         +ENABLE_ACCEL
+         lda   #$4C
+         sta   $356C
+         jsr   $800
+         +DISABLE_ACCEL
+         +RESET_VECTOR $100
+         jmp   $356F
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}

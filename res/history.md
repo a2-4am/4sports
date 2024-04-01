@@ -13,6 +13,7 @@
 - Rock & Scroll
 - Seega
 - Wari
+- Wipeout
 
 ## Revision 1.0-alpha.3 / 20231114
 

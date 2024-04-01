@@ -11,6 +11,17 @@
          jsr   ROM_IN0
 }
 
+; X=0, Z=1 on exit
+; A clobbered
+; Y preserved
+!macro SHORT_COPY .start, .end, .target {
+         ldx   #<(.end-.start)
+-        lda   .start-1, x
+         sta   .target-1, x
+         dex
+         bne   -
+}
+
 !macro READ_ENTIRE_FILE .parm_open, .parm_read {
          jsr   PRODOS_MLI
          !byte CMD_OPEN

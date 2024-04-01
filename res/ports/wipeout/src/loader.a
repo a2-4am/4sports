@@ -1,0 +1,35 @@
+!cpu 6502
+*=$2000
+!to "build/LOADER.SYSTEM#FF2000",plain
+
+STAGE2         = $3F00
+PREFIX_BUFFER  = $4000
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+         !src  "../common/src/prodos.init.a"
+         +SHORT_COPY move_stage2_start, move_stage2_end, STAGE2
+         jmp   STAGE2
+
+move_stage2_start
+!pseudopc STAGE2 {
+         +READ_ENTIRE_FILE parm_boot_open, parm_boot_read
+         jmp   (entry)
+
+parm_boot_open
+         !byte 3
+         !word filename
+         !word PREFIX_BUFFER
+         !byte 0
+
+parm_boot_read
+         !byte 4
+         !byte 1
+entry    !word $0800
+         !word $FFFF
+         !word 0
+
+filename
+         !text 7,"WIPEOUT"
+}
+move_stage2_end
