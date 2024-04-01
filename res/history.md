@@ -6,6 +6,7 @@
 
 - Fox & Geese
 - Kono
+- Micro Golf
 - Mu Torere
 - Nine Men's Morris
 - Rock & Scroll
