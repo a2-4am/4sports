@@ -1,0 +1,33 @@
+!cpu 6502
+*=$7E99
+!to "build/REVERSI#067E99",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         jmp   start
+
+title
+         !bin "src/TITLE.7E9C"
+compressed_data
+         !bin "src/OBJ.X"
+DECRUNCH_FORWARDS = 1
+SHOW_PROGRESS_DURING_DECRUNCH = 1
+kExoProgressWidth = 10               ; depends on total size, max 38
+         !src  "../common/src/exodecrunch.a"
+
+start
+         +INIT_MACHINE
+         jsr   title
+!if * != $9FB3 {
+  !serious "Adjust prelaunch to patch JSR at ", *
+}
+         jsr   decrunch              ; compressed data contains target address
+         jmp   $404B
+
+get_crunched_byte
+         lda   compressed_data
+         inc   get_crunched_byte+1
+         bne   +
+         inc   get_crunched_byte+2
++        rts

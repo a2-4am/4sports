@@ -9,6 +9,7 @@
 - Micro Golf
 - Mu Torere
 - Nine Men's Morris
+- Reversi
 - Rock & Scroll
 - Seega
 - Wari
