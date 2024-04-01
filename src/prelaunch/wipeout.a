@@ -10,6 +10,10 @@
          lda   #$4C
          sta   $356C
          jsr   $800
+         lda   #$EA
+         sta   $4052                 ; skip MACHID checks
+         lda   #$00
+         sta   $405D
          +DISABLE_ACCEL
          +RESET_VECTOR $100
          jmp   $356F
