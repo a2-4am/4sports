@@ -1,0 +1,19 @@
+;license:MIT
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/ROCK.N.SCROLL",plain
+*=$106
+
+    !source "src/prelaunch/common.a"
+
+         +ENABLE_ACCEL
+         lda   #$4C
+         sta   $B55F
+         jsr   $8000
+         +DISABLE_ACCEL
+         +RESET_VECTOR $100
+         jmp   $B562
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}
