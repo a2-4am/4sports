@@ -1,0 +1,3 @@
+OBJ contains $0800..$70FF then $0400..$07FF
+entry point is $4000
+?might need to JSR $1603 before jumping to $4000?

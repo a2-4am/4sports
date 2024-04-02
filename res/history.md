@@ -5,6 +5,7 @@
 ### New games
 
 - Fox & Geese
+- Hi-Res Football
 - Kono
 - Micro Golf
 - Mu Torere
