@@ -1,0 +1,36 @@
+!cpu 6502
+*=$9000
+!to "build/HIRES.SOCCER#069000",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         jmp   start
+
+compressed_data
+         !bin  "src/BANNER.X"
+         !bin  "src/OBJ.X"
+DECRUNCH_FORWARDS = 1
+SHOW_PROGRESS_DURING_DECRUNCH = 0
+         !src  "../common/src/exodecrunch.a"
+
+start
+         +INIT_MACHINE
+         jsr   decrunch              ; decompress title screen at $2000
+         jsr   ROM_TEXT              ; game expects current VTAB to be at bottom
+         bit   GFXMODE
+         bit   PAGE1
+         bit   HIRES
+         bit   FULLGFX
+!if * != $BC4D {
+  !serious "Adjust prelaunch to patch JSR at ", *
+}
+         jsr   decrunch              ; decompress game code at $4000
+         jmp   $4000
+
+get_crunched_byte
+         lda   compressed_data
+         inc   get_crunched_byte+1
+         bne   +
+         inc   get_crunched_byte+2
++        rts

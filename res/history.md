@@ -6,6 +6,7 @@
 
 - Fox & Geese
 - Hi-Res Football
+- Hi-Res Soccer
 - Kono
 - Micro Golf
 - Mu Torere
