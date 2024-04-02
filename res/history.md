@@ -9,6 +9,7 @@
 - Hi-Res Soccer
 - Kono
 - Micro Golf
+- MicroChess
 - Mu Torere
 - Nine Men's Morris
 - Reversi

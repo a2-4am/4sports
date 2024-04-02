@@ -1,0 +1,61 @@
+!cpu 6502
+*=$8000
+!to "build/MICROCHESS#068000",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         jmp   start
+
+credits
+         !bin  "src/CREDITS"
+compressed_data
+         !bin  "src/OBJ.X"
+DECRUNCH_FORWARDS = 1
+SHOW_PROGRESS_DURING_DECRUNCH = 0
+         !src  "../common/src/exodecrunch.a"
+
+start
+         +INIT_MACHINE
+         ldy   #$00                  ; code from original game
+@loop    lda   credits, y
+         bmi   @print
+         sta   $24
+         bpl   @next                 ; always branches
+@print   sty   $F4
+         jsr   ROM_COUT1
+         ldy   $F4
+@next    iny
+         bne   @loop
+!if * != $9667 {
+  !serious "Adjust prelaunch to patch JSR at ", *
+}
+         jsr   decrunch              ; compressed data contains target address
+         bit   GFXMODE
+         bit   PAGE1
+         bit   HIRES
+         bit   FULLGFX
+         lda   #$02
+         sta   $F1
+         lda   #$08
+         sta   $F3
+         ldy   #$00
+         sty   $F0
+         sty   $F2
+-        lda   ($F2), y
+         sta   ($F0), y
+         iny
+         bne   -
+         inc   $F1
+         inc   $F3
+         lda   $F1
+         cmp   #$20
+         bne   -
+         jmp   $600
+
+get_crunched_byte
+         lda   compressed_data
+         inc   get_crunched_byte+1
+         bne   +
+         inc   get_crunched_byte+2
++        rts

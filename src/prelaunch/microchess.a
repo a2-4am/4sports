@@ -1,0 +1,19 @@
+;license:MIT
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/MICROCHESS",plain
+*=$106
+
+    !source "src/prelaunch/common.a"
+
+         +ENABLE_ACCEL
+         lda   #$4C
+         sta   $9667
+         jsr   $8000
+         +DISABLE_ACCEL
+         ; can not set reset vector because game stores data there
+         jmp   $966A
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}

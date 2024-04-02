@@ -51,6 +51,7 @@ ROM_CLREOL_FROM_Y         = $FC9E
 ROM_WAIT                  = $FCA8
 ROM_KEYIN                 = $FD1B
 ROM_COUT                  = $FDED
+ROM_COUT1                 = $FDF0
 ROM_INVERSE               = $FE80    ; INVERSE text
 ROM_NORMAL                = $FE84    ; NORMAL text (instead of INVERSE or FLASH)
 ROM_IN0                   = $FE89    ; SETKBD
