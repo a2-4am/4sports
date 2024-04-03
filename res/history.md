@@ -4,6 +4,7 @@
 
 ### New games
 
+- Checkers
 - Fox & Geese
 - Hi-Res Football
 - Hi-Res Soccer

@@ -1,0 +1,1 @@
+OBJ contains $0800..$5FFF, then $0200..$02FF

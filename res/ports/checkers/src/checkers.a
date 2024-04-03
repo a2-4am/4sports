@@ -1,0 +1,48 @@
+!cpu 6502
+*=$8000
+!to "build/CHECKERS#068000",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         jmp   start
+
+compressed_data
+         !bin "src/OBJ.X"
+DECRUNCH_FORWARDS = 1
+SHOW_PROGRESS_DURING_DECRUNCH = 0
+         !src  "../common/src/exodecrunch.a"
+
+start
+         +INIT_MACHINE
+!if * != $B8B4 {
+  !serious "Adjust prelaunch to patch JSR at ", *
+}
+         jsr   decrunch              ; compressed data contains target address
+         bit   GFXMODE
+         bit   PAGE2
+         bit   HIRES
+         bit   MIXEDGFX
+         ldy   #$00
+-        lda   $6000, y
+         sta   $0200, y
+         iny
+         bne   -
+         lda   #$C2                  ; set in original bootloader, checked in-game
+         sta   $24
+         lda   #$00                  ; wait loop from original game
+         ldx   #$18
+@wait    jsr   ROM_WAIT
+         dex
+         bmi   @exit
+         bit   KBD
+         bpl   @wait
+@exit    bit   CLEARKBD
+         jmp   $3B6C
+
+get_crunched_byte
+         lda   compressed_data
+         inc   get_crunched_byte+1
+         bne   +
+         inc   get_crunched_byte+2
++        rts
