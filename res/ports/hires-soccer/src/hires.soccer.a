@@ -10,7 +10,7 @@
 compressed_data
          !bin  "src/BANNER.X"
          !bin  "src/OBJ.X"
-DECRUNCH_FORWARDS = 1
+FORWARD_DECRUNCHING = 1
 SHOW_PROGRESS_DURING_DECRUNCH = 0
          !src  "../common/src/exodecrunch.a"
 

@@ -42,6 +42,7 @@ MIXEDGFX                  = $C053
 PAGE1                     = $C054    ; page 1 (affects text, HGR, DHGR)
 PAGE2                     = $C055    ; page 2 (affects text, HGR, DHGR)
 HIRES                     = $C057
+AUXMOVE                   = $C311
 ROM_TEXT                  = $FB2F
 ROM_FINALIZE_RESET        = $FB6F
 ROM_MACHINEID             = $FBB3

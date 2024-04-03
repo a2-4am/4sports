@@ -13,6 +13,7 @@
 - MicroChess
 - Mu Torere
 - Nine Men's Morris
+- Pay Day
 - Reversi
 - Rock & Scroll
 - Seega

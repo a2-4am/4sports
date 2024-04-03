@@ -1,0 +1,33 @@
+WINDOWS is $3908/$8A01 (compressed/decompressed)
+  can be decompressed to anywhere because it immediately gets moved to auxmem ($800+, $4000+)
+  (code for this is in LD.SYSTEM)
+  *must* be decompressed backwards because there literally isn't room to fit both ($C309) in mainmem
+
+PAYDAY is $30CC/$7616
+  decompressed to $4000/main
+  loads PAYINTRO (title screen) then PAYINTRO2 (credits code) then BOARD (game screen)
+
+XXXXX PAYINTRO is $13CB/$3FF8
+XXXXX   is DHGR title screen, could be rearranged so mainmem data is first, then
+XXXXX   decompressed into $2000-$5FF8 then copy $4000/main to $2000/aux
+XXXXX   but this would have to happen before loading PAYDAY
+
+PAYINTRO2 displays secondary title/credits screen with resume prompt
+
+BOARD is DHGR screen of game board, loaded once at start of game
+
+no disk access once game starts (unless you save)
+
+after end of game, jumps to $4000 (code from PAYDAY, still in place)
+  to reload and redisplay title screen
+
+so PAYDAY is persistent in mainmem, WINDOWS is persistent in auxmem,
+and everything else is transient and reloaded
+
+LD.SYSTEM is loaded by ProDOS during boot but never reloaded,
+can be named anything.SYSTEM
+
+idea: WINDOWS.X and PAYDAY.X can both fit in mainmem at the same time,
+could potentially copy compressed WINDOWS.X to auxmem and duplicate
+exodecrunch in auxmem, then decompress directly into auxmem
+(would require either no progress bar or bank switching during progress update)

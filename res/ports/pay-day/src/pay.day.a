@@ -1,0 +1,84 @@
+!cpu 6502
+*=$0800
+!to "build/PAY.DAY#060800",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         +INIT_MACHINE
+         jsr   decrunch              ; decompress code to go into auxmem (originally WINDOWS file)
+         lda   #$00                  ; move code from original game (LD.SYSTEM)
+         sta   $3C
+         lda   #$30
+         sta   $3D
+         lda   #$00
+         sta   $42
+         lda   #$08
+         sta   $43
+         lda   #$1C
+         sta   $3E
+         lda   #$47
+         sta   $3F
+         sec
+         jsr   AUXMOVE
+         lda   #$1D
+         sta   $3C
+         lda   #$47
+         sta   $3D
+         lda   #$00
+         sta   $42
+         lda   #$40
+         sta   $43
+         lda   #$1C
+         sta   $3E
+         lda   #$BA
+         sta   $3F
+         sec
+         jsr   AUXMOVE
+
+         +READ_ENTIRE_FILE parm_obj_x_open, parm_obj_x_read
+         lda   #$D4
+         sta   _byte_lo
+         lda   #$50
+         sta   _byte_hi
+         jsr   decrunch_no_reset_progress
+
+!if * != $879 {
+  !serious "Adjust prelaunch to patch JSR at ", *
+}
+         jmp   $4000
+
+parm_obj_x_open
+         !byte 3
+         !word filename
+         !word $1C00
+         !byte 0
+
+parm_obj_x_read
+         !byte 4
+         !byte 1
+         !word $2000
+         !word $FFFF
+         !word 0
+
+filename
+         !text 5,"OBJ.X"
+
+get_crunched_byte
+         lda   _byte_lo
+         bne   +
+         dec   _byte_hi
++        dec   _byte_lo
+_byte_lo = * + 1
+_byte_hi = * + 2
+         lda   end_of_compressed_data
+         rts
+
+FORWARD_DECRUNCHING = 0
+SHOW_PROGRESS_DURING_DECRUNCH = 1
+kExoProgressWidth = 24               ; depends on total size, max 38
+         !src  "../common/src/exodecrunch.a"
+
+compressed_data
+         !bin  "src/AUXOBJ.X"
+end_of_compressed_data

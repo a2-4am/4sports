@@ -9,7 +9,7 @@
 
 compressed_data
          !bin "src/OBJ.X"
-DECRUNCH_FORWARDS = 1
+FORWARD_DECRUNCHING = 1
 SHOW_PROGRESS_DURING_DECRUNCH = 1
 kExoProgressWidth = 14               ; depends on total size, max 38
          !src  "../common/src/exodecrunch.a"
