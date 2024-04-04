@@ -7,6 +7,7 @@
 - Advance to Boardwalk
 - Checkers
 - Fox & Geese
+- Go
 - Hi-Res Football
 - Hi-Res Soccer
 - Kono
