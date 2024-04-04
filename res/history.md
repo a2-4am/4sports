@@ -13,6 +13,7 @@
 - Kono
 - Micro Golf
 - MicroChess
+- Million Perfect Letters
 - Mu Torere
 - Nine Men's Morris
 - Pay Day
