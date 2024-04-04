@@ -4,6 +4,7 @@
 
 ### New games
 
+- Advance to Boardwalk
 - Checkers
 - Fox & Geese
 - Hi-Res Football

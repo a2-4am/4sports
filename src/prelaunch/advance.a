@@ -1,0 +1,19 @@
+;license:MIT
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/ADVANCE",plain
+*=$106
+
+    !source "src/prelaunch/common.a"
+
+         +ENABLE_ACCEL
+         lda   #$4C
+         sta   $211F
+         jsr   $2100
+         +DISABLE_ACCEL
+         +RESET_VECTOR $100
+         jmp   $2122
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}

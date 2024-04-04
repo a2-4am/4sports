@@ -1,0 +1,32 @@
+!cpu 6502
+*=$2100
+!to "build/ADVANCE#062100",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         +INIT_MACHINE
+         jsr   decrunch
+
+!if * != $211F {
+  !serious "Adjust prelaunch to patch JSR at ", *
+}
+         jmp   $4000
+
+get_crunched_byte
+         lda   _byte_lo
+         bne   +
+         dec   _byte_hi
++        dec   _byte_lo
+_byte_lo = * + 1
+_byte_hi = * + 2
+         lda   end_of_compressed_data
+         rts
+
+FORWARD_DECRUNCHING = 0
+SHOW_PROGRESS_DURING_DECRUNCH = 1
+kExoProgressWidth = 12               ; depends on total size, max 38
+         !src  "../common/src/exodecrunch.a"
+
+         !bin  "src/OBJ.X"
+end_of_compressed_data
