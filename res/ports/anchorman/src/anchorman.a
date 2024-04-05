@@ -1,0 +1,46 @@
+!cpu 6502
+*=$4800
+!to "build/ANCHORMAN#064800",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         +INIT_MACHINE
+         jsr   decrunch              ; decompress auxmem data into $800/main first
+         +COPY_TO_AUXMEM $800, $2FFF, $6000
+         dec   ExoProgressPtr+1
+         dec   ExoProgressPtr+1
+         dec   ExoProgressPtr+1
+         dec   ExoProgressPtr+1
+         dec   ExoProgressPtr+1
+         jsr   decrunch_no_reset_progress ; decompress more data into $800/main
+         dec   ExoProgressPtr+1
+         dec   ExoProgressPtr+1
+         dec   ExoProgressPtr+1
+         dec   ExoProgressPtr+1
+         jsr   decrunch_no_reset_progress ; decompress more data into $6000/main
+
+!if * != $485C {
+  !serious "Adjust prelaunch to patch JSR at ", *
+}
+         jmp   $AEE0
+
+get_crunched_byte
+         lda   _byte_lo
+         bne   +
+         dec   _byte_hi
++        dec   _byte_lo
+_byte_lo = * + 1
+_byte_hi = * + 2
+         lda   end_of_compressed_data
+         rts
+
+FORWARD_DECRUNCHING = 0
+SHOW_PROGRESS_DURING_DECRUNCH = 1
+kExoProgressWidth = 33               ; depends on total size, max 38
+         !src  "../common/src/exodecrunch.a"
+
+         !bin  "src/OBJ.6000.B8FF.X"
+         !bin  "src/OBJ.0800.47FF.X"
+         !bin  "src/AUXOBJ.6000.87FF.X"
+end_of_compressed_data

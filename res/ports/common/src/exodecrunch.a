@@ -162,14 +162,14 @@ decrunch:
 !IF SHOW_PROGRESS_DURING_DECRUNCH = 1 {
          ldx   #(kExoProgressWidth+2)
          lda   #$DF
--        sta   $0528+(20-(kExoProgressWidth/2))-1, x
-         sta   $05A8+(20-(kExoProgressWidth/2))-1, x
+-        sta   $0528+(20-(kExoProgressWidth/2))-2, x
+         sta   $05A8+(20-(kExoProgressWidth/2))-2, x
          dex
          bpl   -
          lda   #$20
-         sta   $05A8+(20-(kExoProgressWidth/2))-1
-         sta   $05A8+(20-(kExoProgressWidth/2))+kExoProgressWidth+1
-         lda   #$A8+(20-(kExoProgressWidth/2))
+         sta   $05A8+(20-(kExoProgressWidth/2))-2
+         sta   $05A8+(20-(kExoProgressWidth/2))+kExoProgressWidth
+         lda   #$A8+(20-(kExoProgressWidth/2))-1
          sta   ExoProgressPtr+1
 decrunch_no_reset_progress:
 }

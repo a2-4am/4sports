@@ -36,3 +36,20 @@
 +        !byte 1
          !byte 0
 }
+
+!macro COPY_TO_AUXMEM .mainstart, .mainend, .auxstart {
+         lda   #<.mainstart
+         sta   $3C
+         lda   #>.mainstart
+         sta   $3D
+         lda   #<.mainend
+         sta   $3E
+         lda   #>.mainend
+         sta   $3F
+         lda   #<.auxstart
+         sta   $42
+         lda   #>.auxstart
+         sta   $43
+         sec
+         jsr   AUXMOVE
+}

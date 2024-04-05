@@ -5,6 +5,7 @@
 ### New games
 
 - Advance to Boardwalk
+- Anchorman
 - Checkers
 - Fox & Geese
 - Go

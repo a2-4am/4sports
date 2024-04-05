@@ -1,0 +1,29 @@
+requires 128K even though single hi-res
+
+- SYSTEM file -> $2000..$47FF/main
+jumps to $3000 then loads from disk into mainmem:
+- ANCHB4FTO67 -> $9F00..$B8FF/main
+- ANCHB76     -> $9600..$9FFF/main (slight overlap)
+- ANCHB2      -> $2000..$2FFF/main (clobbers part of SYSTEM file)
+- ANCHB3      -> $0800..$13FF/main
+- ANCHB4      -> $1400..$1FFF/main
+
+ends up with $0800..$47FF/main and $9600..$B8FF/main
+
+then calls $3100 to move to auxmem
+- $2000..$2FFF/main to $6000..$6FFF/aux
+- $0800..$1FFF/main to $7000..$87FF/aux
+
+ends up with $3000..$47FF/main, $9600..$B8FF/main, and $6000..$87FF/aux
+
+then jumps to $3180 to load more from disk into mainmem
+- ANCHB8TO20  -> $0800..$1FFF
+- ANCHB6      -> $6000..$6FFF
+- ANCHB7      -> $7000..$7FFF
+- B80T96      -> $8000..$95FF
+
+ends up with $0800..$47FF/main, $6000..$B8FF/main, and $6000..$87FF/aux
+
+do not need to call $A58A at all (is all protection-related, already disabled)
+
+game entry point is $AEE0
