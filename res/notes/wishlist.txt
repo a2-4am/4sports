@@ -67,24 +67,34 @@ Trick Shot (IDSI)
 World Class Leader Board (Access Software)
 World Series Baseball
 
-//idea:game shows (TODO consolidate any that are the same just different publishers)
-Card Sharks [DHGR]
-Classic Concentration [DHGR] (+ Second Edition, New Second Edition)
-Double Dare
-Family Feud (+ All New Family Feud [DHGR])
-Fun House
-High Rollers
-Hollywood Squares
-Jeopardy (+ First Edition, 25th Anniversary Edition, Junior Edition, New Junior Edition, Second Edition, New Second Edition, Sports Edition, New Sports Edition)
-Press Your Luck [DHGR]
-Remote Control
-Super Password [DHGR]
-The $100,000 Pyramid [DHGR]
-The Price is Right
-Wheel of Fortune [DHGR] (+ Second Edition, New Second Edition, Third Edition, Golden Edition)
-Win, Lose, or Draw [DHGR] (+ Junior Edition, Second Edition)
+//idea:game shows
+Card Sharks [DHGR][128K]
+Classic Concentration (+ New Second Edition) [DHGR][128K]
+Double Dare [HGR][64K]
+Family Feud [HGR][64K]
+All New Family Feud [DHGR][128K]
+Fun House [HGR-but-128K][ProDOS]
+High Rollers [64K but uses lowercase text]
+Hollywood Squares [64K][ProDOS]
+Jeopardy First Edition (+ Second Edition, Sports Edition, 25th Anniversary Edition, Junior Edition) [HGR][64K]
+Press Your Luck [DHGR][128K]
+Remote Control [HGR-but-128K]
+Super Password [DHGR][128K]
+The $100,000 Pyramid [HGR][48K]
+The Price is Right [HGR][64K]
+Wheel of Fortune First Edition (+ Second Edition, Third Edition, Golden Edition) [DHGR][128K]
+Win, Lose, or Draw (+ Second Edition, Junior Edition) [DHGR][128K] (Junior Edition is HGR-but-128K)
 
-//idea:Bez collection (these are in woz-a-day)
+//idea:Bez collection
+Nimwit
+Place Ball
+Slide Glide
+Magnet Madness
+Zig Zag Flag Shag
+Fuelish Future
+Mix Matcher
+Lumber Jack Crash
+Jump Pit
 Weights and Treasure [has construction kit]
 Brain Machine [has construction kit]
 
