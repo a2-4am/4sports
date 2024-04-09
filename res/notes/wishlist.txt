@@ -88,7 +88,6 @@ Win, Lose, or Draw (+ Second Edition, Junior Edition) [DHGR][128K] (Junior Editi
 //idea:Bez collection
 Place Ball
 Slide Glide
-Magnet Madness
 Zig Zag Flag Shag
 Fuelish Future
 Mix Matcher

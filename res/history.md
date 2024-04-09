@@ -12,6 +12,7 @@
 - Hi-Res Football
 - Hi-Res Soccer
 - Kono
+- Magnet Madness
 - Micro Golf
 - MicroChess
 - Million Perfect Letters
