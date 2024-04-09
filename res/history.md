@@ -16,6 +16,7 @@
 - MicroChess
 - Million Perfect Letters
 - Mu Torere
+- Nimwit
 - Nine Men's Morris
 - Pay Day
 - Reversi
