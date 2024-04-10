@@ -16,6 +16,7 @@
 - Micro Golf
 - MicroChess
 - Million Perfect Letters
+- Mix Matcher
 - Mu Torere
 - Nimwit
 - Nine Men's Morris
