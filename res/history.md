@@ -11,6 +11,7 @@
 - Go
 - Hi-Res Football
 - Hi-Res Soccer
+- Jump Pit
 - Kono
 - Magnet Madness
 - Micro Golf
