@@ -16,29 +16,30 @@ skiing (2)
 wrestling (3)
 
 //to port
-3-D Skiing (Continential Software)
-Championship Golf [4am crack]
-Colossus Chess IV (Firebird)
-Competition Karate
-Chess 7.0 (Odesta)
-Chuck Yeager's Advanced Flight Simulator [priority]
-Dave Winfield's Batter Up [4am crack]
-Earl Weaver Baseball
-F-15 Strike Eagle
-Fathom's 40 [4am crack]
-Fore! [4am crack]
+3-D Skiing (Continential Software) [needs-crack][48K]
+Championship Golf [4am crack][48K]
+Colossus Chess IV (Firebird) [needs-crack][48K][supports-data-disk]
+Competition Karate [needs-crack][48K][supports-data-disk]
+Chess 7.0 (Odesta) [needs-crack][48K][supports-data-disk]
+Chuck Yeager's Advanced Flight Simulator [needs-crack][priority]
+Dave Winfield's Batter Up [4am crack][64K]
+Earl Weaver Baseball [needs-crack][HGR-but-128K]
+F-15 Strike Eagle v1.4 [san inc crack][64K]
+Fathom's 40 [4am crack][48K]
+Fore! [4am crack][48K]
 Golf Course (Main Street Publishing)
 Golf's Best
-GFL Championship Football [4am crack]
+GFL Championship Football [4am crack][64K]
 Hi-Res Computer Golf [4am crack]
 Hi-Res Computer Golf 2
-Jet [priority]
+Jet [priority][64K][supports-data-disk]
 Joe Thiesmann's Pro Football [4am crack]
 John Elway's Quarterback
 John Madden Football
 Ken Uston's Professional Blackjack (latest version is 1.23?) [4am crack]
 Maxi Golf
 Micro League Baseball (1984 version, not 1980)
+Odin (Odesta) [needs-crack][48K]
 Olympic Decathlon
 Pro Football (Systems Design Lab)
 Pro Golf (Home-Computer Software)
@@ -46,9 +47,9 @@ Professional Tour Golf [4am crack]
 Pure Stat Baseball
 Pure Stat College Basketball
 Ringside Seat (SSI)
-Sargon III (Spinnaker)
+Sargon III (Spinnaker) [supports-data-disk]
 Sierra Championship Boxing [4am crack]
-Silent Service
+Silent Service [64K]
 Sports Spectacular (Keypunch) [unprotected]
 Star League Baseball
 Star Rank Boxing II [4am crack]
@@ -63,7 +64,8 @@ The Sporting News Baseball [DHGR][4am crack][priority]
 The World's Greatest Baseball Game (Enhanced Version) [4am crack]
 The World's Greatest Football Game [4am crack]
 Top Fuel Eliminator (Activision)
-Trick Shot (IDSI)
+Trick Shot (IDSI) [needs-crack][supports-data-disk]
+Ultracheckers (Malibu Microcomputing) [needs-crack]
 World Class Leader Board (Access Software)
 World Series Baseball
 
