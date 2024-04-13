@@ -1,0 +1,24 @@
+original uses 6 external files for puzzle data
+named PUZZLE01 .. PUZZLE06
+
+$5100 JSR $1015
+
+$1015 JMP $1127
+
+$1127 JSR $11BC
+
+$11BC gets number of next puzzle to load
+and converts it to ASCII and modifies the filename in situ
+(starts at $12B4, only digit that changes is at $12BC
+although code can handle more than 9 if necessary)
+
+$112A uses ProDOS MLI to open the now-properly-named file
+then execution continues at $1138 if no error on open
+
+$1138 sets length ($200) and address ($6A00)
+then continues to $11E2
+
+$11E2 reads and closes the file
+
+game code includes first (tutorial) level, so the first
+disk access isn't until after you solve that, to load PUZZLE01
