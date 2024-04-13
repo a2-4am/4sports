@@ -1,0 +1,23 @@
+
+   Fill the board with colored tiles
+
+
+           mouse or keyboard
+
+
+                        B to place blue
+  I          
+J   K  or  <   >  then  W to place white
+  M          
+                        Space to cycle
+
+
+
+H* * * * * * * * * * * * * *display hint
+
+Ctrl-R * * * * * * * * * * restart level
+
+Ctrl-S * * * * * * * * * * *toggle sound
+
+Esc* * * * * * * * * * * * * *quit level
+[eof]
