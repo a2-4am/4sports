@@ -17,6 +17,7 @@
 - Micro Golf
 - MicroChess
 - Million Perfect Letters
+- Million Perfect Tiles
 - Mix Matcher
 - Mu Torere
 - Nimwit
