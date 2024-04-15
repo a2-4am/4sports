@@ -1,0 +1,76 @@
+!cpu 6502
+*=$8000
+!to "build/ZZFS#068000",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         jmp   start
+
+compressed_data
+         !bin "src/OBJ1.X"
+         !bin "src/OBJ2.X"
+FORWARD_DECRUNCHING = 1
+SHOW_PROGRESS_DURING_DECRUNCH = 1
+kExoProgressWidth = 7               ; depends on total size, max 38
+         !src  "../common/src/exodecrunch.a"
+
+start
+         +INIT_MACHINE
+         jsr   decrunch              ; compressed data contains target address
+         bit   GFXMODE
+         bit   PAGE1
+         bit   HIRES
+         bit   FULLGFX
+         jsr   decrunch_no_reset_progress
+         ldx   #$0C
+         ldy   #$00
+@a       lda   $9000, y
+@b       sta   $A200, y
+         iny
+         bne   @a
+         inc   @a+2
+         inc   @b+2
+         dex
+         bne   @a
+         lda   #<load_level
+         sta   $514A
+         lda   #>load_level
+         sta   $514B
+!if * != $B9DF {
+  !serious "Adjust prelaunch to patch JSR at ", *
+}
+         jsr   $900
+         bit   CLEARKBD
+         jsr   PRODOS_MLI
+         !byte CMD_QUIT
+         !word +
++        !byte 4
+
+get_crunched_byte
+         lda   compressed_data
+         inc   get_crunched_byte+1
+         bne   +
+         inc   get_crunched_byte+2
++        rts
+
+load_level
+         jsr   $11BC                 ; use game code to get # of next level
+         and   #$0F
+         asl
+         clc
+         adc   #$A0                  ; calculate where we stored that level data ($A200+)
+         sta   @a+2
+         lda   #$6A
+         sta   @b+2
+         ldx   #$02
+         ldy   #$00
+@a       lda   $FD00, y              ; SMC
+@b       sta   $6A00, y              ; SMC
+         iny
+         bne   @a
+         inc   @a+2
+         inc   @b+2
+         dex
+         bne   @a
+         rts

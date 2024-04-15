@@ -1,0 +1,4 @@
+same PUZZLE01..06 system as Place Ball
+$5149 JSR $1015 -> JMP $1127 -> JSR $11BC to determine next level name
+then loads from PUZZLE* file into $6A00 ($200 bytes each)
+

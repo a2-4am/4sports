@@ -29,6 +29,7 @@
 - Seega
 - Wari
 - Wipeout
+- Zig Zag Flag Shag
 
 ## Revision 1.0-alpha.3 / 20231114
 
