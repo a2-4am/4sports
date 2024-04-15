@@ -23,6 +23,7 @@
 - Nimwit
 - Nine Men's Morris
 - Pay Day
+- Place Ball
 - Reversi
 - Rock & Scroll
 - Seega

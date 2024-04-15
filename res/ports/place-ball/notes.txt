@@ -22,3 +22,13 @@ $11E2 reads and closes the file
 
 game code includes first (tutorial) level, so the first
 disk access isn't until after you solve that, to load PUZZLE01
+
+-=-=-
+
+OBJ1 contains $900..$3FFF (initial title screen, originally packed)
+OBJ2 contains $5000..$8FFF + PUZZLE01 + PUZZLE02 + ... + PUZZLE06
+
+must move puzzles up because game uses $9000+ (until maybe $95FF?)
+but there's plenty of room in higher memory because the original
+assumes BASIC.SYSTEM remains in memory so it couldn't be touching
+anything beyond $9600
