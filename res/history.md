@@ -7,6 +7,7 @@
 - Advance to Boardwalk
 - Anchorman
 - Checkers
+- Chuck Yeager's Advanced Flight Trainer
 - Fox & Geese
 - Go
 - Hi-Res Football
