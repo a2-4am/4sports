@@ -1,0 +1,18 @@
+;license:MIT
+;(c) 2024 by qkumba
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/CHUCK.YEAGER",plain
+*=$106
+
+    !source "src/prelaunch/common.a"
+
+         lda   #$60
+         sta   $865
+         jsr   $800       ; decompress
+         +LC_REBOOT
+         jmp   $6004
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}
