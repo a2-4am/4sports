@@ -23,12 +23,12 @@ Competition Karate [needs-crack][48K][supports-data-disk]
 Chess 7.0 (Odesta) [needs-crack][48K][supports-data-disk]
 Dave Winfield's Batter Up [4am crack][64K]
 Earl Weaver Baseball [needs-crack][HGR-but-128K]
-F-15 Strike Eagle v1.4 [san inc crack][64K]
+F-15 Strike Eagle v1.4 [san inc crack][64K][priority]
 Fathom's 40 [4am crack][48K]
 Fore! [4am crack][48K]
 Golf Course (Main Street Publishing)
 Golf's Best
-GFL Championship Football [4am crack][64K]
+GFL Championship Football [4am crack][64K][priority]
 Hi-Res Computer Golf [4am crack]
 Hi-Res Computer Golf 2
 Jet [priority][64K][supports-data-disk]
@@ -69,18 +69,18 @@ World Class Leader Board (Access Software)
 World Series Baseball
 
 //idea:game shows
-Card Sharks [DHGR][128K]
+Card Sharks [DHGR][128K][priority]
 Classic Concentration (+ New Second Edition) [DHGR][128K]
 Double Dare [HGR][64K]
 Family Feud [HGR][64K]
-All New Family Feud [DHGR][128K]
+All New Family Feud [DHGR][128K][priority]
 Fun House [HGR-but-128K][ProDOS]
 High Rollers [64K but uses lowercase text]
 Hollywood Squares [64K][ProDOS]
 Jeopardy First Edition (+ Second Edition, Sports Edition, 25th Anniversary Edition, Junior Edition) [HGR][64K]
-Press Your Luck [DHGR][128K]
+Press Your Luck [DHGR][128K][priority]
 Remote Control [HGR-but-128K]
-Super Password [DHGR][128K]
+Super Password [DHGR][128K][priority]
 The $100,000 Pyramid [HGR][48K]
 The Price is Right [HGR][64K]
 Wheel of Fortune First Edition (+ Second Edition, Third Edition, Golden Edition) [DHGR][128K]
@@ -95,6 +95,7 @@ Brain Machine [has construction kit]
 
 //idea:board games
 A Question of Scruples
+Candy Land [DHGR][128K][priority]
 Clue
 Risk v1.4
 Monty Plays Scrabble v4
