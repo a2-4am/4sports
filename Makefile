@@ -69,10 +69,20 @@ dsk: index asmproboot asmlauncher extract
 	done
 	bin/changebootloader.sh build/"$(DISK)" build/proboothd
 
-extract: preconditions md
+gamesconf: preconditions md
+#
+# create a version of GAMES.CONF without comments or blank lines or anything after display titles
+#
+	[ -f build/index ] || (awk '!/^$$|^#/' < res/GAMES.CONF | awk -F'/' '{ print $$1 }' > build/GAMES.CONF)
+#
+# create a list of all game filenames, without metadata or display names, sorted by game filename
+#
+	[ -f build/index ] || (awk -F, '/,/ { print $$2 }' < build/GAMES.CONF | awk -F= '{ print $$1 }' | sort > build/GAMES.SORTED)
+
+extract: preconditions md gamesconf
 	$(PARALLEL) '$(CADIUS) EXTRACTVOLUME {} build/X/ >>build/log' ::: res/dsk/*.po
 	rm -f build/X/**/.DS_Store build/X/**/PRODOS* build/X/**/LOADER.SYSTEM*
-	for f in $$(grep '^....1' res/GAMES.CONF | awk '!/^$$|^#/' | awk -F, '/,/ { print $$2 }' | awk -F= '{ print $$1 }'); do mv build/X/"$$(basename $$f)"/"$$(basename $$f)"* build/X.INDEXED/; rm -rf build/X/"$$(basename $$f)"; done
+	for f in $$(grep '^....1' build/GAMES.CONF | awk '!/^$$|^#/' | awk -F, '/,/ { print $$2 }' | awk -F= '{ print $$1 }'); do mv build/X/"$$(basename $$f)"/"$$(basename $$f)"* build/X.INDEXED/; rm -rf build/X/"$$(basename $$f)"; done
 	(for f in build/X.INDEXED/*; do echo "$$(basename $$f)"; done) | bin/buildindexedfile.sh -a -p build/TOTAL.DATA build/X.INDEXED > build/XSINGLE.IDX
 
 index: preconditions md asmfx asmprelaunch asmdemo compress extract
@@ -87,14 +97,6 @@ index: preconditions md asmfx asmprelaunch asmdemo compress extract
 	[ -f build/index ] || (bin/converthelp.sh res/HELPTEXT build/HELPTEXT)
 	[ -f build/index ] || (bin/converthelp.sh res/CREDITS build/CREDITS)
 	[ -f build/index ] || $(PARALLEL) 'bin/converthelp.sh "{}" "build/GAMEHELP/{/}"' ::: res/GAMEHELP/*
-#
-# create a version of GAMES.CONF without comments or blank lines
-#
-	[ -f build/index ] || (awk '!/^$$|^#/' < res/GAMES.CONF > build/GAMES.CONF)
-#
-# create a list of all game filenames, without metadata or display names, sorted by game filename
-#
-	[ -f build/index ] || (awk -F, '/,/ { print $$2 }' < build/GAMES.CONF | awk -F= '{ print $$1 }' | sort > build/GAMES.SORTED)
 #
 # precompute indexed files for prelaunch
 # note: prelaunch must be first in TOTAL.DATA due to a hack in LoadStandardPrelaunch
@@ -254,12 +256,12 @@ attract: compress
 	bin/check-attract-mode.sh
 	bin/generate-mini-attract-mode.sh
 
-cache: preconditions md
+cache: preconditions md gamesconf
 	$(PARALLEL) ::: \
-	    'awk -F= '"'"'/^00/ { print $$2 }'"'"' < res/GAMES.CONF | bin/buildcache.py > build/cache00.a' \
-	    'awk -F= '"'"'/^0/ { print $$2 }'"'"' < res/GAMES.CONF | bin/buildcache.py > build/cache01.a' \
-	    'awk -F= '"'"'/^.0/ { print $$2 }'"'"' < res/GAMES.CONF | bin/buildcache.py > build/cache10.a' \
-	    'awk -F= '"'"'!/^$$|^#|^\[/ { print $$2 }'"'"' < res/GAMES.CONF | bin/buildcache.py > build/cache11.a'
+	    'awk -F= '"'"'/^00/ { print $$2 }'"'"' < build/GAMES.CONF | bin/buildcache.py > build/cache00.a' \
+	    'awk -F= '"'"'/^0/ { print $$2 }'"'"' < build/GAMES.CONF | bin/buildcache.py > build/cache01.a' \
+	    'awk -F= '"'"'/^.0/ { print $$2 }'"'"' < build/GAMES.CONF | bin/buildcache.py > build/cache10.a' \
+	    'awk -F= '"'"'!/^$$|^#|^\[/ { print $$2 }'"'"' < build/GAMES.CONF | bin/buildcache.py > build/cache11.a'
 	$(PARALLEL) ::: \
 	    '$(ACME) -o res/CACHE00.IDX build/cache00.a' \
 	    '$(ACME) -o res/CACHE01.IDX build/cache01.a' \
