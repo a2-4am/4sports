@@ -1,0 +1,40 @@
+;license:MIT
+;(c) 2024 by qkumba
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/CHAMP.WRESTLE",plain
+*=$106
+
+    !source "src/prelaunch/common.a"
+
+         +ENABLE_ACCEL
+
+         lda   #$60
+         sta   $9DE
+         jsr   $800       ; load "DOS"
+         lda   #$4C
+         sta   $B79C
+         lda   #<callback
+         sta   $B79D
+         lda   #>callback
+         sta   $B79E
+         +DISABLE_ACCEL
+
+         jmp   $B700
+
+callback
+         lda   $B7B3
+         cmp   #8
+         bne   +
+         lda   $B7B4
+         cmp   #6
+         bne   +
+         sta   $8400      ; reset vector to reboot
++
+         ldx   #$ff
+         txs
+         jmp   $B79F
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}
