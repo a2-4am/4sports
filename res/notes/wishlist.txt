@@ -1,19 +1,25 @@
-//categories (counts are approximate)
+//genres (counts are approximate)
 baseball (10)
 basketball (4)
+board (15) [chess, checkers, Go, Reversi]
 boxing (4)
-chess (5)
 compilation (10) [e.g. The Games, Decathlon]
 football (8)
+game show (19)
 golf (12)
 hockey (2)
 karate (4)
 lounge (4) [billiards, shuffleboard, foosball]
 navigator (14) [flight sim, boat sim]
+puzzle (20)
 racing (6)
 soccer (2)
 skiing (2)
 wrestling (3)
+
+//other potential filters
+double hi-res graphics (23)
+Mockingboard support
 
 //to port
 3-D Skiing (Continential Software) [needs-crack][48K]
