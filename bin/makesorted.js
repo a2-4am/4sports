@@ -20,6 +20,13 @@ while (!b.atendofstream)
     break
   }
 
+  e = d.indexOf("/")
+
+  if (e > -1)
+  {
+    d = d.substr(0, e)
+  }
+
   e = d.indexOf("=")
 
   if (e == -1)
