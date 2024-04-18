@@ -8,8 +8,10 @@
 - Anchorman
 - Checkers
 - Chuck Yeager's Advanced Flight Trainer
+- F-15 Strike Eagle
 - Fox & Geese
 - Go
+- GFL Championship Football
 - Hi-Res Football
 - Hi-Res Soccer
 - Jump Pit
@@ -28,6 +30,7 @@
 - Reversi
 - Rock & Scroll
 - Seega
+- The Sporting News Baseball
 - Wari
 - Wipeout
 - Zig Zag Flag Shag
