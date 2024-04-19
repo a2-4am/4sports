@@ -72,7 +72,6 @@ World Class Leader Board (Access Software)
 World Series Baseball
 
 //idea:game shows
-Card Sharks [DHGR][128K][priority]
 Classic Concentration (+ New Second Edition) [DHGR][128K]
 Double Dare [HGR][64K]
 Family Feud [HGR][64K]
