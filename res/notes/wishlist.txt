@@ -75,7 +75,6 @@ World Series Baseball
 Classic Concentration (+ New Second Edition) [DHGR][128K]
 Double Dare [HGR][64K]
 Family Feud [HGR][64K]
-All New Family Feud [DHGR][128K][priority]
 Fun House [HGR-but-128K][ProDOS]
 High Rollers [64K but uses lowercase text]
 Hollywood Squares [64K][ProDOS]
