@@ -28,7 +28,7 @@ Colossus Chess IV (Firebird) [needs-crack][48K][supports-data-disk]
 Competition Karate [needs-crack][48K][supports-data-disk]
 Chess 7.0 (Odesta) [needs-crack][48K][supports-data-disk]
 Dave Winfield's Batter Up [4am crack][64K]
-Earl Weaver Baseball [needs-crack][HGR-but-128K]
+Earl Weaver Baseball [needs-crack][HGR-but-128K][priority]
 Fathom's 40 [4am crack][48K]
 Fore! [4am crack][48K]
 Golf Course (Main Street Publishing)
@@ -43,7 +43,7 @@ Ken Uston's Professional Blackjack (latest version is 1.23?) [4am crack]
 Maxi Golf
 Micro League Baseball (1984 version, not 1980)
 Odin (Odesta) [needs-crack][48K]
-Olympic Decathlon
+Olympic Decathlon [priority]
 Pro Football (Systems Design Lab)
 Pro Golf (Home-Computer Software)
 Professional Tour Golf [4am crack]
@@ -51,18 +51,18 @@ Pure Stat Baseball
 Pure Stat College Basketball
 Ringside Seat (SSI)
 Sargon III (Spinnaker) [supports-data-disk]
-Sierra Championship Boxing [4am crack]
-Silent Service [64K]
+Sierra Championship Boxing [4am crack][priority]
+Silent Service [64K][priority]
 Sports Spectacular (Keypunch) [unprotected]
 Star League Baseball
-Star Rank Boxing II [4am crack]
+Star Rank Boxing II [4am crack][priority]
 Sub Battle Simulator [4am crack]
 Super Sunday [4am crack]
-Superstar Indoor Sports
+Superstar Indoor Sports [priority]
 Techo-Sport Racing (K-Tek) [Tom Greene]
 Tennis (Softdisk) [unprotected]
 Tuesday Morning Quarterback [4am crack]
-The Fidelity Chessmaster 2100 (Software Toolworks)
+The Fidelity Chessmaster 2100 (Software Toolworks) [priority]
 The World's Greatest Baseball Game (Enhanced Version) [4am crack]
 The World's Greatest Football Game [4am crack]
 Top Fuel Eliminator (Activision)
