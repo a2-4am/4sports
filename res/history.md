@@ -6,6 +6,7 @@
 
 - Advance to Boardwalk
 - Anchorman
+- Card Sharks
 - Checkers
 - Chuck Yeager's Advanced Flight Trainer
 - F-15 Strike Eagle
@@ -27,6 +28,7 @@
 - Nine Men's Morris
 - Pay Day
 - Place Ball
+- Press Your Luck
 - Reversi
 - Rock & Scroll
 - Seega
