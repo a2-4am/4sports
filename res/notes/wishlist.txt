@@ -51,7 +51,6 @@ Pure Stat Baseball
 Pure Stat College Basketball
 Ringside Seat (SSI)
 Sargon III (Spinnaker) [supports-data-disk]
-Silent Service [64K][priority]
 Sports Spectacular (Keypunch) [unprotected]
 Star League Baseball
 Star Rank Boxing II [4am crack][priority]
