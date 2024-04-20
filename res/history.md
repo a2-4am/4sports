@@ -33,6 +33,7 @@
 - Reversi
 - Rock & Scroll
 - Seega
+- Sierra Championship Boxing
 - Super Password
 - The Sporting News Baseball
 - Wari
