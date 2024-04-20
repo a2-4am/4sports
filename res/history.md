@@ -5,6 +5,7 @@
 ### New games
 
 - Advance to Boardwalk
+- All New Family Feud
 - Anchorman
 - Card Sharks
 - Checkers
