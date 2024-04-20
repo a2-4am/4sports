@@ -32,6 +32,7 @@
 - Reversi
 - Rock & Scroll
 - Seega
+- Super Password
 - The Sporting News Baseball
 - Wari
 - Wipeout
