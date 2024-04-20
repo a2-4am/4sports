@@ -34,6 +34,7 @@
 - Rock & Scroll
 - Seega
 - Sierra Championship Boxing
+- Silent Service
 - Super Password
 - The Sporting News Baseball
 - Wari
