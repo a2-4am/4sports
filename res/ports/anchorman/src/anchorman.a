@@ -18,11 +18,10 @@
          dec   ExoProgressPtr+1
          dec   ExoProgressPtr+1
          dec   ExoProgressPtr+1
-         jsr   decrunch_no_reset_progress ; decompress more data into $6000/main
-
-!if * != $485C {
-  !serious "Adjust prelaunch to patch JMP at ", *
+!if * != $4859 {
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
 }
+         jsr   decrunch_no_reset_progress ; decompress more data into $6000/main
          jmp   $AEE0
 
 get_crunched_byte
