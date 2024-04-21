@@ -1,0 +1,23 @@
+;license:MIT
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/ODIN",plain
+*=$106
+
+    !source "src/prelaunch/common.a"
+
+         +ENABLE_ACCEL
+         lda   $AA2F
+         pha
+         lda   #$60
+         sta   $AA2F
+         jsr   $8000
+         pla
+         sta   $AA2F
+         +DISABLE_ACCEL
+         +NEW_RESET_VECTOR $200
+         jmp   $AA2F
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}

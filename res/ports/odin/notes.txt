@@ -1,0 +1,43 @@
+bootloader sets up $200..$2FF (important)
+also $4E=A5 (important)
+
+$26=8C
+$3E=00
+$3F=8C
+$41=00
+$C0=00
+$C1=13
+$C2=FE
+$C3=DF
+$C4=00
+$C5=00
+$C6=FF
+$C7=FF
+$C8=51
+$C9=8B
+(none seem important)
+
+bootloader on text page 1 pushes $7F/$41 then exits via $FC58
+then execution continues at $7F42
+uses $4E as part of decryption key
+decrypts downward until self-modifies branch target
+then execution continues at $7F6E
+which copies/decrypts onto zero page + stack
+RTS pops address just decrypted onto bottom of stack
+then execution continues at $00AB
+clears memory $8ABC..$BFFF and $0C00..$1FFF
+uses $200..$25F as decryption key
+decrypts more then self-modifies to jump to $7E54
+
+entry point at $7E54 clears part of zero page where
+previous phase lived, then continues to game
+
+once execution hits $7E54, all of zero page (including $4E)
+has been clobbered and $200..$2FF is never used again
+all registers are irrelevant
+stack is irrelevant
+regions that were clobbered earlier are irrelevant
+
+can break at $7E54, capture $800..$BFF and $4000..$8ABB,
+then later jump to $7E54 to start game
+($4000..$5FFF and $800..$BFF still showing title screen at this point)

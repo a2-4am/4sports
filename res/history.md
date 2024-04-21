@@ -27,6 +27,7 @@
 - Mu Torere
 - Nimwit
 - Nine Men's Morris
+- Odin
 - Pay Day
 - Place Ball
 - Press Your Luck
