@@ -51,6 +51,7 @@ Pure Stat Baseball
 Pure Stat College Basketball
 Ringside Seat (SSI)
 Sargon III (Spinnaker) [supports-data-disk]
+Spinout (Chris Oberth) [48K][unreleased, see <https://www.gamingalexandria.com/wp/2021/08/oberth-archives-one/>]
 Sports Spectacular (Keypunch) [unprotected]
 Star League Baseball
 Star Rank Boxing II [4am crack][priority]
