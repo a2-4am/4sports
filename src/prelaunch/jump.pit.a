@@ -8,11 +8,11 @@
 
          +ENABLE_ACCEL
          lda   #$4C
-         sta   $B8A9
+         sta   $B8A6
          jsr   $8000
          +DISABLE_ACCEL
          +RESET_VECTOR $100
-         jmp   $B8AC
+         jmp   $B8A9
 
 !if * > $1C0 {
   !error "code is too large, ends at ", *

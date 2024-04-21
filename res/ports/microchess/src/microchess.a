@@ -28,7 +28,7 @@ start
 @next    iny
          bne   @loop
 !if * != $9667 {
-  !serious "Adjust prelaunch to patch JSR at ", *
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
 }
          jsr   decrunch              ; compressed data contains target address
          bit   GFXMODE

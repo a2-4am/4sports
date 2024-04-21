@@ -9,7 +9,7 @@
          jsr   decrunch
 
 !if * != $211F {
-  !serious "Adjust prelaunch to patch JSR at ", *
+  !serious "Adjust prelaunch to patch JMP at ", *
 }
          jmp   $4000
 

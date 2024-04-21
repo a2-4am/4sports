@@ -22,6 +22,9 @@ start
          bit   PAGE1
          bit   HIRES
          bit   FULLGFX
+!if * != $B26D {
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
+}
          jsr   decrunch_no_reset_progress
          ldx   #$0C
          ldy   #$00
@@ -37,9 +40,6 @@ start
          sta   $5101
          lda   #>load_level
          sta   $5102
-!if * != $B290 {
-  !serious "Adjust prelaunch to patch JSR at ", *
-}
          jsr   $900
          bit   CLEARKBD
          jsr   PRODOS_MLI

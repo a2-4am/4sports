@@ -17,7 +17,7 @@ kExoProgressWidth = 13               ; depends on total size, max 38
 start
          +INIT_MACHINE
 !if * != $356C {
-  !serious "Adjust prelaunch to patch JSR at ", *
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
 }
          jsr   decrunch              ; compressed data contains target address
          jmp   $4000

@@ -17,7 +17,7 @@ kExoProgressWidth = 19               ; depends on total size, max 38
 start
          +INIT_MACHINE
 !if * != $BA3C {
-  !serious "Adjust prelaunch to patch JSR at ", *
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
 }
          jsr   decrunch              ; compressed data contains target address
          bit   GFXMODE

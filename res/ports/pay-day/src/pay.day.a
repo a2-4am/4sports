@@ -41,11 +41,10 @@
          sta   _byte_lo
          lda   #$50
          sta   _byte_hi
-         jsr   decrunch_no_reset_progress
-
-!if * != $879 {
-  !serious "Adjust prelaunch to patch JSR at ", *
+!if * != $876 {
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
 }
+         jsr   decrunch_no_reset_progress
          jmp   $4000
 
 parm_obj_x_open

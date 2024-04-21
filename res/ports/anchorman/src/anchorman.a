@@ -21,7 +21,7 @@
          jsr   decrunch_no_reset_progress ; decompress more data into $6000/main
 
 !if * != $485C {
-  !serious "Adjust prelaunch to patch JSR at ", *
+  !serious "Adjust prelaunch to patch JMP at ", *
 }
          jmp   $AEE0
 

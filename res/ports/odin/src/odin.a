@@ -18,10 +18,10 @@ kExoProgressWidth = 12               ; depends on total size, max 38
 start
          +INIT_MACHINE
          jsr   decrunch              ; compressed data contains target address
-         jsr   decrunch_no_reset_progress
-!if * != $AA2F {
-  !serious "Adjust prelaunch to RTS at ", *
+!if * != $AA2C {
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
 }
+         jsr   decrunch_no_reset_progress
          bit   GFXMODE
          bit   PAGE2
          bit   HIRES
