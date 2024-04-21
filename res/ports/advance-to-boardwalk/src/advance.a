@@ -6,11 +6,10 @@
          !src  "../common/src/macros.a"
 
          +INIT_MACHINE
-         jsr   decrunch
-
-!if * != $211F {
-  !serious "Adjust prelaunch to patch JMP at ", *
+!if * != $211C {
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
 }
+         jsr   decrunch
          jmp   $4000
 
 get_crunched_byte
