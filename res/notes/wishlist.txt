@@ -31,42 +31,38 @@ Dave Winfield's Batter Up [4am crack][64K]
 Earl Weaver Baseball [4am crack][HGR-but-128K][priority]
 Fathom's 40 [4am crack][48K]
 Fore! [4am crack][48K]
-Golf Course (Main Street Publishing)
-Golf's Best
-Hi-Res Computer Golf [4am crack]
-Hi-Res Computer Golf 2
+Hi-Res Computer Golf 2 [needs-crack][48K][supports-data-disk]
 Jet [priority][64K][supports-data-disk]
-Joe Thiesmann's Pro Football [4am crack]
-John Elway's Quarterback
-John Madden Football
-Ken Uston's Professional Blackjack (latest version is 1.23?) [4am crack]
-Maxi Golf
-Micro League Baseball (1984 version, not 1980)
-Olympic Decathlon [priority]
+Joe Thiesmann's Pro Football [4am crack][64K]
+John Elway's Quarterback [HGR-but-128K]
+John Madden Football [needs-crack][offdisk][64K]
+Ken Uston's Professional Blackjack v1.23 [4am crack][48K]
+Maxi Golf [needs-crack]
+Micro League Baseball (1984 version, not 1980) [needs-crack][64K][supports-data-disk]
+Olympic Decathlon [priority][needs-crack][48K]
 Pro Football (Systems Design Lab)
 Pro Golf (Home-Computer Software)
 Professional Tour Golf [4am crack]
-Pure Stat Baseball
+Pure Stat Baseball [needs-crack][64K]
 Pure Stat College Basketball
-Ringside Seat (SSI)
-Sargon III (Spinnaker) [supports-data-disk]
+Ringside Seat (SSI) [4am/san inc crack][48K]
+Sargon III (Hayden) [4am crack][supports-data-disk]
 Spinout (Chris Oberth) [48K][unreleased, see <https://www.gamingalexandria.com/wp/2021/08/oberth-archives-one/>]
-Sports Spectacular (Keypunch) [unprotected]
-Star League Baseball
+Star League Baseball [needs-crack][64K]
 Star Rank Boxing II [4am crack][priority]
-Sub Battle Simulator [4am crack]
-Super Sunday [4am crack]
+Sub Battle Simulator [4am crack][64K]
+Super Sunday [4am crack][64K]
 Superstar Indoor Sports [priority]
 Techo-Sport Racing (K-Tek) [Tom Greene]
 Tennis (Softdisk) [unprotected]
-Tuesday Morning Quarterback [4am crack]
+Tuesday Morning Quarterback [4am crack][48K]
 The Fidelity Chessmaster 2100 (Software Toolworks) [priority]
-The World's Greatest Baseball Game (Enhanced Version) [4am crack]
-The World's Greatest Football Game [4am crack]
-Top Fuel Eliminator (Activision)
-Trick Shot (IDSI) [needs-crack][supports-data-disk]
-Ultracheckers (Malibu Microcomputing) [needs-crack]
-World Class Leader Board (Access Software)
+The World's Greatest Baseball Game (Enhanced Version) [4am crack][64K][supports-data-disk]
+The World's Greatest Football Game [4am crack][64K]
+Top Fuel Eliminator (Activision) [4am crack][HGR-but-128K]
+Trick Shot (IDSI) [needs-crack][48K][supports-data-disk]
+Ultracheckers (Malibu Microcomputing) [needs-crack][48K]
+World Class Leader Board (Access Software) [64K]
 World Series Baseball
 
 //idea:game shows
