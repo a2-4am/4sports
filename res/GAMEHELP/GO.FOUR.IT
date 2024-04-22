@@ -1,0 +1,22 @@
+
+
+    Get four in a row horizontally,
+
+       vertically, or diagonally
+
+
+
+              <  select  >
+
+         press Return to place
+
+
+
+S* * * * * * * * * * * * * *toggle sound
+
+T* * * * * * * * * * * * *take back move
+
+A* * * * * * * * * * * * * * * * *advice
+
+Esc* * * * * * * * * * * * * * * * *quit
+[eof]
