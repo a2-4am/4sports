@@ -11,7 +11,6 @@
          sta   $AD5C
          jsr   $8000
          +DISABLE_ACCEL
-         +RESET_VECTOR $100
          jmp   $AD5F
 
 !if * > $1C0 {

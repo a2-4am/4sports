@@ -11,7 +11,6 @@
          sta   $BC5B
          jsr   $8000
          +DISABLE_ACCEL
-         +RESET_VECTOR $100
          jmp   $BC5E
 
 !if * > $1C0 {

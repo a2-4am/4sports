@@ -11,7 +11,6 @@
          sta   $B9ED
          jsr   $8000
          +DISABLE_ACCEL
-         +RESET_VECTOR $100
          jmp   $B9F0
 
 !if * > $1C0 {

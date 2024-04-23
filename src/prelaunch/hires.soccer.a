@@ -11,7 +11,6 @@
          sta   $BC4D
          jsr   $9000
          +DISABLE_ACCEL
-         +RESET_VECTOR $100
          jmp   $BC50
 
 !if * > $1C0 {

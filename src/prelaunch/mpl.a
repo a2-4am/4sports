@@ -11,7 +11,6 @@
          sta   $9E01
          jsr   $8000
          +DISABLE_ACCEL
-         +RESET_VECTOR $100
          jmp   $9E04
 
 !if * > $1C0 {

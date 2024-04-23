@@ -11,7 +11,6 @@
          sta   $A6A5
          jsr   $8000
          +DISABLE_ACCEL
-         +RESET_VECTOR $100
          jmp   $A6A8
 
 !if * > $1C0 {
