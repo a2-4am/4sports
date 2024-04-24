@@ -37,6 +37,7 @@
 - Seega
 - Sierra Championship Boxing
 - Silent Service
+- Sudoku
 - Super Password
 - The Sporting News Baseball
 - Wari
