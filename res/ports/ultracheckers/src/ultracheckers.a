@@ -1,0 +1,48 @@
+!cpu 6502
+*=$8000
+!to "build/ULTRACHECKERS#068000",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         jmp   start
+
+compressed_data
+         !bin "src/OBJ.X"
+FORWARD_DECRUNCHING = 1
+SHOW_PROGRESS_DURING_DECRUNCH = 0
+         !src  "../common/src/exodecrunch.a"
+
+start
+         +INIT_MACHINE
+!if * != $93CB {
+  !serious "Adjust prelaunch to patch JSR at ", *
+}
+         jsr   decrunch              ; compressed data contains target address
+         bit   GFXMODE
+         bit   PAGE1
+         bit   HIRES
+         bit   FULLGFX
+         lda   #$F9                  ; set by original bootloader
+         sta   $20
+         lda   #$E3
+         sta   $21
+         lda   #$F4
+         sta   $22
+         lda   #$15
+         sta   $23
+         lda   #$2F
+         sta   $24
+         lda   #$16
+         sta   $25
+         lda   #$00
+         sta   $3FE
+         sta   $3FF
+         jmp   $19BB
+
+get_crunched_byte
+         lda   compressed_data
+         inc   get_crunched_byte+1
+         bne   +
+         inc   get_crunched_byte+2
++        rts

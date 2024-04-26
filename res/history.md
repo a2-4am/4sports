@@ -42,6 +42,7 @@
 - The Sporting News Baseball
 - Wari
 - Wipeout
+- Ultracheckers
 - Zig Zag Flag Shag
 
 ## Revision 1.0-alpha.3 / 20231114
