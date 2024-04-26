@@ -4,6 +4,7 @@
 
 ### New games
 
+- Acey Deucey
 - Advance to Boardwalk
 - All New Family Feud
 - Anchorman

@@ -1,0 +1,18 @@
+;license:MIT
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/ACEY.DEUCY",plain
+*=$106
+
+    !source "src/prelaunch/common.a"
+
+         +ENABLE_ACCEL
+         lda   #$4C
+         sta   $97A8
+         jsr   $8000
+         +DISABLE_ACCEL
+         jmp   $97A8+3
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}

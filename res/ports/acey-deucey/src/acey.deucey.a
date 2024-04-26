@@ -1,0 +1,41 @@
+!cpu 6502
+*=$8000
+!to "build/ACEY.DEUCEY#068000",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         jmp   start
+
+compressed_data
+         !bin "src/OBJ1.X"
+         !bin "src/OBJ2.X"
+FORWARD_DECRUNCHING = 1
+SHOW_PROGRESS_DURING_DECRUNCH = 0
+         !src  "../common/src/exodecrunch.a"
+
+start
+         +INIT_MACHINE
+         jsr   decrunch              ; compressed data contains target address
+!if * != $97A8 {
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
+}
+         jsr   $900
+         bit   CLEARKBD
+         jsr   decrunch
+         ldx   #$30                  ; wait loop based on original game code
+-        lda   #$70
+         jsr   ROM_WAIT
+         dex
+         beq   +
+         bit   KBD
+         bpl   -
++        bit   CLEARKBD
+         jmp   $40C
+
+get_crunched_byte
+         lda   compressed_data
+         inc   get_crunched_byte+1
+         bne   +
+         inc   get_crunched_byte+2
++        rts
