@@ -10,6 +10,7 @@
 - Card Sharks
 - Checkers
 - Chuck Yeager's Advanced Flight Trainer
+- Draw Poker
 - F-15 Strike Eagle
 - Fox & Geese
 - Go
