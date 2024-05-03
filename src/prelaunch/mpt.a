@@ -8,10 +8,10 @@
 
          +ENABLE_ACCEL
          lda   #$4C
-         sta   $A6A5
+         sta   $A6AC
          jsr   $8000
          +DISABLE_ACCEL
-         jmp   $A6A8
+         jmp   $A6AC+3
 
 !if * > $1C0 {
   !error "code is too large, ends at ", *
