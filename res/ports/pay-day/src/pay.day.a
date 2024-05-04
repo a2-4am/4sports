@@ -37,7 +37,7 @@
          jsr   AUXMOVE
 
          +READ_ENTIRE_FILE parm_obj_x_open, parm_obj_x_read
-         lda   #$D4
+         lda   #$D1
          sta   _byte_lo
          lda   #$50
          sta   _byte_hi
