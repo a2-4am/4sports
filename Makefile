@@ -63,10 +63,7 @@ dsk: index asmproboot asmlauncher extract
             rm -f "$$f"/.DS_Store; \
             $(CADIUS) ADDFOLDER build/"$(DISK)" "/$(VOLUME)/$$(basename $$f)" "$$f" -C >>build/log; \
         done
-	$(CADIUS) CREATEFOLDER build/"$(DISK)" "/$(VOLUME)/X/" -C >>build/log
-	for f in build/X/*; do \
-	    $(CADIUS) ADDFOLDER build/"$(DISK)" "/$(VOLUME)/X/$$(basename $$f)" "$$f" -C >>build/log; \
-	done
+	$(CADIUS) ADDFOLDER build/"$(DISK)" "/$(VOLUME)/X" "build/X" -C >>build/log; \
 	bin/changebootloader.sh build/"$(DISK)" build/proboothd
 
 gamesconf: preconditions md
@@ -81,8 +78,14 @@ gamesconf: preconditions md
 
 extract: preconditions md gamesconf
 	$(PARALLEL) '$(CADIUS) EXTRACTVOLUME {} build/X/ >>build/log' ::: res/dsk/*.po
-	rm -f build/X/**/.DS_Store build/X/**/PRODOS* build/X/**/LOADER.SYSTEM*
+	rm -f build/X/**/.DS_Store build/X/**/PRODOS* build/X/**/LOADER.SYSTEM* build/X/**/_FileInformation.txt
 	for f in $$(grep '^....1' build/GAMES.CONF | awk '!/^$$|^#/' | awk -F, '/,/ { print $$2 }' | awk -F= '{ print $$1 }'); do mv build/X/"$$(basename $$f)"/"$$(basename $$f)"* build/X.INDEXED/; rm -rf build/X/"$$(basename $$f)"; done
+	for d in build/X/*; do \
+		for f in "$$d"/*; do \
+			mv -i "$$f" build/X/"$$(basename $$f)"; \
+		done; \
+		rmdir "$$d"; \
+	done
 	(for f in build/X.INDEXED/*; do echo "$$(basename $$f)"; done) | bin/buildindexedfile.sh -a -p build/TOTAL.DATA build/X.INDEXED > build/XSINGLE.IDX
 
 index: preconditions md asmfx asmprelaunch asmdemo compress extract
