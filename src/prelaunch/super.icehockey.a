@@ -1,0 +1,49 @@
+;license:MIT
+;(c) 2024 by qkumba
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/SUPER.ICEHOCKEY",plain
+*=$106
+
+    !source "src/prelaunch/common.a"
+
+         +ENABLE_ACCEL
+
+         lda   #$60
+         sta   $A02
+         jsr   $800       ; load "DOS"
+         lda   #<callback
+         sta   $B748
+         lda   #>callback
+         sta   $B749
+         jmp   $B700
+
+callback
+         ldx   #0
+         stx   $9E52
+         inx
+         stx   $9E53
+         lda   #<callback2
+         sta   $B7B8
+         lda   #>callback2
+         sta   $B7B9
+         +DISABLE_ACCEL
+         jmp   $9D84
+
+callback2
+         jsr   $BD00
+         lda   $B7EC
+         eor   #$14
+         bne   +
+         lda   $B7ED
+         eor   #$0E
+         bne   +
+         sta   $9688
+         lsr   $968D      ; reset vector
+         +LC_REBOOT
+         clc
++        rts
+
+!if * > $1C0 {
+  !error "code is too large, ends at ", *
+}
