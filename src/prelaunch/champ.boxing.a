@@ -23,6 +23,7 @@ callback
          stx   $9E52
          inx
          stx   $9E53
+         +LC_REBOOT
          +DISABLE_ACCEL
          jmp   $9D84
 
