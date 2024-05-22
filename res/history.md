@@ -1,18 +1,18 @@
 # Total Replay II: Instant Replay changelog
 
-## Revision 1.0-alpha.4
+## Revision 1.0-alpha.4 / unreleased
 
-### New games
+### New games in v1.0-alpha.4
 
 - Acey Deucey
 - Advance to Boardwalk
-- All New Family Feud
 - Anchorman
 - Card Sharks
 - Checkers
 - Chuck Yeager's Advanced Flight Trainer
 - Draw Poker
 - F-15 Strike Eagle
+- Family Feud
 - Fox & Geese
 - Go
 - Go Four It
@@ -47,24 +47,32 @@
 - Ultracheckers
 - Zig Zag Flag Shag
 
+### Enhancements & bug fixes in v1.0-alpha.4
+
+- Upgrade Black Belt to v2 (also fixes Mockingboard incompatibility, [issue 23](https://github.com/a2-4am/4sports/issues/23))
+- Fix Mockingboard issue in One on One ([issue 34](https://github.com/a2-4am/4sports/issues/34))
+- Fix reset issues in Championship Baseball, Championship Wrestling, Superstar Ice Hockey (issues [36](https://github.com/a2-4am/4sports/issues/36), [35](https://github.com/a2-4am/4sports/issues/35), [45](https://github.com/a2-4am/4sports/issues/45))
+- Properly restore language card reset and IRQ vectors on re-entry (fixes multiple long-standing issues, including reset issues in Sudoku)
+- Fix latent floppy drive access in Championship Baseball, Test Drive (issues [40](https://github.com/a2-4am/4sports/issues/40), [46](https://github.com/a2-4am/4sports/issues/46))
+
 ## Revision 1.0-alpha.3 / 20231114
 
 - Fix Formula 1 Racer demo crash on IIgs
 
 ## Revision 1.0-alpha.2 / 20231113
 
-### New games
+### New games in v1.0-alpha.2
 
 - Championship Baseball
 - Pensate
 - Stunt Car Racer
 
-### Migrated from Total Replay
+### Migrated from Total Replay in v1.0-alpha.2
 
 - 8-bit Slicks
 - Pitstop II
 
-### Enhancements & bug fixes in 1.0-alpha.2
+### Enhancements & bug fixes in v1.0-alpha.2
 
 - Updated Black Belt to version 2 (fixes Mockingboard and adds new play mode)
 - Add self-running demos for Autobahn, Formula 1 Racer, and Track & Field ([PR 22](https://github.com/a2-4am/4sports/pull/22), [PR 24](https://github.com/a2-4am/4sports/pull/24), [PR 26](https://github.com/a2-4am/4sports/pull/26), [PR 32](https://github.com/a2-4am/4sports/pull/32), thanks Frank M.)
@@ -75,7 +83,7 @@
 
 ## Revision 1.0-alpha.1 / 20221109
 
-### New games
+### New games in v1.0-alpha.1
 
 - Autobahn
 - Championship Basketball
@@ -87,7 +95,7 @@
 - Superstar Ice Hockey
 - The American Challenge
 
-### Migrated from Total Replay
+### Migrated from Total Replay in v1.0-alpha.1
 
 - Battle Chess
 - Bop'n Wrestle
