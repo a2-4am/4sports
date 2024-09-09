@@ -7,11 +7,12 @@
 
          !source "src/fx/fx.hgr.precomputed.2bit.a"
 
-         +FX_INITONCE_2BIT CoordinatesFile, Start
-         +FX_RIPPLE_2BIT
+         +FX_INITONCE_2BIT FXCodeFile, CoordinatesFile, Start
+         jsr   iRippleCoordinates2Bit
 Start
-         +FX_PRECOMPUTED_2BIT Coordinates2Bit
+         jmp   FXCode
 
+FXCodeFile
+         +PSTRING "HGR2"
 CoordinatesFile
-         !byte 18
-         !text "FX/W.IR.BLOOM.DATA"
+         +PSTRING "W.IR.BLOOM.DATA"

@@ -88,6 +88,12 @@ kDFXIndexRecord
 kSFXIndexRecord
          !source "src/index/sfx.idx.a"
 
+kFXCodeIndexRecord
+         !source "src/index/fxcode.idx.a"
+
+kFXDataIndexRecord
+         !source "src/index/fxdata.idx.a"
+
 kGameHelpIndexRecord
          !source "src/index/gamehelp.idx.a"
 
@@ -156,25 +162,20 @@ kXSingleRecord
          !source "src/index/xsingle.idx.a"
 
 kTotalDataFile
-         !byte 10
-         !raw  "TOTAL.DATA"
+         +PSTRING "TOTAL.DATA"
 
 kAnimatedTitleDirectory
-         !byte 15
-         !raw  "TITLE.ANIMATED/"
+         +PSTRING "TITLE.ANIMATED/"
 
 kGameDirectory
-         !byte 2
-         !raw  "X/"
+         +PSTRING "X/"
 kGameDirectoryLen = 3 ; we need this elsewhere
 
 kFXDirectory
-         !byte 3
-         !raw  "FX/"
+         +PSTRING "FX/"
 
 kGlobalPrefsFilename
-         !byte 10
-         !raw  "PREFS.CONF"
+         +PSTRING "PREFS.CONF"
 
 kStandardPrelaunchRecord
          !source "src/index/standard.prelaunch.a"
@@ -182,12 +183,8 @@ kStandardPrelaunchRecord
 kCoverFadeRecord
          !source "src/index/coverfade.idx.a"
 
-kGRFizzleRecord
-         !source "src/index/gr.fizzle.idx.a"
-
-kDGRFizzleRecord
-         !source "src/index/dgr.fizzle.idx.a"
-
+; following three records must end up on the same page
+; after relocation to LC RAM
 kHelpBackgroundRecord
          !source "src/index/res.help.idx.a"
 
@@ -196,3 +193,13 @@ kTitleRecord
 
 kCoverRecord
          !source "src/index/res.cover.idx.a"
+
+!if (RELBASE != $2000) and (>kCoverRecord != >kHelpBackgroundRecord) {
+         !serious "cover records are not all on the same page: ", kHelpBackgroundRecord, ", ", kTitleRecord, ", ", kCoverRecord
+}
+
+kGRFizzleRecord
+         !source "src/index/gr.fizzle.idx.a"
+
+kDGRFizzleRecord
+         !source "src/index/dgr.fizzle.idx.a"

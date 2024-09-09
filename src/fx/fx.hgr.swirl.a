@@ -7,11 +7,13 @@
 
          !source "src/fx/fx.hgr.precomputed.1bit.a"
 
-         +FX_INITONCE_1BIT CoordinatesFile, Start
-         +FX_RIPPLE_1BIT aslmod4
-Start
-         +FX_PRECOMPUTED_1BIT Coordinates1Bit
+         +FX_INITONCE_1BIT FXCodeFile, CoordinatesFile, Start
+         jsr   iRippleCoordinates1Bit4
 
+Start
+         jmp   FXCode
+
+FXCodeFile
+         +PSTRING "HGR1"
 CoordinatesFile
-         !byte 15
-         !text "FX/CORNER4.DATA"
+         +PSTRING "CORNER4.DATA"

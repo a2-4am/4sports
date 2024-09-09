@@ -4,7 +4,7 @@
 !to "build/PRELAUNCH.INDEXED/FOX.AND.GEESE",plain
 *=$106
 
-    !source "src/prelaunch/common.a"
+         !source "src/macros.a"
 
          +ENABLE_ACCEL
          lda   #$4C

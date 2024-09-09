@@ -39,7 +39,7 @@
          ldy   $FF
          jsr   HGRHalfBlockCopy
          lda   #$28
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
          ldx   $F9
          bne   @a
@@ -91,5 +91,4 @@
          jmp   @outerloop
 @exit    rts
 
-         !source "src/wait.a"
          +HGR_HALF_BLOCK_COPY_ROUTINES

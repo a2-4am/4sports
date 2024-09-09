@@ -5,14 +5,13 @@
 !to "build/FX.INDEXED/DHGR.TWOPASS.LR",plain
 *=$6000
 
-hgrlo    =     $0200                 ; [$C0 bytes, main memory only]
-hgr1hi   =     $0300                 ; [$C0 bytes, main memory only]
+;hgrlo    =     $0201                 ; [$C0 bytes, main memory only] defined in constants.a
+;hgr1hi   =     $0301                 ; [$C0 bytes, main memory only] defined in constants.a
 
          !source "src/fx/macros.a"
 
          +COPY_TO_0 start, end
-         ;X=0
-         +BUILD_HGR_LOOKUP_TABLES_X_IS_ALREADY_0 hgrlo, hgr1hi
+         jsr   iBuildHGRTables
          jmp   loop
 
 start
@@ -35,17 +34,17 @@ rowloop
 -        sec
 src      lda   $FDFD, y              ; SMC
 dst      sta   $FDFD ,y              ; SMC
-         sta   $C003
-         sta   $C005
+         sta   READAUXMEM
+         sta   WRITEAUXMEM
          bcc   -
-         sta   $C002
-         sta   $C004
+         sta   READMAINMEM
+         sta   WRITEMAINMEM
          inx
          inx
          cpx   #$C0
          bcc   rowloop
          lda   #$10
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   exit
          iny
          cpy   #$28
@@ -53,7 +52,5 @@ dst      sta   $FDFD ,y              ; SMC
          lda   <startx
          beq   loop
 exit     rts
-
-         !source "src/wait.a"
 }
 end

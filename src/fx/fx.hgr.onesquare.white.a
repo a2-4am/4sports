@@ -87,7 +87,7 @@
          lda   ($FE),y
          bpl   @copy
          lda   #$18
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
          bpl   @next                 ; always branches
 @copy
@@ -127,7 +127,7 @@
          lda   ($FE),y
          bpl   @copy2
          lda   #$18
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
          bpl   @loop2                ; always branches
 @copy2
@@ -140,7 +140,6 @@
          beq   @loop2                ; always branches
 @exit    rts
 
-         !source "src/wait.a"
          +HGR_WHITE_ROUTINES
          +HGR_BLOCK_COPY_ROUTINES
 

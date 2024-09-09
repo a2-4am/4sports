@@ -43,7 +43,7 @@ dst  = $26
          dey
          bpl   -
          lda   #$28
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
          inc   row1
          dec   row2
@@ -65,5 +65,4 @@ mask4    !byte %10011001
          !byte %10110011
          !byte %11100110
 
-         !source "src/wait.a"
          +HGR_CALC_ROUTINES

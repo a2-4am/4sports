@@ -1,5 +1,5 @@
 !cpu 6502
-!to "build/FX/SLOW.STAR.DATA",plain
+!to "build/FXDATA/SLOW.STAR.DATA",plain
 *=$8600
          !byte $30,%00001010
          !byte $30,%00101010
@@ -6721,8 +6721,3 @@
          !byte $1A,%00000000
          !byte $1E,%00000000
          !byte $1C,%00000000
-         !byte $80
-
-         !source "src/fx/fx.hgr.precomputed.1bit.a"
-         +FX_RIPPLE_1BIT aslmod2
-         rts

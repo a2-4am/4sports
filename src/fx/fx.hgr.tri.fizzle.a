@@ -43,7 +43,7 @@ maskindex = $FD           ; byte
 +        jsr   HGRBlockCopyWithMask
 @wait
          lda   #$0C
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
          inc   coord
          bne   +
@@ -107,6 +107,5 @@ mask4
          !byte %11111110
          !byte %11111111
 
-         !source "src/wait.a"
          +HGR_COPY_MASK_ROUTINES
          +HGR_BLOCK_COPY_ROUTINES

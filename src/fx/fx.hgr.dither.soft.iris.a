@@ -7,10 +7,11 @@
 
          !source "src/fx/fx.hgr.precomputed.2bit.a"
 
-         +FX_INITONCE_2BIT CoordinatesFile, Start
+         +FX_INITONCE_2BIT FXCodeFile, CoordinatesFile, Start
 Start
-         +FX_PRECOMPUTED_2BIT_DITHER Coordinates2Bit, EndCoordinates2Bit
+         jmp   FXCode
 
+FXCodeFile
+         +PSTRING "HGRDITHER2"
 CoordinatesFile
-         !byte 17
-         !text "FX/SOFT.IRIS.DATA"
+         +PSTRING "SOFT.IRIS.DATA"

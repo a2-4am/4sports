@@ -20,6 +20,8 @@ RELBASE=$2000
 
 FirstMover
 !pseudopc RELBASE {
+         !source "src/fx.lib.a"
+
 ;------------------------------------------------------------------------------
 ; Reenter
 ; This is the primary entry point for returning to the launcher from anywhere.
@@ -37,10 +39,15 @@ FirstMover
 ;
 ; If there is no stack to restore, this exits via SearchMode.
 ;
-; in:    none
+; in:    LC RAM bank 1 or 2 must be banked in for reading because that's where
+;        this code lives
 ; out:   see above
 ;------------------------------------------------------------------------------
 Reenter
+         ; ensure that this code is high enough that it can function with
+         ; either LC RAM bank 1 or 2 banked in, because we might switch banks
+         ; during the routine
+         !if (RELBASE != $2000) and (* < $E000) { !serious "Reenter is too low" }
          cld
          sta   $C000                 ; Turn 80STORE switch off
          ldx   #$ff
@@ -54,6 +61,8 @@ Reenter
          sta   $bf00,x
          dex
          bpl   -
+         lda   #<PrelaunchInit       ; reset prelaunch vector (animated titles change it)
+         sta   iPrelaunchInit+1
          ldx   #5
 -        lda   ResetVector,x         ; copy reentry wrapper to bottom of stack
          sta   $100,x                ; (used as reset vector because //e always
@@ -106,7 +115,6 @@ ResetVector                          ; 6 bytes, copied to $100
          ; these routines will only be called after relocating to language card
          !source "src/ui.search.mode.a"         ; \__ execution falls through
          !source "src/ui.animation.a"           ; /
-
          !source "src/ui.browse.mode.a"
          !source "src/ui.attract.mode.a"
          !source "src/ui.attract.hgr.a"
@@ -127,7 +135,7 @@ ResetVector                          ; 6 bytes, copied to $100
          !source "src/glue.decompress.a"
          !source "src/textrank.a"
          !source "src/okvs.a"
-         !source "src/wait.a"
+         !source "src/prodos.path.a"
 
          ; add new files above here
          !source "src/hw.vbl.a"
@@ -152,32 +160,51 @@ gGlobalPrefsStore
                                      ; flips out if it has certain values (it will
                                      ; be set to $55 as part of the 64K memory test,
                                      ; which is apparently one of the acceptable values)
+
+         +DEFINE_INDIRECT_VECTOR iPrelaunchInit,               PrelaunchInit
+         +DEFINE_INDIRECT_VECTOR iSetupPrecomputed3Bit,        SetupPrecomputed3Bit
+         +DEFINE_INDIRECT_VECTOR iRippleCoordinates3Bit,       RippleCoordinates3Bit
+         +DEFINE_INDIRECT_VECTOR iReverseCoordinates3Bit,      ReverseCoordinates3Bit
+         +DEFINE_INDIRECT_VECTOR iRippleCoordinates2Bit,       RippleCoordinates2Bit
+         +DEFINE_INDIRECT_VECTOR iReverseCoordinates2Bit,      ReverseCoordinates2Bit
+         +DEFINE_INDIRECT_VECTOR iBuildDHGRSparseBitmasks2Bit, BuildDHGRSparseBitmasks2Bit
+         +DEFINE_INDIRECT_VECTOR iBuildHGRSparseBitmasks2Bit,  BuildHGRSparseBitmasks2Bit
+         +DEFINE_INDIRECT_VECTOR iBuildDHGRSparseBitmasks1Bit, BuildDHGRSparseBitmasks1Bit
+         +DEFINE_INDIRECT_VECTOR iBuildHGRSparseBitmasks1Bit,  BuildHGRSparseBitmasks1Bit
+         +DEFINE_INDIRECT_VECTOR iRippleCoordinates1Bit4,      RippleCoordinates1Bit4
+         +DEFINE_INDIRECT_VECTOR iRippleCoordinates1Bit3,      RippleCoordinates1Bit3
+         +DEFINE_INDIRECT_VECTOR iRippleCoordinates1Bit2,      RippleCoordinates1Bit2
+         +DEFINE_INDIRECT_VECTOR iRippleCoordinates1Bit,       RippleCoordinates1Bit
+         +DEFINE_INDIRECT_VECTOR iReverseCoordinates1Bit,      ReverseCoordinates1Bit
+         +DEFINE_INDIRECT_VECTOR iWaitForKeyWithTimeout,       WaitForKeyWithTimeout
+         +DEFINE_INDIRECT_VECTOR iBuildDHGRDitherMasks,        BuildDHGRDitherMasks
+         +DEFINE_INDIRECT_VECTOR iBuildHGRDitherMasks,         BuildHGRDitherMasks
+         +DEFINE_INDIRECT_VECTOR iBuildDHGRMirrorCols,         BuildDHGRMirrorCols
+         +DEFINE_INDIRECT_VECTOR iBuildHGRMirrorCols,          BuildHGRMirrorCols
+         +DEFINE_INDIRECT_VECTOR iBuildHGRMirrorTables,        BuildHGRMirrorTables
+         +DEFINE_INDIRECT_VECTOR iBuildHGRTables,              BuildHGRTables
+         +DEFINE_INDIRECT_VECTOR iLoadFXDATA,                  LoadFXDATA
+         +DEFINE_INDIRECT_VECTOR iLoadFXCODE,                  LoadFXCODE
+         +DEFINE_INDIRECT_VECTOR iLoadXSingle,                 LoadXSingle
+         +DEFINE_INDIRECT_VECTOR iAddToPath,                   AddToPath
+         +DEFINE_INDIRECT_VECTOR iLoadFileDirect,              LoadFileDirect
+         ; SMC to RTS on a II+
+         +DEFINE_INDIRECT_VECTOR WaitForVBL,               WaitForVBL_iie
+         !if (RELBASE != $2000) and (* != UnwaitForVBL) { !serious "UnwaitForVBL=",*,", fix constants.a" }
+         rts                         ; SMC to JMP on a IIc
+         !word iUnwaitForVBL
+
 SwitchToBank2
          +READ_RAM2_WRITE_RAM2
          rts
-         !source "src/prodos.path.a" ; paths end up on the same page
-
-; iLoadXSingle (label is in constants.a)
-         jmp   LoadXSingle           ; no direct calling - target can move
-
-; iAddToPath (label is in constants.a)
-         jmp   AddToPath             ; no direct calling - target can move
-
-; iLoadFileDirect (label is in constants.a)
-         jmp   LoadFileDirect        ; no direct calling - target can move
-
-; WaitForVBL (label is in constants.a)
-         jmp   WaitForVBL_iie        ; SMC to RTS on a II+
-
-; UnwaitForVBL (label is in constants.a)
-         rts                         ; SMC to JMP on a IIc
-         !word iUnwaitForVBL
 
 ; MockingboardStuff (label is in constants.a)
 ;      slot number where Mockingboard was detected and type of board
 ;      #$00 if no Mockingboard detected
-         !byte $FD                   ; MockingboardStuff ($FFF8)
-; MachineStatus (label is in constants.a so prelaunchers can use it)
+         !if (RELBASE != $2000) and (* != MockingboardStuff) { !serious "MockingboardStuff=",*,", fix constants.a" }
+         !byte $FD
+
+; MachineStatus (label is in constants.a)
 ;      7 6 5 4 3 2 1 0
 ;      | | | | | | | +- bit 0 reserved
 ;      | | | | | | +--- bit 1 reserved
@@ -188,7 +215,10 @@ SwitchToBank2
 ;      | +------------- bit 6 = 1 if 128K
 ;      +--------------- bit 7 = 1 if joystick
 ; Use the bit masks defined in constants.a
-         !byte $FD                   ; MachineStatus ($FFF9)
+         !if (RELBASE != $2000) and (* != MachineStatus) { !serious "MachineStatus=",*,", fix constants.a" }
+         !byte $FD
+
+         !if (RELBASE != $2000) and (* != $FFFA) { !serious "Expected LC vectors to start at $FFFA, found ",* }
          !word Reenter               ; NMI vector ($FFFA-B)
          !word Reenter               ; reset vector ($FFFC-D)
          !word Ignore                ; IRQ vector ($FFFE-F)
@@ -207,7 +237,7 @@ COPYSRC = *
   !if LCRAM2_END >= DisableAccelerator {
     !error "code is too large: ends at ", LCRAM2_END
   }
-  FONTDST = $E000
+  FONTDST = $D100
 }
 EvenLasterMover
   FONTSRC = *
@@ -223,5 +253,8 @@ EvenLasterMover
     !warn "OKVS CACHE at ", OKVS_CACHE
     !warn "LCRAM2 ends at ", LCRAM2_END
     !warn "RELBASE = ", $10000 - (LastMover - FirstMover)
+    !if ($10000 - (LastMover - FirstMover) < $D500) { ; end of font data
+      !serious "code is too large, RELBASE overlaps with font data"
+    }
   }
 }

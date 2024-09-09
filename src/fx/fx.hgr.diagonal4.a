@@ -43,7 +43,7 @@ counter = $ff
          cmp   #24
          bcc   @rowloop
          lda   #64
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
          dec   col
          dec   counter
@@ -60,6 +60,5 @@ copymasks
          !byte %11111110
          !byte %11111111
 
-         !source "src/wait.a"
          +HGR_COPY_MASK_ROUTINES
          +HGR_BLOCK_COPY_ROUTINES

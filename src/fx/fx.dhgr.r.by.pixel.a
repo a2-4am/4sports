@@ -5,23 +5,22 @@
 !to "build/FX.INDEXED/DHGR.R.BY.PIXEL",plain
 *=$6000
 
-hgrlo    =     $0201                 ; [$C0 bytes, main memory only, offset by 1 because lookups will be based on $0200,x]
-hgr1hi   =     $0301                 ; [$C0 bytes, main memory only]
+;hgrlo    =     $0201                 ; [$C0 bytes, main memory only] defined in constants.a
 copymasks=     $02C1                 ; [$07 bytes, different values in main and auxmem]
+;hgr1hi   =     $0301                 ; [$C0 bytes, main memory only] defined in constants.a
 
          !source "src/fx/macros.a"
 
          +COPY_TO_0 start, end
-         ;X=0
-         +BUILD_HGR_LOOKUP_TABLES_X_IS_ALREADY_0 hgrlo, hgr1hi
+         jsr   iBuildHGRTables
 
          ldy   #7                    ; copy copymask arrays into place in main and auxmem
 -        lda   copymasks_main-1, y
          sta   copymasks-1, y
          lda   copymasks_aux-1, y
-         sta   $C005
+         sta   WRITEAUXMEM
          sta   copymasks-1, y
-         sta   $C004
+         sta   WRITEMAINMEM
          dey
          bne   -
 
@@ -78,16 +77,16 @@ src      eor   $FDFD, y              ; SMC
          and   copymasks, x          ; bank-specific copymasks are at the same address in main and auxmem, which is neat
          eor   (<dst+1), y
 dst      sta   $FDFD, y              ; SMC
-+        sta   $C003
-         sta   $C005
++        sta   READAUXMEM
+         sta   WRITEAUXMEM
          bcc   -
-         sta   $C002
-         sta   $C004
+         sta   READMAINMEM
+         sta   WRITEMAINMEM
          dec   <rowindex
          bne   rowloop
          dec   <maskindex
          bpl   maskloop
-         bit   $C000
+         bit   KBD
          bmi   exit
          iny
          cpy   #$28

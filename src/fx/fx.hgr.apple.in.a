@@ -7,11 +7,12 @@
 
          !source "src/fx/fx.hgr.precomputed.3bit.a"
 
-         +FX_INITONCE_3BIT CoordinatesFile, Start
-         +FX_REVERSE_3BIT
+         +FX_INITONCE_3BIT FXCodeFile, CoordinatesFile, Start
+         jsr   iReverseCoordinates3Bit
 Start
-         +FX_PRECOMPUTED_3BIT Coordinates3Bit
+         jmp   FXCode
 
+FXCodeFile
+         +PSTRING "HGR3"
 CoordinatesFile
-         !byte 13
-         !text "FX/APPLE.DATA"
+         +PSTRING "APPLE.DATA"

@@ -14,7 +14,7 @@ set VOLUME=INSTANT.REPLAY
 rem third-party tools required to build (must be in path)
 
 rem https://sourceforge.net/projects/acme-crossass/
-rem version 0.96.3 or later
+rem version 0.97 or later
 set ACME=acme
 
 rem https://github.com/mach-kernel/cadius
@@ -42,8 +42,6 @@ if "%2". equ "". (
   rem
   rem create _FileInformation.txt files for subdirectories
   rem
-  cscript /nologo bin\buildfileinfo.js res\ICONS "CA" "0000" >>build/log
-  cscript /nologo bin\buildfileinfo.js build\FX "06" "6000" >>build/log
   1>nul copy /y src\prelaunch\_FileInformation.txt build\PRELAUNCH >>build/log
   rem
   rem add everything to the disk
@@ -52,13 +50,11 @@ if "%2". equ "". (
 echo|set/p="adding files..."
 %CADIUS% ADDFILE "build\%DISK%" "/%VOLUME%/" "build\TOTAL.DATA" -C >>build\log
 if "%2". equ "". (
-  for %%q in (build\PREFS.CONF res\Finder.Data res\Finder.Root) do %CADIUS% ADDFILE "build\%DISK%" "/%VOLUME%/" "build\%%~nxq" -C >>build\log
-  for %%q in (res\TITLE.ANIMATED res\ICONS build\FX build\PRELAUNCH) do (
+  for %%q in (build\PREFS.CONF res\Finder.Data res\Finder.Root) do %CADIUS% ADDFILE "build\%DISK%" "/%VOLUME%/" "%%q" -C >>build\log
+  for %%q in (res\TITLE.ANIMATED res\ICONS build\PRELAUNCH build\X) do (
     1>nul 2>nul del /s "%%q\.DS_Store"
     %CADIUS% ADDFOLDER "build\%DISK%" "/%VOLUME%/%%~nxq" %%q -C >>build\log
   )
-  %CADIUS% CREATEFOLDER "build\%DISK%" "/%VOLUME%/X/" -C >>build\log
-  %CADIUS% ADDFOLDER "build\%DISK%" "/%VOLUME%/X" "build\X" -C >>build\log
   cscript /nologo bin\changebootloader.js "build\%DISK%" build\proboothd
 )
 echo done
@@ -66,7 +62,7 @@ goto :EOF
 )
 
 if "%1" equ "index" (
-call index
+call :index
 goto :EOF
 )
 
@@ -172,6 +168,14 @@ echo|set/p="indexing fx..."
 cscript /nologo bin\buildfx.js res\FX.CONF build\FX.IDX build\TOTAL.DATA build\FX.INDEXED >>build\log
 cscript /nologo bin\buildfx.js res\DFX.CONF build\DFX.IDX build\TOTAL.DATA build\FX.INDEXED >>build\log
 cscript /nologo bin\buildfx.js res\SFX.CONF build\SFX.IDX build\TOTAL.DATA build\FX.INDEXED >>build\log
+dir /b build\FXCODE >build\fxcode.lst
+cscript /nologo bin\buildfx.js build\fxcode.lst build\FXCODE.IDX build\TOTAL.DATA build\FXCODE >>build\log
+rem
+rem precompute indexed files for coordinates files loaded by graphic effects
+rem note: these can not be padded because some of them are loaded into tight spaces near the unclobberable top of main memory
+rem
+dir /b build\FXDATA >build\fxdata.lst
+cscript /nologo bin\buildfx.js build\fxdata.lst build\FXDATA.IDX build\TOTAL.DATA build\FXDATA >>build\log
 echo done
 rem
 rem precompute indexed files for HGR & DHGR action screenshots
@@ -200,19 +204,16 @@ cscript /nologo bin\buildss.js build\ACTIONHGR2* build\HGR2.IDX nul build\TOTAL.
 cscript /nologo bin\buildss.js build\ACTIONHGR3* build\HGR3.IDX nul build\TOTAL.DATA build\TOTAL.DATA >>build\log
 cscript /nologo bin\buildss.js build\ACTIONHGR4* build\HGR4.IDX nul build\TOTAL.DATA build\TOTAL.DATA >>build\log
 cscript /nologo bin\buildss.js build\ACTIONHGR5* build\HGR5.IDX nul build\TOTAL.DATA build\TOTAL.DATA >>build\log
-REM cscript /nologo bin\buildss.js build\ACTIONHGR6* build\HGR6.IDX nul build\TOTAL.DATA build\TOTAL.DATA >>build\log
+cscript /nologo bin\buildss.js build\ACTIONHGR6* build\HGR6.IDX nul build\TOTAL.DATA build\TOTAL.DATA >>build\log
 cscript /nologo bin\buildss.js build\ACTIONDHGR* build\DHGR.IDX nul build\TOTAL.DATA build\TOTAL.DATA >>build\log
 echo done
-rem precompute indexed files for GR and DGR action screenshots
+rem precompute indexed files for GR action screenshots
 rem note: these can be padded because they are not compressed
 rem
 echo|set/p="indexing (d)gr action..."
 1>nul copy /y nul build\ACTIONGR
-1>nul copy /y nul build\ACTIONDGR
 for %%q in (res\ACTION.GR\*) do 1>nul >>build\ACTIONGR echo %%q
-for %%q in (res\ACTION.DGR\*) do 1>nul >>build\ACTIONDGR echo %%q
 cscript /nologo bin\buildss.js build\ACTIONGR* build\GR.IDX nul build\TOTAL.DATA build\TOTAL.DATA pad >>build\log
-REM cscript /nologo bin\buildss.js build\ACTIONDGR* build\DGR.IDX nul build\TOTAL.DATA build\TOTAL.DATA pad >>build\log
 echo done
 rem
 rem precompute indexed files for SHR artwork
@@ -227,7 +228,6 @@ rem note: these can not be padded because some of them are loaded too close to $
 rem
 echo|set/p="indexing demos..."
 cscript /nologo bin\buildss.js build\DEMO build\DEMO.IDX nul build\TOTAL.DATA nul >>build\log
-cscript /nologo bin\addfile.js build\DEMO.IDX src\index\demo.idx.a
 echo done
 rem
 rem precompute indexed files for single-load game binaries
@@ -235,10 +235,10 @@ rem note: these can be padded because they are loaded at a time when all of main
 rem
 echo|set/p="indexing single-loaders..."
 for %%q in (res\dsk\*.po) do %CADIUS% EXTRACTVOLUME "%%q" build\X\ >>build\log
-1>nul 2>nul del /s build\X\.DS_Store build\X\PRODOS* build\X\LOADER.SYSTEM*
+1>nul 2>nul del /s build\X\.DS_Store build\X\PRODOS* build\X\LOADER.SYSTEM* build\X\_FileInformation.txt
 1>nul copy /y nul build\XSINGLE.IDX
 cscript /nologo bin\buildsingle.js build\X.INDEXED build\XSINGLE.IDX build\TOTAL.DATA pad >>build\log
-cscript /nologo bin\addfile.js build\XSINGLE.IDX src\index\xsingle.idx.a
+cscript /nologo bin\flatten.js
 echo done
 rem
 rem create search indexes for each variation of (game-requires-joystick) X (game-requires-128K)
@@ -265,9 +265,13 @@ cscript /nologo bin\addfile.js build\SEARCH11.IDX src\index\search11.idx.a
 cscript /nologo bin\addfile.js res\CACHE11.IDX src\index\cache11.idx.a
 cscript /nologo bin\addfile.js build\PRELAUNCH.IDX src\index\prelaunch.idx.a
 cscript /nologo bin\addfile.js build\ATTRACT.IDX src\index\attract.idx.a
+cscript /nologo bin\addfile.js build\DEMO.IDX src\index\demo.idx.a
+cscript /nologo bin\addfile.js build\XSINGLE.IDX src\index\xsingle.idx.a
 cscript /nologo bin\addfile.js build\FX.IDX src\index\fx.idx.a
 cscript /nologo bin\addfile.js build\DFX.IDX src\index\dfx.idx.a
 cscript /nologo bin\addfile.js build\SFX.IDX src\index\sfx.idx.a
+cscript /nologo bin\addfile.js build\FXCODE.IDX src\index\fxcode.idx.a
+cscript /nologo bin\addfile.js build\FXDATA.IDX src\index\fxdata.idx.a
 cscript /nologo bin\addfile.js build\GAMEHELP.IDX src\index\gamehelp.idx.a
 cscript /nologo bin\addfile.js build\SLIDESHOW.IDX src\index\slideshow.idx.a
 cscript /nologo bin\addfile.js build\MINIATTRACT0.IDX src\index\miniattract0.idx.a
@@ -280,17 +284,15 @@ cscript /nologo bin\addfile.js build\HGR2.IDX src\index\hgr2.idx.a
 cscript /nologo bin\addfile.js build\HGR3.IDX src\index\hgr3.idx.a
 cscript /nologo bin\addfile.js build\HGR4.IDX src\index\hgr4.idx.a
 cscript /nologo bin\addfile.js build\HGR5.IDX src\index\hgr5.idx.a
-REM cscript /nologo bin\addfile.js build\HGR6.IDX src\index\hgr6.idx.a
+cscript /nologo bin\addfile.js build\HGR6.IDX src\index\hgr6.idx.a
 cscript /nologo bin\addfile.js build\DHGR.IDX src\index\dhgr.idx.a
 cscript /nologo bin\addfile.js build\GR.IDX src\index\gr.idx.a
-REM cscript /nologo bin\addfile.js build\DGR.IDX src\index\dgr.idx.a
 cscript /nologo bin\addfile.js build\ARTWORK.IDX src\index\artwork.idx.a
 rem
 rem add additional miscellaneous files
 rem
 cscript /nologo bin\addfile.js build\COVERFADE src\index\coverfade.idx.a
 cscript /nologo bin\addfile.js build\GR.FIZZLE src\index\gr.fizzle.idx.a
-cscript /nologo bin\addfile.js build\DGR.FIZZLE src\index\dgr.fizzle.idx.a
 cscript /nologo bin\addfile.js build\HELPTEXT src\index\helptext.idx.a
 cscript /nologo bin\addfile.js build\CREDITS src\index\credits.idx.a
 cscript /nologo bin\addfile.js res\DECRUNCH src\index\decrunch.idx.a
@@ -302,8 +304,9 @@ goto :EOF
 2>nul md build
 2>nul md build\X
 2>nul md build\X.INDEXED
-2>nul md build\FX
 2>nul md build\FX.INDEXED
+2>nul md build\FXDATA
+2>nul md build\FXCODE
 2>nul md build\PRELAUNCH
 2>nul md build\PRELAUNCH.INDEXED
 2>nul md build\ATTRACT0
@@ -317,9 +320,9 @@ goto :EOF
 :asmlauncher
 2>nul 1>build\buildnum.log %GIT% rev-list --count HEAD
 if errorlevel 1 (set _build=0) else for /f "tokens=*" %%q in (build\buildnum.log) do set _build=%%q
-2>build\relbase.log %ACME% -DBUILDNUMBER=%_build% src\4cade.a
+2>build\relbase.log %ACME% -DBUILDNUMBER=%_build% src/4cade.a
 for /f "tokens=*" %%q in (build\relbase.log) do set _make=%%q
-%ACME% -DBUILDNUMBER=%_build% -DRELBASE=$!_make:~-5,4! -r build\4cade.lst src\4cade.a
+%ACME% -DBUILDNUMBER=%_build% -DRELBASE=$!_make:~-5,4! -r build/4cade.lst src/4cade.a
 goto :EOF
 
 :asmdemo
@@ -353,7 +356,7 @@ echo done
 goto :EOF
 
 :asmproboot
-%ACME% -r build\proboothd.lst src\proboothd\proboothd.a >> build\log
+%ACME% -r build/proboothd.lst src/proboothd/proboothd.a >> build\log
 goto :EOF
 
 :compress

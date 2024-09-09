@@ -7,10 +7,11 @@
 
          !source "src/fx/fx.dhgr.precomputed.2bit.a"
 
-         +FX_INITONCE_2BIT CoordinatesFile, Start
+         +FX_INITONCE_2BIT FXCodeFile, CoordinatesFile, Start
 Start
-         +FX_PRECOMPUTED_2BIT_DHGR_DITHER Coordinates2Bit, EndCoordinates2Bit
+         jmp   FXCode
 
+FXCodeFile
+         +PSTRING "DHGRDITHER2"
 CoordinatesFile
-         !byte 12
-         !text "FX/STAR.DATA"
+         +PSTRING "STAR.DATA"

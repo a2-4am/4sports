@@ -7,10 +7,11 @@
 
          !source "src/fx/fx.dhgr.precomputed.2bit.a"
 
-         +FX_INITONCE_2BIT CoordinatesFile, Start
+         +FX_INITONCE_2BIT FXCodeFile, CoordinatesFile, Start
 Start
-         +FX_PRECOMPUTED_2BIT_DHGR Coordinates2Bit
+         jmp   FXCode
 
+FXCodeFile
+         +PSTRING "DHGR2"
 CoordinatesFile
-         !byte 13
-         !text "FX/HEART.DATA"
+         +PSTRING "HEART.DATA"

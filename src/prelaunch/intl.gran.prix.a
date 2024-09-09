@@ -5,7 +5,7 @@
 !to "build/PRELAUNCH.INDEXED/INTL.GRAN.PRIX",plain
 *=$106
 
-    !source "src/prelaunch/common.a"
+         !source "src/macros.a"
 
          lda   #$60       ; RTS instead of JMP
          sta   $201A

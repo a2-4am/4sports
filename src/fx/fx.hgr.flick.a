@@ -6,14 +6,14 @@
 *=$6000
 
 rowcount = $FF                       ; [byte]
-hgrlo = $200                         ; [$C0 bytes]
-startrows_by_column = $2C0           ; [$28 bytes]
-hgrhi = $300                         ; [$C0 bytes]
-rowcounts_by_column = $3C0           ; [$28 bytes]
+;hgrlo = $201                         ; [$C0 bytes] defined in constants.a
+startrows_by_column = $2C1           ; [$28 bytes]
+;hgrhi = $301                         ; [$C0 bytes] defined in constants.a
+rowcounts_by_column = $3C1           ; [$28 bytes]
 
          !source "src/fx/macros.a"
 
-         +BUILD_HGR_LOOKUP_TABLES hgrlo, hgrhi
+         jsr   iBuildHGRTables
 
          ldy   #$27
 -        lda   #$00
@@ -65,14 +65,12 @@ nextcolumn
 ++       dey
          bpl   -
          lda   #$48
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   exit
          lda   rowcounts_by_column+$27
          cmp   #$80
          bne   frameloop
 exit     rts
-
-         !source "src/wait.a"
 
 initial_rowcounts
          !byte $01,$01,$00,$00,$FF,$FF,$FE,$FE,$FD,$FD

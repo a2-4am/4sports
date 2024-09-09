@@ -10,9 +10,6 @@
 
 page1 = $FC
 page2 = $FE
-dithermasks = $6200
-hgrlo = $6301
-hgrhi = $6401
 
          !source "src/fx/macros.a"
 
@@ -27,8 +24,8 @@ hgrhi = $6401
          sta   page2+1
 }
 
-         +BUILD_DITHER_MASKS dithermasks
-         +BUILD_HGR_LOOKUP_TABLES hgrlo, hgrhi
+         jsr   iBuildHGRDitherMasks
+         jsr   iBuildHGRTables
          ldx   #$80
          lda   #0
 -        sta   dithermasks, x

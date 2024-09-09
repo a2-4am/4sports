@@ -43,7 +43,7 @@ dst  = $26
          dey
          bpl   -
          lda   #$30
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
 !if 0 {
          ldx   mask1
@@ -62,7 +62,6 @@ dst  = $26
          bne   @loop
 @exit    rts
 
-         !source "src/wait.a"
          +HGR_CALC_ROUTINES
 
 mask1    !byte %10110011

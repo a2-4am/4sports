@@ -22,7 +22,7 @@
          txa
          jsr   HGRHalfBlockToWhite
          lda   #$02
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
          inc   coord
          bne   +
@@ -45,7 +45,7 @@
          txa
          jsr   HGRHalfBlockCopy
          lda   #$02
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
          inc   coord
          bne   +
@@ -56,6 +56,5 @@
 +        bne   @copyloop
 @exit    rts
 
-         !source "src/wait.a"
          +HGR_WHITE_ROUTINES
          +HGR_HALF_BLOCK_COPY_ROUTINES

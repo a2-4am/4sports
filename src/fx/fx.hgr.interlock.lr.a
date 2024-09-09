@@ -34,12 +34,11 @@ row = $FF
          cmp   #$FF
          bne   @loop
          lda   #$20
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
          inc   @h1
          dec   @h2
          bpl   @outerloop
 @exit    rts
 
-         !source "src/wait.a"
          +HGR_CALC_ROUTINES

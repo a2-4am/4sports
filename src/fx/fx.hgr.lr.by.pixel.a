@@ -50,7 +50,7 @@ col = $ff
          dec   row
          bpl   @clearrowloop
          lda   #8
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
          dec   maskindex
          bpl   @clearmaskloop
@@ -98,7 +98,7 @@ col = $ff
          dec   row
          bpl   @rowloop
          lda   #8
-         jsr   WaitForKeyWithTimeout
+         jsr   iWaitForKeyWithTimeout
          bmi   @exit
          dec   maskindex
          bpl   @maskloop
@@ -111,5 +111,4 @@ clearmasks
          !byte $80,$81,$83,$87,$8F,$9F,$BF
 copymasks
          !byte $FF,$BF,$9F,$8F,$87,$83,$81
-         !source "src/wait.a"
          +HGR_CALC_ROUTINES

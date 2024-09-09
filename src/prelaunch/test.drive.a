@@ -5,7 +5,7 @@
 !to "build/PRELAUNCH.INDEXED/TEST.DRIVE",plain
 *=$106
 
-    !source "src/prelaunch/common.a"
+         !source "src/macros.a"
 
          inc   $3F4       ; force reboot
          +READ_RAM2_NO_WRITE
