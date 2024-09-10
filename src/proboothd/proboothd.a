@@ -357,6 +357,9 @@ filename +PSTRING "LAUNCHER.SYSTEM"
 
          !src  "src/4cade.branding.a"
 
-!if (* > $9ff) {
-         !serious "Bootloader is too large"
+!if (* > $9fc) {
+         !serious "Bootloader is too large, ", *
 }
+
+*=$9fc
+!byte $D3,$C1,$CE,$A1
