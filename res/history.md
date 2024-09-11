@@ -1,6 +1,6 @@
 # Total Replay II: Instant Replay changelog
 
-## Revision 1.0-alpha.4 / unreleased
+## Revision 1.0-alpha.4 / 20240912
 
 ### New games in v1.0-alpha.4
 
@@ -53,6 +53,7 @@
 - Fix Mockingboard issue in One on One ([issue 34](https://github.com/a2-4am/4sports/issues/34))
 - Fix reset issues in Championship Baseball, Championship Wrestling, Superstar Ice Hockey (issues [36](https://github.com/a2-4am/4sports/issues/36), [35](https://github.com/a2-4am/4sports/issues/35), [45](https://github.com/a2-4am/4sports/issues/45))
 - Properly restore language card reset and IRQ vectors on re-entry (fixes multiple long-standing issues, including reset issues in Sudoku)
+- Properly reset zero page and stack after some 128K games that use the ones in auxiliary memory
 - Fix latent floppy drive access in Championship Baseball, Test Drive (issues [40](https://github.com/a2-4am/4sports/issues/40), [46](https://github.com/a2-4am/4sports/issues/46))
 
 ## Revision 1.0-alpha.3 / 20231114
