@@ -1,5 +1,11 @@
 # Total Replay II: Instant Replay changelog
 
+## Revision 1.0-alpha.5 / unreleased
+
+### Migrated from Total Replay in v1.0-alpha.5
+
+- Video Vegas
+
 ## Revision 1.0-alpha.4 / 20240912
 
 ### New games in v1.0-alpha.4
