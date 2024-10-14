@@ -23,6 +23,7 @@ Mockingboard support
 
 //to port
 3-D Skiing (Continential Software) [needs-crack][48K]
+Airsim 3 (Mind Systems Corp) [needs-crack]? [Mockingboard] http://tinyurl.com/28zee8ky
 Championship Golf [4am crack][48K]
 Colossus Chess IV (Firebird) [needs-crack][48K][supports-data-disk]
 Competition Karate [needs-crack][48K][supports-data-disk]
