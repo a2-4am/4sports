@@ -14,8 +14,9 @@
          lda   #$2c
          sta   $b12
          sta   $b17       ; don't let game change reset vector
+         jsr   HideLaunchArtwork
          jmp   $a00
 
-!if * > $1C0 {
+!if * > HideLaunchArtwork {
   !error "code is too large, ends at ", *
 }

@@ -26,6 +26,7 @@
          lda   #>callback2
          sta   $F85A
 +        jsr   DisableAccelerator
+         jsr   HideLaunchArtwork
          jmp   $F800
 
 callback1
@@ -41,6 +42,6 @@ callback2
          sta   $8213      ; patch - don't decrease lives
          rts
 
-!if * > $1C0 {
+!if * > HideLaunchArtwork {
   !error "code is too large, ends at ", *
 }

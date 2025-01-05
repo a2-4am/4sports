@@ -22,8 +22,9 @@
 hook     inc   $CF4       ; reset vector fix (moved to $3F4)
 
          +DISABLE_ACCEL
+         jsr   HideLaunchArtwork
          jmp   $C00
 
-!if * > $1C0 {
+!if * > HideLaunchArtwork {
   !error "code is too large, ends at ", *
 }

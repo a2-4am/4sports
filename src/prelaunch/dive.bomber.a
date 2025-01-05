@@ -20,12 +20,13 @@
          sta   $FFFD      ; reset vector patch
          +READ_RAM2_WRITE_RAM2
          jsr   DisableAccelerator
+         jsr   HideLaunchArtwork
          jmp   $F800
 
 reset
          +READ_ROM_NO_WRITE
          jmp   $FAA6
 
-!if * > $1C0 {
+!if * > HideLaunchArtwork {
   !error "code is too large, ends at ", *
 }

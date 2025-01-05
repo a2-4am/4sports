@@ -15,8 +15,9 @@
          +READ_RAM1_WRITE_RAM1
          +LC_REBOOT
          +DISABLE_ACCEL
+         jsr   HideLaunchArtwork
          jmp   $B700
 
-!if * > $1C0 {
+!if * > HideLaunchArtwork {
   !error "code is too large, ends at ", *
 }

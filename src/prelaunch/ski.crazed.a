@@ -44,6 +44,6 @@ callback2
          lsr   $A37
          jmp   $A00
 
-!if * > $1C0 {
+!if * > HideLaunchArtwork {
   !error "code is too large, ends at ", *
 }

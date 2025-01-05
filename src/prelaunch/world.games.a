@@ -27,10 +27,11 @@
          jsr   DisableAccelerator
          inc   $BF0E      ; disable ROM remapping
          inc   $D6A       ; set power up byte to reboot
+         jsr   HideLaunchArtwork
          jmp   $BF5
 
 game     !byte 7
          !text "/GAME/X"
-!if * > $1C0 {
+!if * > HideLaunchArtwork {
   !error "code is too large, ends at ", *
 }

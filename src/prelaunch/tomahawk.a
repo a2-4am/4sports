@@ -31,12 +31,13 @@
                           ; yes, it changes the vector like 300 times
          +DISABLE_ACCEL
          lda   $C083
+         jsr   HideLaunchArtwork
          jmp   $235
 
 reset
          +READ_ROM_NO_WRITE
          jmp   $FAA6
 
-!if * > $1C0 {
+!if * > HideLaunchArtwork {
   !error "code is too large, ends at ", *
 }
