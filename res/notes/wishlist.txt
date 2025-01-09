@@ -42,6 +42,7 @@ Ken Uston's Professional Blackjack v1.23 [4am crack][48K]
 Maxi Golf [needs-crack]
 Micro League Baseball (1984 version, not 1980) [needs-crack][64K][supports-data-disk]
 Olympic Decathlon [priority][needs-crack][48K]
+Pleins Gaz [64K], see <https://www.soberka.com/games/#pleins-gaz>
 Pro Football (Systems Design Lab)
 Pro Golf (Home-Computer Software)
 Professional Tour Golf [4am crack]
