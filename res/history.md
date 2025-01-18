@@ -6,6 +6,17 @@
 
 - Video Vegas
 
+### Enhancements & bug fixes in v1.0-alpha.5
+
+- Show game's super hi-res artwork on launch (on Apple IIgs or other supported hardware)
+- Remove visible instructions from title screens shown in search and browse modes, to reduce confusion before game launch (e.g. Mario Bros title says "Press space to start" but that's not true until you launch it). Actual in-game title screens are not affected by this change. Thanks Andrew R. for the idea.
+- Properly reset Mockingboard speech chip on Ctrl-Reset (closes [660](https://github.com/a2-4am/4cade/issues/660))
+- Improve Mockingboard speech detection algorithm (closes [661](https://github.com/a2-4am/4cade/issues/661))
+- Improve Mockingboard mono/stereo detection
+- Remove false positive on A2FPGA which made it look like it supported Mockingboard speech even though it doesn't (closes [664](https://github.com/a2-4am/4cade/issues/664))
+- Reduce color fringing, especially visible on game help pages (PR [645](https://github.com/a2-4am/4cade/pull/645), thanks xotmatrix)
+- Improve compatibility on machines running ROMx custom ROM and booting from BOOTi mass storage device
+
 ## Revision 1.0-alpha.4 / 20240912
 
 ### New games in v1.0-alpha.4
