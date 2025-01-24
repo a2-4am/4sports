@@ -62,6 +62,7 @@ GAMES.SORTED=$(BUILDDIR)/GAMES.SORTED
 PREFS.CONF=$(BUILDDIR)/PREFS.CONF
 SS=$(BUILDDIR)/SS
 SS.LIST=$(BUILDDIR)/ss.list
+ACTION.DGR.LIST=$(BUILDDIR)/action.dgr.list
 ACTION.DHGR.LIST=$(BUILDDIR)/action.dhgr.list
 ACTION.GR.LIST=$(BUILDDIR)/action.gr.list
 ACTION.HGR0.LIST=$(BUILDDIR)/action.hgr0.list
@@ -77,6 +78,7 @@ TITLE.DHGR.LIST=$(BUILDDIR)/title.dhgr.list
 TOTAL.DATA=$(BUILDDIR)/TOTAL.DATA
 X=$(BUILDDIR)/X
 XSINGLE.LIST=$(BUILDDIR)/xsingle.list
+ACTION.DGR.SOURCES=$(wildcard res/ACTION.DGR/*)
 ACTION.DHGR.SOURCES=$(wildcard res/ACTION.DHGR/*)
 ACTION.GR.SOURCES=$(wildcard res/ACTION.GR/*)
 ACTION.HGR.SOURCES=$(wildcard res/ACTION.HGR/*)
@@ -204,6 +206,9 @@ $(ACTION.DHGR.LIST): $(ACTION.DHGR.SOURCES) | $(MD)
 $(ACTION.GR.LIST): $(ACTION.GR.SOURCES) | $(MD)
 	(cd res/ACTION.GR/ && for f in *; do echo "$$f"; done) > "$@"
 
+$(ACTION.DGR.LIST): $(ACTION.DGR.SOURCES) | $(MD)
+	(cd res/ACTION.DGR/ && for f in *; do echo "$$f"; done) > "$@"
+
 $(ARTWORK.SHR.LIST): $(ARTWORK.SHR.SOURCES) | $(MD)
 	(cd res/ARTWORK.SHR/ && for f in *; do echo "$$f"; done) > "$@"
 
@@ -213,7 +218,7 @@ $(TITLE.HGR.LIST): $(TITLE.HGR.SOURCES) | $(MD)
 $(TITLE.DHGR.LIST): $(TITLE.DHGR.SOURCES) | $(MD)
 	(cd res/TITLE.DHGR/ && for f in *; do echo "$$f"; done) > "$@"
 
-$(TOTAL.DATA): $(FX) $(PRELAUNCH) $(DEMO) $(SS) $(X) $(ATTRACT) $(ATTRACT.IDX) $(HELPTEXT) $(CREDITS) $(GAMEHELP) $(GAMES.CONF) $(GAMES.SORTED) $(ACTION.HGR0.LIST) $(ACTION.HGR1.LIST) $(ACTION.HGR2.LIST) $(ACTION.HGR3.LIST) $(ACTION.HGR4.LIST) $(ACTION.HGR5.LIST) $(ACTION.HGR6.LIST) $(ACTION.DHGR.LIST) $(ACTION.GR.LIST) $(ARTWORK.SHR.LIST) $(TITLE.DHGR.LIST) $(TITLE.HGR.LIST) $(CACHE.SOURCES) $(ATTRACT.CONF) $(DFX.CONF) $(FX.CONF) $(SFX.CONF) $(COVER) $(DECRUNCH) $(HELP) $(JOYSTICK) $(TITLE)
+$(TOTAL.DATA): $(FX) $(PRELAUNCH) $(DEMO) $(SS) $(X) $(ATTRACT) $(ATTRACT.IDX) $(HELPTEXT) $(CREDITS) $(GAMEHELP) $(GAMES.CONF) $(GAMES.SORTED) $(ACTION.HGR0.LIST) $(ACTION.HGR1.LIST) $(ACTION.HGR2.LIST) $(ACTION.HGR3.LIST) $(ACTION.HGR4.LIST) $(ACTION.HGR5.LIST) $(ACTION.HGR6.LIST) $(ACTION.DGR.LIST) $(ACTION.DHGR.LIST) $(ACTION.GR.LIST) $(ARTWORK.SHR.LIST) $(TITLE.DHGR.LIST) $(TITLE.HGR.LIST) $(CACHE.SOURCES) $(ATTRACT.CONF) $(DFX.CONF) $(FX.CONF) $(SFX.CONF) $(COVER) $(DECRUNCH) $(HELP) $(JOYSTICK) $(TITLE)
 #
 # precompute indexed files for prelaunch
 # note: prelaunch must be first in TOTAL.DATA due to a hack in LoadStandardPrelaunch
@@ -271,10 +276,11 @@ $(TOTAL.DATA): $(FX) $(PRELAUNCH) $(DEMO) $(SS) $(X) $(ATTRACT) $(ATTRACT.IDX) $
 	bin/buildindexedfile.py "$@" res/ACTION.HGR < "$(ACTION.HGR6.LIST)" > "$(BUILDDIR)"/HGR6.IDX
 	bin/buildindexedfile.py "$@" res/ACTION.DHGR < "$(ACTION.DHGR.LIST)" > "$(BUILDDIR)"/DHGR.IDX
 #
-# precompute indexed files for GR action screenshots
+# precompute indexed files for GR and DGR action screenshots
 # note: these can be padded because they are not compressed
 #
 	bin/buildindexedfile.py -p "$@" res/ACTION.GR < "$(ACTION.GR.LIST)" > "$(BUILDDIR)"/GR.IDX
+	bin/buildindexedfile.py -p "$@" res/ACTION.DGR < "$(ACTION.DGR.LIST)" > "$(BUILDDIR)"/DGR.IDX
 #
 # precompute indexed files for SHR artwork
 # note: these can not be padded because they are compressed and the decompressor needs the exact size
@@ -338,9 +344,11 @@ $(TOTAL.DATA): $(FX) $(PRELAUNCH) $(DEMO) $(SS) $(X) $(ATTRACT) $(ATTRACT.IDX) $
 		"$(BUILDDIR)"/HGR6.IDX src/index/hgr6.idx.a \
 		"$(BUILDDIR)"/DHGR.IDX src/index/dhgr.idx.a \
 		"$(BUILDDIR)"/GR.IDX src/index/gr.idx.a \
+		"$(BUILDDIR)"/DGR.IDX src/index/dgr.idx.a \
 		"$(BUILDDIR)"/ARTWORK.IDX src/index/artwork.idx.a \
 		"$(BUILDDIR)"/COVERFADE src/index/coverfade.idx.a \
 		"$(BUILDDIR)"/GR.FIZZLE src/index/gr.fizzle.idx.a \
+		"$(BUILDDIR)"/DGR.FIZZLE src/index/dgr.fizzle.idx.a \
 		"$(HELPTEXT)" src/index/helptext.idx.a \
 		"$(CREDITS)" src/index/credits.idx.a \
 		"$(DECRUNCH)" src/index/decrunch.idx.a \
