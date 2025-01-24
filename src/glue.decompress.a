@@ -9,7 +9,10 @@
 ; - DecompressSHR
 ;
 
-DECRUNCH = $0314                     ; decrunch entry point
+; these are maintained by hand and must remain in sync with
+; labels in exodecrunch.a, which is assembled separately
+DECRUNCH_EXIT_ON_KEYPRESS = $025c    ; set to 'RTS' to exit decrunch on keypress
+DECRUNCH = $031a                     ; decrunch entry point
 
 ;------------------------------------------------------------------------------
 ; DecompressSHR
@@ -65,20 +68,37 @@ DecompressInternal
          lda   #<(@params - 1)
          pha
          bvs   +
-         jmp   LoadIndexedFile       ; load decompression code to $200
+         jmp   LoadIndexedFile       ; load decompression code to $200/main
 +        jmp   LoadAuxIndexedFile    ; load decompression code to $200/aux
 @params  !word $200
          !word kDecrunchRecord
          ldx   auxreq
          sta   READMAINMEM,x         ; X = 0 or 1, so this will be READMAINMEM or READAUXMEM
          sta   WRITEMAINMEM,x        ; X = 0 or 1, so this will be WRITEMAINMEM or WRITEAUXMEM
-         jsr   DECRUNCH              ; loaded from separate file
+         beq   +
+         lda   #$60
+         sta   DECRUNCH_EXIT_ON_KEYPRESS
++        jsr   DECRUNCH
+-        stx   exo_save_x
+         sty   exo_save_y
          sta   READMAINMEM
          sta   WRITEMAINMEM
          jsr   SwitchToBank2
          lda   #0
          sta   auxreq
          jmp   DisableAcceleratorAndSwitchToBank1
+
+ResumeAuxDecompress
+         jsr   SwitchToBank2
+         jsr   EnableAccelerator
+         sta   READAUXMEM
+         sta   WRITEAUXMEM
+         lda   #$EA
+         sta   DECRUNCH_EXIT_ON_KEYPRESS
+         ldx   exo_save_x
+         ldy   exo_save_y
+         jsr   DECRUNCH_EXIT_ON_KEYPRESS+1
+         jmp   -
 
 ;------------------------------------------------------------------------------
 ; DecompressDHGR
@@ -93,8 +113,10 @@ DecompressInternal
 ;        $0200..$03CB clobbered by decompressor
 ;------------------------------------------------------------------------------
 DecompressDHGR
-         jsr   DecompressHGR
-         sta   WRITEMAINMEM
+         lda   #$3F
+         bit   SHRRTS
+         jsr   DecompressInternal
+         sta   READAUXMEM
          lda   #$60
          sta   PageFrom+2
          lda   #$40

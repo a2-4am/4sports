@@ -95,7 +95,7 @@ FX.CONF=res/FX.CONF
 SFX.CONF=res/SFX.CONF
 PREFS.CONF.SOURCE=res/PREFS.CONF
 COVER=res/COVER
-DECRUNCH=res/DECRUNCH
+DECRUNCH=build/DECRUNCH
 FINDER.DATA=res/Finder.Data
 FINDER.ROOT=res/Finder.Root
 HELP=res/HELP
@@ -427,6 +427,9 @@ $(MD):
 	mkdir -p "$(BUILDDIR)"
 	touch "$(CADIUS.LOG)"
 	@touch "$@"
+
+$(DECRUNCH): $(MD)
+	$(ACME) -o $(DECRUNCH) src/decrunch/exodecrunch.a
 
 clean:
 	rm -rf "$(BUILDDIR)"/ || rm -rf "$(BUILDDIR)"

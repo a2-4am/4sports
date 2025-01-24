@@ -19,14 +19,15 @@ LaunchInternal
          stx   RestoreStackNextTime + 1
                                      ; tell |Reenter| to restore the stack and stack pointer
 
-         ldx   #(PrelaunchInitInternal_e-PrelaunchInitInternal+1)
+         ldx   #(PrelaunchInitInternal_e-PrelaunchInitInternal)
 -        lda   PrelaunchInitInternal-1, x
          sta   PrelaunchInit-1, x
          dex
          bne   -
-         ldx   #(HideLaunchArtworkInternal_e-HideLaunchArtworkInternal+1)
+         ldx   #(HideLaunchArtworkInternal_e-HideLaunchArtworkInternal)
 -        lda   HideLaunchArtworkInternal-1, x
          sta   HideLaunchArtwork-1, x
+         sta   HideLaunchArtworkLC2-1, x
          dex
          bne   -
          ;X=0
@@ -55,10 +56,16 @@ LaunchInternal
          bit   CLEARKBD
          lda   MachineStatus
          and   #SUPPORTS_SHR
-         bne   +
+         bne   @turnOffSHRShadow
          lda   #$60
          sta   HideLaunchArtwork
-+        jmp   iPrelaunchInit
+         sta   HideLaunchArtworkLC2
+         bne   @jmp                  ; always branches
+@turnOffSHRShadow
+         lda   #%00101000            ; matches powerup value
+         sta   SHADOW
+         sta   SHADOW
+@jmp     jmp   iPrelaunchInit
 
 PrelaunchInitInternal
 !pseudopc PrelaunchInit {
