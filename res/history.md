@@ -4,6 +4,7 @@
 
 ### Migrated from Total Replay in v1.0-alpha.5
 
+- Bejeweled
 - Video Vegas
 
 ### Enhancements & bug fixes in v1.0-alpha.5
