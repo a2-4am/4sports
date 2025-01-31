@@ -1,0 +1,19 @@
+;license:MIT
+;(c) 2024 by 4am
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/FASTGAMMON",plain
+*=$106
+
+         !source "src/macros.a"
+
+         +ENABLE_ACCEL
+         lda   #$4C
+         sta   $97D9
+         jsr   $8000
+         +DISABLE_ACCEL
+         jmp   $97D9+3
+
+!if * > HideLaunchArtwork {
+  !error "code is too large, ends at ", *
+}

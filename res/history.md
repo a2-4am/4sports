@@ -2,6 +2,10 @@
 
 ## Revision 1.0-alpha.5 / unreleased
 
+### New games in v1.0-alpha.5
+
+- Fastgammon
+
 ### Migrated from Total Replay in v1.0-alpha.5
 
 - Bejeweled
