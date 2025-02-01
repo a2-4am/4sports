@@ -1,0 +1,39 @@
+!cpu 6502
+*=$8000
+!to "build/SLIDE.GLIDE#068000",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         jmp   start
+
+compressed_data
+         !bin "src/OBJ0.X"
+         !bin "src/OBJ1.X"
+         !bin "src/OBJ2.X"
+FORWARD_DECRUNCHING = 1
+SHOW_PROGRESS_DURING_DECRUNCH = 0
+         !src  "../common/src/exodecrunch.a"
+
+start
+         +INIT_MACHINE
+         jsr   decrunch              ; decompress title screen routine at $6000
+         jsr   $6000                 ; show title screen
+!if * != $B080 {
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
+}
+         jsr   decrunch              ; decompress game code at $0900
+         jsr   decrunch              ; decompress game code at $5000
+         jsr   $900
+         bit   CLEARKBD
+         jsr   PRODOS_MLI
+         !byte CMD_QUIT
+         !word +
++        !byte 4
+
+get_crunched_byte
+         lda   compressed_data
+         inc   get_crunched_byte+1
+         bne   +
+         inc   get_crunched_byte+2
++        rts

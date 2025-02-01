@@ -1,5 +1,5 @@
 ;license:MIT
-;(c) 2024 by 4am
+;(c) 2025 by 4am
 
 !cpu 6502
 !to "build/PRELAUNCH.INDEXED/FASTGAMMON",plain

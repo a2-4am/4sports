@@ -1,0 +1,19 @@
+;license:MIT
+;(c) 2025 by 4am
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/SLIDE.GLIDE",plain
+*=$106
+
+         !source "src/macros.a"
+
+         +ENABLE_ACCEL
+         lda   #$4C
+         sta   $B080
+         jsr   $8000
+         +DISABLE_ACCEL
+         jmp   $B080+3
+
+!if * > HideLaunchArtwork {
+  !error "code is too large, ends at ", *
+}
