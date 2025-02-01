@@ -23,6 +23,7 @@
 - Remove false positive on A2FPGA which made it look like it supported Mockingboard speech even though it doesn't (closes [664](https://github.com/a2-4am/4cade/issues/664))
 - Reduce color fringing, especially visible on game help pages (PR [645](https://github.com/a2-4am/4cade/pull/645), thanks xotmatrix)
 - Improve compatibility on machines running ROMx custom ROM and booting from BOOTi mass storage device
+- Add more box art (thanks Alex R., Andrew R.)
 
 ## Revision 1.0-alpha.4 / 20240912
 
