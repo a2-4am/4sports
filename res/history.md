@@ -5,6 +5,7 @@
 ### New games in v1.0-alpha.5
 
 - Fastgammon
+- Slide Glide
 
 ### Migrated from Total Replay in v1.0-alpha.5
 
