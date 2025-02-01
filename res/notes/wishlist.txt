@@ -50,7 +50,6 @@ Pure Stat Baseball [needs-crack][64K]
 Pure Stat College Basketball
 Ringside Seat (SSI) [4am/san inc crack][48K]
 Sargon III (Hayden) [4am crack][supports-data-disk]
-Spinout (Chris Oberth) [48K][unreleased, see <https://www.gamingalexandria.com/wp/2021/08/oberth-archives-one/>]
 Star League Baseball [needs-crack][64K]
 Star Rank Boxing II [4am crack][priority]
 Sub Battle Simulator [4am crack][64K]
@@ -82,7 +81,6 @@ Wheel of Fortune First Edition (+ Second Edition, Third Edition, Golden Edition)
 Win, Lose, or Draw (+ Second Edition, Junior Edition) [DHGR][128K] (Junior Edition is HGR-but-128K)
 
 //idea:Bez collection
-Slide Glide
 Fuelish Future
 Lumber Jack Crash
 Weights and Treasure [has construction kit]

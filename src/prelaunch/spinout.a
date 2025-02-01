@@ -1,0 +1,16 @@
+;license:MIT
+;(c) 2021 by qkumba
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/SPINOUT",plain
+*=$106
+
+         !source "src/macros.a"
+
+         +NEW_RESET_VECTOR $101
+         jsr   HideLaunchArtwork
+         jmp   (ldrlo2)              ; last ProRWTS load address
+
+!if * > HideLaunchArtwork {
+  !error "code is too large, ends at ", *
+}

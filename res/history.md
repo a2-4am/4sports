@@ -6,6 +6,7 @@
 
 - Fastgammon
 - Slide Glide
+- Spinout
 
 ### Migrated from Total Replay in v1.0-alpha.5
 
