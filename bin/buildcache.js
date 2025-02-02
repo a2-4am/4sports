@@ -26,25 +26,22 @@ while (!b.atendofstream)
     continue
   }
 
-  e = c.substr(c.indexOf("=") + 1)
-  e = e.substr(0, e.indexOf("/"))
-
   if (c.substr(0, 2) == "00")
   {
-    f00.writeline(e)
+    f00.writeline(c.substr(c.indexOf("=") + 1))
   }
 
   if (c.substr(0, 1) == "0")
   {
-    f01.writeline(e)
+    f01.writeline(c.substr(c.indexOf("=") + 1))
   }
 
   if (c.substr(1, 1) == "0")
   {
-    f10.writeline(e)
+    f10.writeline(c.substr(c.indexOf("=") + 1))
   }
 
-  f11.writeline(e)
+  f11.writeline(c.substr(c.indexOf("=") + 1))
 }
 
 f11.close()

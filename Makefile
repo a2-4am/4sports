@@ -57,6 +57,7 @@ ATTRACT.IDX=$(BUILDDIR)/ATTRACT.IDX
 HELPTEXT=$(BUILDDIR)/HELPTEXT
 CREDITS=$(BUILDDIR)/CREDITS
 GAMEHELP=$(BUILDDIR)/GAMEHELP
+GAMEHELP.COMPRESSED=$(BUILDDIR)/GAMEHELP.COMPRESSED
 GAMES.CONF=$(BUILDDIR)/GAMES.CONF
 GAMES.SORTED=$(BUILDDIR)/GAMES.SORTED
 PREFS.CONF=$(BUILDDIR)/PREFS.CONF
@@ -96,8 +97,8 @@ DFX.CONF=res/DFX.CONF
 FX.CONF=res/FX.CONF
 SFX.CONF=res/SFX.CONF
 PREFS.CONF.SOURCE=res/PREFS.CONF
+GAMES.CONF.SOURCE=res/GAMES.CONF
 COVER=res/COVER
-DECRUNCH=build/DECRUNCH
 FINDER.DATA=res/Finder.Data
 FINDER.ROOT=res/Finder.Root
 HELP=res/HELP
@@ -128,8 +129,8 @@ $(PREFS.CONF): $(PREFS.CONF.SOURCE) | $(MD)
 	bin/padto.sh "$@"
 
 # create a version of GAMES.CONF without comments or blank lines or anything after display titles
-$(GAMES.CONF): $(MD)
-	awk '!/^$$|^#/' < res/GAMES.CONF | awk -F'/' '{ print $$1 }' > "$@"
+$(GAMES.CONF): $(MD) $(GAMES.CONF.SOURCE)
+	awk '!/^$$|^#/' < "$(GAMES.CONF.SOURCE)" | awk -F'/' '{ print $$1 }' > "$@"
 
 # create a list of all game filenames, without metadata or display names, sorted by game filename
 $(GAMES.SORTED): | $(MD) $(GAMES.CONF)
@@ -161,6 +162,11 @@ $(CREDITS): $(MD)
 $(GAMEHELP): $(GAMEHELP.SOURCES) | $(MD)
 	mkdir -p "$@"
 	$(PARALLEL) 'bin/converthelp.sh "{}" "$@/{/}"' ::: res/GAMEHELP/*
+	@touch "$@"
+
+$(GAMEHELP.COMPRESSED): $(GAMEHELP) | $(MD)
+	mkdir -p "$@"
+	$(PARALLEL) '[ -f "$@/{/}" ] || ${EXOMIZER} "{}"@0x0900 -o "$@/{/}"' ::: "$(GAMEHELP)"/*
 	@touch "$@"
 
 # precompute binary data structures for slideshow configuration files
@@ -218,7 +224,7 @@ $(TITLE.HGR.LIST): $(TITLE.HGR.SOURCES) | $(MD)
 $(TITLE.DHGR.LIST): $(TITLE.DHGR.SOURCES) | $(MD)
 	(cd res/TITLE.DHGR/ && for f in *; do echo "$$f"; done) > "$@"
 
-$(TOTAL.DATA): $(FX) $(PRELAUNCH) $(DEMO) $(SS) $(X) $(ATTRACT) $(ATTRACT.IDX) $(HELPTEXT) $(CREDITS) $(GAMEHELP) $(GAMES.CONF) $(GAMES.SORTED) $(ACTION.HGR0.LIST) $(ACTION.HGR1.LIST) $(ACTION.HGR2.LIST) $(ACTION.HGR3.LIST) $(ACTION.HGR4.LIST) $(ACTION.HGR5.LIST) $(ACTION.HGR6.LIST) $(ACTION.DGR.LIST) $(ACTION.DHGR.LIST) $(ACTION.GR.LIST) $(ARTWORK.SHR.LIST) $(TITLE.DHGR.LIST) $(TITLE.HGR.LIST) $(CACHE.SOURCES) $(ATTRACT.CONF) $(DFX.CONF) $(FX.CONF) $(SFX.CONF) $(COVER) $(DECRUNCH) $(HELP) $(JOYSTICK) $(TITLE)
+$(TOTAL.DATA): $(FX) $(PRELAUNCH) $(DEMO) $(SS) $(X) $(ATTRACT) $(ATTRACT.IDX) $(HELPTEXT) $(CREDITS) $(GAMEHELP.COMPRESSED) $(GAMES.CONF) $(GAMES.SORTED) $(ACTION.HGR0.LIST) $(ACTION.HGR1.LIST) $(ACTION.HGR2.LIST) $(ACTION.HGR3.LIST) $(ACTION.HGR4.LIST) $(ACTION.HGR5.LIST) $(ACTION.HGR6.LIST) $(ACTION.DGR.LIST) $(ACTION.DHGR.LIST) $(ACTION.GR.LIST) $(ARTWORK.SHR.LIST) $(TITLE.DHGR.LIST) $(TITLE.HGR.LIST) $(CACHE.SOURCES) $(ATTRACT.CONF) $(DFX.CONF) $(FX.CONF) $(SFX.CONF) $(COVER) $(HELP) $(JOYSTICK) $(TITLE)
 #
 # precompute indexed files for prelaunch
 # note: prelaunch must be first in TOTAL.DATA due to a hack in LoadStandardPrelaunch
@@ -234,15 +240,16 @@ $(TOTAL.DATA): $(FX) $(PRELAUNCH) $(DEMO) $(SS) $(X) $(ATTRACT) $(ATTRACT.IDX) $
 	bin/padto.sh "$@"
 	bin/buildindexedfile.py "$@" res/TITLE.HGR "$(BUILDDIR)"/HGR.TITLES.LOG < "$(TITLE.HGR.LIST)" > "$(BUILDDIR)"/TITLE.IDX
 	bin/buildindexedfile.py "$@" res/TITLE.DHGR "$(BUILDDIR)"/DHGR.TITLES.LOG < "$(TITLE.DHGR.LIST)" > "$(BUILDDIR)"/DTITLE.IDX
+	mkdir -p "$(BUILDDIR)"/index/
 	bin/addfiles.py "$@" \
-		"$(COVER)" src/index/res.cover.idx.a \
-		"$(TITLE)" src/index/res.title.idx.a \
-		"$(HELP)" src/index/res.help.idx.a
+		"$(COVER)" "$(BUILDDIR)"/index/res.cover.idx.a \
+		"$(TITLE)" "$(BUILDDIR)"/index/res.title.idx.a \
+		"$(HELP)" "$(BUILDDIR)"/index/res.help.idx.a
 #
 # precompute indexed files for game help
-# note: these can be padded because they're loaded into $800 at a time when $800..$1FFF is clobber-able
+# note: these can not be padded because they are compressed and the decompressor needs the exact size
 #
-	bin/buildindexedfile.py -p "$@" "$(GAMEHELP)" < "$(GAMES.SORTED)" > "$(BUILDDIR)"/GAMEHELP.IDX
+	bin/buildindexedfile.py "$@" "$(GAMEHELP.COMPRESSED)" < "$(GAMES.SORTED)" > "$(BUILDDIR)"/GAMEHELP.IDX
 #
 # precompute indexed files for slideshows
 # note: these can be padded because they're loaded into $800 at a time when $800..$1FFF is clobber-able
@@ -302,57 +309,56 @@ $(TOTAL.DATA): $(FX) $(PRELAUNCH) $(DEMO) $(SS) $(X) $(ATTRACT) $(ATTRACT.IDX) $
 # in the form of OKVS data structures, plus game counts in the form of source files
 #
 	$(PARALLEL) ::: \
-	    '(grep "^00" < "$(GAMES.CONF)" | bin/buildsearch.py src/index/count00.a "$(BUILDDIR)"/HGR.TITLES.LOG "" > "$(BUILDDIR)"/SEARCH00.IDX)' \
-	    '(grep "^0" < "$(GAMES.CONF)" | bin/buildsearch.py src/index/count01.a "$(BUILDDIR)"/HGR.TITLES.LOG "$(BUILDDIR)"/DHGR.TITLES.LOG > "$(BUILDDIR)"/SEARCH01.IDX)' \
-	    '(grep "^.0" < "$(GAMES.CONF)" | bin/buildsearch.py src/index/count10.a "$(BUILDDIR)"/HGR.TITLES.LOG "" > "$(BUILDDIR)"/SEARCH10.IDX)' \
-	    '(bin/buildsearch.py src/index/count11.a "$(BUILDDIR)"/HGR.TITLES.LOG "$(BUILDDIR)"/DHGR.TITLES.LOG < "$(GAMES.CONF)" > "$(BUILDDIR)"/SEARCH11.IDX)'
+	    '(grep "^00" < "$(GAMES.CONF)" | bin/buildsearch.py "$(BUILDDIR)"/index/count00.a "$(BUILDDIR)"/HGR.TITLES.LOG "" > "$(BUILDDIR)"/SEARCH00.IDX)' \
+	    '(grep "^0" < "$(GAMES.CONF)" | bin/buildsearch.py "$(BUILDDIR)"/index/count01.a "$(BUILDDIR)"/HGR.TITLES.LOG "$(BUILDDIR)"/DHGR.TITLES.LOG > "$(BUILDDIR)"/SEARCH01.IDX)' \
+	    '(grep "^.0" < "$(GAMES.CONF)" | bin/buildsearch.py "$(BUILDDIR)"/index/count10.a "$(BUILDDIR)"/HGR.TITLES.LOG "" > "$(BUILDDIR)"/SEARCH10.IDX)' \
+	    '(bin/buildsearch.py "$(BUILDDIR)"/index/count11.a "$(BUILDDIR)"/HGR.TITLES.LOG "$(BUILDDIR)"/DHGR.TITLES.LOG < "$(GAMES.CONF)" > "$(BUILDDIR)"/SEARCH11.IDX)'
 #
 # add IDX files to the combined index file and generate
 # the index records that callers use to reference them,
 # plus additional miscellaneous files
 #
 	bin/addfiles.py "$@" \
-		"$(BUILDDIR)"/SEARCH00.IDX src/index/search00.idx.a \
-		res/CACHE00.IDX src/index/cache00.idx.a \
-		"$(BUILDDIR)"/SEARCH01.IDX src/index/search01.idx.a \
-		res/CACHE01.IDX src/index/cache01.idx.a \
-		"$(BUILDDIR)"/SEARCH10.IDX src/index/search10.idx.a \
-		res/CACHE10.IDX src/index/cache10.idx.a \
-		"$(BUILDDIR)"/SEARCH11.IDX src/index/search11.idx.a \
-		res/CACHE11.IDX src/index/cache11.idx.a \
-		"$(BUILDDIR)"/PRELAUNCH.IDX src/index/prelaunch.idx.a \
-		"$(ATTRACT.IDX)" src/index/attract.idx.a \
-		"$(BUILDDIR)"/DEMO.IDX src/index/demo.idx.a \
-		"$(BUILDDIR)"/XSINGLE.IDX src/index/xsingle.idx.a \
-		"$(BUILDDIR)"/FX.IDX src/index/fx.idx.a \
-		"$(BUILDDIR)"/DFX.IDX src/index/dfx.idx.a \
-		"$(BUILDDIR)"/SFX.IDX src/index/sfx.idx.a \
-		"$(BUILDDIR)"/FXCODE.IDX src/index/fxcode.idx.a \
-		"$(BUILDDIR)"/FXDATA.IDX src/index/fxdata.idx.a \
-		"$(BUILDDIR)"/GAMEHELP.IDX src/index/gamehelp.idx.a \
-		"$(BUILDDIR)"/SLIDESHOW.IDX src/index/slideshow.idx.a \
-		"$(BUILDDIR)"/MINIATTRACT0.IDX src/index/miniattract0.idx.a \
-		"$(BUILDDIR)"/MINIATTRACT1.IDX src/index/miniattract1.idx.a \
-		"$(BUILDDIR)"/TITLE.IDX src/index/title.idx.a \
-		"$(BUILDDIR)"/DTITLE.IDX src/index/dtitle.idx.a \
-		"$(BUILDDIR)"/HGR0.IDX src/index/hgr0.idx.a \
-		"$(BUILDDIR)"/HGR1.IDX src/index/hgr1.idx.a \
-		"$(BUILDDIR)"/HGR2.IDX src/index/hgr2.idx.a \
-		"$(BUILDDIR)"/HGR3.IDX src/index/hgr3.idx.a \
-		"$(BUILDDIR)"/HGR4.IDX src/index/hgr4.idx.a \
-		"$(BUILDDIR)"/HGR5.IDX src/index/hgr5.idx.a \
-		"$(BUILDDIR)"/HGR6.IDX src/index/hgr6.idx.a \
-		"$(BUILDDIR)"/DHGR.IDX src/index/dhgr.idx.a \
-		"$(BUILDDIR)"/GR.IDX src/index/gr.idx.a \
-		"$(BUILDDIR)"/DGR.IDX src/index/dgr.idx.a \
-		"$(BUILDDIR)"/ARTWORK.IDX src/index/artwork.idx.a \
-		"$(BUILDDIR)"/COVERFADE src/index/coverfade.idx.a \
-		"$(BUILDDIR)"/GR.FIZZLE src/index/gr.fizzle.idx.a \
-		"$(BUILDDIR)"/DGR.FIZZLE src/index/dgr.fizzle.idx.a \
-		"$(HELPTEXT)" src/index/helptext.idx.a \
-		"$(CREDITS)" src/index/credits.idx.a \
-		"$(DECRUNCH)" src/index/decrunch.idx.a \
-		"$(JOYSTICK)" src/index/joystick.idx.a
+		"$(BUILDDIR)"/SEARCH00.IDX "$(BUILDDIR)"/index/search00.idx.a \
+		res/CACHE00.IDX "$(BUILDDIR)"/index/cache00.idx.a \
+		"$(BUILDDIR)"/SEARCH01.IDX "$(BUILDDIR)"/index/search01.idx.a \
+		res/CACHE01.IDX "$(BUILDDIR)"/index/cache01.idx.a \
+		"$(BUILDDIR)"/SEARCH10.IDX "$(BUILDDIR)"/index/search10.idx.a \
+		res/CACHE10.IDX "$(BUILDDIR)"/index/cache10.idx.a \
+		"$(BUILDDIR)"/SEARCH11.IDX "$(BUILDDIR)"/index/search11.idx.a \
+		res/CACHE11.IDX "$(BUILDDIR)"/index/cache11.idx.a \
+		"$(BUILDDIR)"/PRELAUNCH.IDX "$(BUILDDIR)"/index/prelaunch.idx.a \
+		"$(ATTRACT.IDX)" "$(BUILDDIR)"/index/attract.idx.a \
+		"$(BUILDDIR)"/DEMO.IDX "$(BUILDDIR)"/index/demo.idx.a \
+		"$(BUILDDIR)"/XSINGLE.IDX "$(BUILDDIR)"/index/xsingle.idx.a \
+		"$(BUILDDIR)"/FX.IDX "$(BUILDDIR)"/index/fx.idx.a \
+		"$(BUILDDIR)"/DFX.IDX "$(BUILDDIR)"/index/dfx.idx.a \
+		"$(BUILDDIR)"/SFX.IDX "$(BUILDDIR)"/index/sfx.idx.a \
+		"$(BUILDDIR)"/FXCODE.IDX "$(BUILDDIR)"/index/fxcode.idx.a \
+		"$(BUILDDIR)"/FXDATA.IDX "$(BUILDDIR)"/index/fxdata.idx.a \
+		"$(BUILDDIR)"/GAMEHELP.IDX "$(BUILDDIR)"/index/gamehelp.idx.a \
+		"$(BUILDDIR)"/SLIDESHOW.IDX "$(BUILDDIR)"/index/slideshow.idx.a \
+		"$(BUILDDIR)"/MINIATTRACT0.IDX "$(BUILDDIR)"/index/miniattract0.idx.a \
+		"$(BUILDDIR)"/MINIATTRACT1.IDX "$(BUILDDIR)"/index/miniattract1.idx.a \
+		"$(BUILDDIR)"/TITLE.IDX "$(BUILDDIR)"/index/title.idx.a \
+		"$(BUILDDIR)"/DTITLE.IDX "$(BUILDDIR)"/index/dtitle.idx.a \
+		"$(BUILDDIR)"/HGR0.IDX "$(BUILDDIR)"/index/hgr0.idx.a \
+		"$(BUILDDIR)"/HGR1.IDX "$(BUILDDIR)"/index/hgr1.idx.a \
+		"$(BUILDDIR)"/HGR2.IDX "$(BUILDDIR)"/index/hgr2.idx.a \
+		"$(BUILDDIR)"/HGR3.IDX "$(BUILDDIR)"/index/hgr3.idx.a \
+		"$(BUILDDIR)"/HGR4.IDX "$(BUILDDIR)"/index/hgr4.idx.a \
+		"$(BUILDDIR)"/HGR5.IDX "$(BUILDDIR)"/index/hgr5.idx.a \
+		"$(BUILDDIR)"/HGR6.IDX "$(BUILDDIR)"/index/hgr6.idx.a \
+		"$(BUILDDIR)"/DHGR.IDX "$(BUILDDIR)"/index/dhgr.idx.a \
+		"$(BUILDDIR)"/GR.IDX "$(BUILDDIR)"/index/gr.idx.a \
+		"$(BUILDDIR)"/DGR.IDX "$(BUILDDIR)"/index/dgr.idx.a \
+		"$(BUILDDIR)"/ARTWORK.IDX "$(BUILDDIR)"/index/artwork.idx.a \
+		"$(BUILDDIR)"/COVERFADE "$(BUILDDIR)"/index/coverfade.idx.a \
+		"$(BUILDDIR)"/GR.FIZZLE "$(BUILDDIR)"/index/gr.fizzle.idx.a \
+		"$(BUILDDIR)"/DGR.FIZZLE "$(BUILDDIR)"/index/dgr.fizzle.idx.a \
+		"$(HELPTEXT)" "$(BUILDDIR)"/index/helptext.idx.a \
+		"$(CREDITS)" "$(BUILDDIR)"/index/credits.idx.a \
+		"$(JOYSTICK)" "$(BUILDDIR)"/index/joystick.idx.a
 	@touch "$@"
 
 # assemble main program
@@ -370,8 +376,9 @@ $(DEMO): $(DEMO.SOURCES) | $(MD)
 
 # assemble graphic effects
 $(FX): $(FX.SOURCES) | $(MD)
-	mkdir -p "$@" "$(BUILDDIR)"/FX.INDEXED "$(BUILDDIR)"/FXDATA "$(BUILDDIR)"/FXCODE
+	mkdir -p "$@" "$(BUILDDIR)"/FX.INDEXED "$(BUILDDIR)"/FXDATA "$(BUILDDIR)"/FXDATA.UNCOMPRESSED "$(BUILDDIR)"/FXCODE
 	$(PARALLEL) 'if grep -q "^!to" "{}"; then $(ACME) "{}"; fi' ::: src/fx/*.a
+	$(PARALLEL) '${EXOMIZER} {}@0x$$(echo {/}|cut -d, -f2) -o "$(BUILDDIR)/FXDATA/"$$(echo {/}|cut -d, -f1)' ::: "$(BUILDDIR)"/FXDATA.UNCOMPRESSED/*
 	(cd "$(BUILDDIR)"/FXCODE/ && for f in *; do echo "$$f"; done) > "$(FXCODE.LIST)"
 	(cd "$(BUILDDIR)"/FXDATA/ && for f in *; do echo "$$f"; done) > "$(FXDATA.LIST)"
 	@touch "$@"
@@ -392,11 +399,17 @@ $(PROBOOTHD): $(PROBOOT.SOURCES) | $(MD)
 # only needs to be run when a new graphic file is added.
 # It create files in the repository which can then be checked in.
 #
+# Most of these files are a known size (enforced by truncate command)
+# so we do not include the target address in the compressed data.
+# The launcher will set the target address at runtime before
+# decompressing. This saves 2 bytes per file.
+#
 compress: $(MD)
-	$(PARALLEL) '[ -f "res/ACTION.HGR/{/}" ] || ${EXOMIZER} "{}"@0x4000 -o "res/ACTION.HGR/{/}"' ::: res/ACTION.HGR.UNCOMPRESSED/*
-	$(PARALLEL) '[ -f "res/ACTION.DHGR/{/}" ] || ${EXOMIZER} "{}"@0x4000 -o "res/ACTION.DHGR/{/}"' ::: res/ACTION.DHGR.UNCOMPRESSED/*
-	$(PARALLEL) '[ -f "res/ARTWORK.SHR/{/}" ] || ${EXOMIZER} "{}"@0x2000 -o "res/ARTWORK.SHR/{/}"' ::: res/ARTWORK.SHR.UNCOMPRESSED/*
+	$(PARALLEL) '[ -f "res/ACTION.HGR/{/}" ] || (truncate -s 8192 "{}" && ${EXOMIZER} "{}"@0x0000 -o "res/ACTION.HGR/{/}" && truncate -s -2 "res/ACTION.HGR/{/}")' ::: res/ACTION.HGR.UNCOMPRESSED/*
+	$(PARALLEL) '[ -f "res/ACTION.DHGR/{/}" ] || (truncate -s 16384 "{}" && ${EXOMIZER} "{}"@0x0000 -o "res/ACTION.DHGR/{/}" && truncate -s -2 "res/ACTION.DHGR/{/}")' ::: res/ACTION.DHGR.UNCOMPRESSED/*
+	$(PARALLEL) '[ -f "res/ARTWORK.SHR/{/}" ] || (truncate -s 32768 "{}" && ${EXOMIZER} "{}"@0x0000 -o "res/ARTWORK.SHR/{/}" && truncate -s -2 "res/ARTWORK.SHR/{/}")' ::: res/ARTWORK.SHR.UNCOMPRESSED/*
 	$(PARALLEL) '[ -f "res/TITLE.HGR/{/}" ] || bin/packhgrfile.py "{}" "res/TITLE.HGR/{/}"' ::: res/TITLE.HGR.UNPACKED/*
+	$(PARALLEL) '[ -f "res/TITLE.DHGR/{/}" ] || bin/packdhgrfile.py "{}" "res/TITLE.DHGR/{/}"' ::: res/TITLE.DHGR.UNPACKED/*
 
 #
 # |attract| must be called separately because it is slow and
@@ -435,9 +448,6 @@ $(MD):
 	mkdir -p "$(BUILDDIR)"
 	touch "$(CADIUS.LOG)"
 	@touch "$@"
-
-$(DECRUNCH): $(MD)
-	$(ACME) -o $(DECRUNCH) src/decrunch/exodecrunch.a
 
 clean:
 	rm -rf "$(BUILDDIR)"/ || rm -rf "$(BUILDDIR)"
