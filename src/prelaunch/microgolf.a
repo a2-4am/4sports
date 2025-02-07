@@ -12,6 +12,7 @@
          sta   $18B6
          jsr   $0800
          +DISABLE_ACCEL
+         jsr   HideLaunchArtwork
          jmp   $18B9
 
 !if * > HideLaunchArtwork {
