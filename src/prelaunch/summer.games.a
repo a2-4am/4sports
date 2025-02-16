@@ -14,12 +14,9 @@
 
          +READ_RAM1_WRITE_RAM1
          +LC_REBOOT
-         +READ_ROM_NO_WRITE
-
-         +DISABLE_ACCEL
-         jsr   HideLaunchArtwork
+         +DISABLE_ACCEL_AND_HIDE_ARTWORK
          jmp   $B700
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

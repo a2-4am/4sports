@@ -15,6 +15,6 @@
          ; can not set reset vector because game stores data there
          jmp   $966A
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

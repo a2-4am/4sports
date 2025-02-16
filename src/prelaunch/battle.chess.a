@@ -7,8 +7,7 @@
 
          !source "src/macros.a"
 
-         jsr   HideLaunchArtwork
-         +ENABLE_ACCEL
+         +ENABLE_ACCEL_AND_HIDE_ARTWORK
          inc   $3F4       ; force reboot
          lda   #$50
          sta   $933
@@ -32,6 +31,6 @@ callback !pseudopc $250 {
 }
 callback_e
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

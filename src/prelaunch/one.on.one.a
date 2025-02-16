@@ -7,9 +7,9 @@
 
          !source "src/macros.a"
 
-         jsr   HideLaunchArtwork
          +READ_RAM2_WRITE_RAM2
          jsr   EnableAccelerator
+         jsr   HideLaunchArtworkLC2
          lda   MockingboardStuff
          cmp   #1
          and   #7
@@ -53,6 +53,6 @@ skipmb
 +
          jmp   $400
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

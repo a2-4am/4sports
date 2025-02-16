@@ -16,7 +16,6 @@
          sta   $B748
          lda   #>callback
          sta   $B749
-         jsr   HideLaunchArtwork
          jmp   $B700
 
 callback
@@ -28,7 +27,7 @@ callback
          sta   $B7B8
          lda   #>callback2
          sta   $B7B9
-         +DISABLE_ACCEL
+         +DISABLE_ACCEL_AND_HIDE_ARTWORK
          jmp   $9D84
 
 callback2
@@ -45,6 +44,6 @@ callback2
          clc
 +        rts
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

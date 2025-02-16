@@ -14,6 +14,6 @@
          +DISABLE_ACCEL
          jmp   $A6AC+3
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

@@ -7,11 +7,11 @@
 
          !source "src/macros.a"
 
+         +HIDE_ARTWORK
          ;+ENABLE_ACCEL
          lda   #$60
          sta   $A13
          jsr   $800      ; decompress
-         jsr   HideLaunchArtwork
 
          lda   #$60
          sta   $D048     ; set hook
@@ -29,6 +29,6 @@
          ;+DISABLE_ACCEL ; LC is overwritten by this point
          jmp   $6000
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

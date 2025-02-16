@@ -17,6 +17,6 @@ blackbelt_mb
          !byte 23
          !text "PRELAUNCH/BLACK.BELT.MB"
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

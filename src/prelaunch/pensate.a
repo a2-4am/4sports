@@ -7,14 +7,13 @@
 
          !source "src/macros.a"
 
-         jsr   HideLaunchArtwork
-         +ENABLE_ACCEL
+         +ENABLE_ACCEL_AND_HIDE_ARTWORK
          lda   #$4C
          sta   $404A
          jsr   $4000      ; decompress
          +DISABLE_ACCEL
          jmp   $880
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

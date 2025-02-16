@@ -45,6 +45,6 @@ callback2
          +DISABLE_ACCEL
          jmp   $B4B8
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

@@ -16,6 +16,6 @@
          txs
          jmp   $211F
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

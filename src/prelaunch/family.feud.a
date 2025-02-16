@@ -38,6 +38,6 @@ callback2
          sta   $960F      ; reset vector
 +        rts
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

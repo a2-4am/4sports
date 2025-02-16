@@ -13,11 +13,11 @@
          jsr   $800       ; decompress
 
          jsr   DisableAccelerator
-         jsr   HideLaunchArtwork
+         jsr   HideLaunchArtworkLC2
          jsr   $BE44
          +LC_REBOOT
          jmp   $9B6
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

@@ -8,9 +8,9 @@
          !source "src/macros.a"
 
          +NEW_RESET_VECTOR $101
-         jsr   HideLaunchArtwork
+         +HIDE_ARTWORK
          jmp   (ldrlo2)              ; last ProRWTS load address
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

@@ -12,7 +12,7 @@
          sta   $21BE
          jsr   $2000      ; decompress
          jsr   DisableAccelerator
-         jsr   HideLaunchArtwork
+         jsr   HideLaunchArtworkLC2
          jsr   $B801
          lda   #$4C
          sta   $21C8
@@ -28,6 +28,6 @@
          sta   $105       ; update reset hook to reboot
          jmp   $21CB
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

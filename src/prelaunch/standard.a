@@ -5,11 +5,11 @@
 !to "build/PRELAUNCH.INDEXED/STANDARD",plain
 *=$106
 
-         !source "src/constants.a"
+         !source "src/macros.a"
 
-         jsr   HideLaunchArtwork
+         +HIDE_ARTWORK
          jmp   (ldrlo2)              ; last ProRWTS load address
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

@@ -25,13 +25,13 @@
          sta   $C72       ; disable /RAM shenanigans
          +READ_RAM2_NO_WRITE
          jsr   DisableAccelerator
+         jsr   HideLaunchArtworkLC2
          inc   $BF0E      ; disable ROM remapping
          inc   $D6A       ; set power up byte to reboot
-         jsr   HideLaunchArtwork
          jmp   $BF5
 
 game     !byte 7
          !text "/GAME/X"
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }

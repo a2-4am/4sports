@@ -15,6 +15,6 @@
          +NEW_RESET_VECTOR $200
          jmp   $AA2F
 
-!if * > HideLaunchArtwork {
+!if * > PrelaunchMax {
   !error "code is too large, ends at ", *
 }
