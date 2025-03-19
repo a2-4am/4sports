@@ -66,6 +66,13 @@ Trick Shot (IDSI) [needs-crack][48K][supports-data-disk]
 World Class Leader Board (Access Software) [64K]
 World Series Baseball
 
+//MicroProse (already have Solo Flight, F-15 Strike Eagle, Silent Service)
+Conflict in Vietnam v331.00 [64K/128K]
+Crusade in Europe v321.03 [64K/128K]
+Decision in the Desert (no visible version) [64K/128K]
+NATO Commander v1.2 [64K]
+Pirates v332.01 [128K]
+
 //idea:game shows
 Classic Concentration (+ New Second Edition) [DHGR][128K]
 Double Dare [HGR][64K]
