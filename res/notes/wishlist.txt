@@ -24,6 +24,9 @@ Mockingboard support
 //to port
 3-D Skiing (Continential Software) [needs-crack][48K]
 Airsim 3 (Mind Systems Corp) [needs-crack]? [Mockingboard] http://tinyurl.com/28zee8ky
+Battleship Commander (Quality Software)
+Bridge Partner (Personal Software)
+Bridge v4.0 (Artworx)
 Championship Golf [4am crack][48K]
 Colossus Chess IV (Firebird) [needs-crack][48K][supports-data-disk]
 Competition Karate [needs-crack][48K][supports-data-disk]
@@ -34,6 +37,7 @@ Echelon (Access Software) [needs-crack][64K]
 Fathom's 40 [4am crack][48K]
 Fore! [4am crack][48K]
 Hi-Res Computer Golf 2 [needs-crack][48K][supports-data-disk]
+Hi-Res Cribbage
 Jet [priority][64K][supports-data-disk]
 Joe Thiesmann's Pro Football [4am crack][64K]
 John Elway's Quarterback [HGR-but-128K]
@@ -48,6 +52,7 @@ Pro Golf (Home-Computer Software)
 Professional Tour Golf [4am crack]
 Pure Stat Baseball [needs-crack][64K]
 Pure Stat College Basketball
+Pyramid of Ra
 Ringside Seat (SSI) [4am/san inc crack][48K]
 Sargon III (Hayden) [4am crack][supports-data-disk]
 Star League Baseball [needs-crack][64K]
@@ -57,6 +62,7 @@ Super Sunday [4am crack][64K]
 Superstar Indoor Sports [priority]
 Techo-Sport Racing (K-Tek) [Tom Greene]
 Tennis (Softdisk) [unprotected]
+Thunderchopper
 Tuesday Morning Quarterback [4am crack][48K]
 The Fidelity Chessmaster 2100 (Software Toolworks) [priority]
 The World's Greatest Baseball Game (Enhanced Version) [4am crack][64K][supports-data-disk]
