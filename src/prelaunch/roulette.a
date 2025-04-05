@@ -1,0 +1,19 @@
+;license:MIT
+;(c) 2025 by 4am
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/ROULETTE",plain
+*=$106
+
+         !source "src/macros.a"
+
+         +ENABLE_ACCEL
+         lda   #$4C
+         sta   $5b0e
+         jsr   $4000
+         +DISABLE_ACCEL
+         jmp   $5b0e+3
+
+!if * > PrelaunchMax {
+  !error "code is too large, ends at ", *
+}

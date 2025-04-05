@@ -1,0 +1,34 @@
+!cpu 6502
+*=$4000
+!to "build/ROULETTE#064000",plain
+
+         !src  "../common/src/constants.a"
+         !src  "../common/src/macros.a"
+
+         jmp   start
+
+compressed_data
+         !bin "src/OBJ.X"
+FORWARD_DECRUNCHING = 1
+SHOW_PROGRESS_DURING_DECRUNCH = 0
+         !src  "../common/src/exodecrunch.a"
+
+start
+         +INIT_MACHINE
+!if * != $5b0e {
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
+}
+         jsr   decrunch              ; compressed data contains target address
+         ldx   #0
+-        lda   $2c40, x
+         sta   $0, x
+         inx
+         bne   -
+         jmp   $D566                 ; RUN
+
+get_crunched_byte
+         lda   compressed_data
+         inc   get_crunched_byte+1
+         bne   +
+         inc   get_crunched_byte+2
++        rts
