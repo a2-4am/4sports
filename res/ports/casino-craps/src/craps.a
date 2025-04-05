@@ -15,8 +15,8 @@ SHOW_PROGRESS_DURING_DECRUNCH = 0
 
 start
          +INIT_MACHINE
-!if * != $18B6 {
-;  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
+!if * != $614d {
+  !serious "Adjust prelaunch to patch JSR at ", *, " to JMP"
 }
          jsr   decrunch              ; compressed data contains target address
          ldx   #0
