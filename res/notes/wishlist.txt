@@ -27,7 +27,6 @@ Airsim 3 (Mind Systems Corp) [needs-crack]? [Mockingboard] http://tinyurl.com/28
 Battleship Commander (Quality Software)
 Bridge Partner (Personal Software)
 Bridge v4.0 (Artworx)
-Casino Craps (Softape) [48K][BASIC]
 Championship Golf [4am crack][48K]
 Colossus Chess IV (Firebird) [needs-crack][48K][supports-data-disk]
 Competition Karate [needs-crack][48K][supports-data-disk]
@@ -46,7 +45,7 @@ John Madden Football [needs-crack][offdisk][64K]
 Ken Uston's Professional Blackjack v1.23 [4am crack][48K]
 Maxi Golf [needs-crack]
 Micro League Baseball (1984 version, not 1980) [needs-crack][64K][supports-data-disk]
-Olympic Decathlon [priority][needs-crack][48K]
+Microsoft Decathlon [priority][needs-crack][48K]
 Pleins Gaz [64K], see <https://www.soberka.com/games/#pleins-gaz>
 Pro Football (Systems Design Lab)
 Pro Golf (Home-Computer Software)
