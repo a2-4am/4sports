@@ -1,0 +1,86 @@
+;license:MIT
+;(c) 2025 by 4am
+;
+; common assembler macros (6502 compatible)
+;
+
+!macro REQUIRE_BOOL .var, .name {
+!ifndef .var {
+         !serious .name," is not defined"
+}
+!if .var<>0 and .var<>1 {
+         !serious .name," must be 0 or 1"
+}
+}
+
+!macro   PSTRING .string {
+         !byte +-*-1
+         !raw  .string
++
+}
+
+; load the address of .ptr into A (low) and Y (high)
+!macro   LDADDR .ptr {
+         lda   #<.ptr
+         ldy   #>.ptr
+}
+
+; load a 16-bit value into A (low) and Y (high)
+!macro   LD16 .ptr {
+         lda   .ptr
+         ldy   .ptr+1
+}
+
+; store a 16-bit value from A (low) and Y (high)
+!macro   ST16 .ptr {
+         sta   .ptr
+         sty   .ptr+1
+}
+
+; use BIT to swallow the following 1-byte opcode
+!macro   HIDE_NEXT_BYTE {
+         !byte $24
+}
+
+; use BIT to swallow the following 2-byte opcode
+!macro   HIDE_NEXT_2_BYTES {
+         !byte $2C
+}
+
+; various language card configurations
+!macro   READ_RAM1_NO_WRITE {
+         sta   $C088
+}
+
+!macro   READ_RAM1_WRITE_RAM1_1 { ; when the other bank is in already
+                                  ; just one access is needed
+         bit   $C08B
+}
+
+!macro   READ_RAM1_WRITE_RAM1 {
+         bit   $C08B
+         bit   $C08B
+}
+
+!macro   READ_RAM2_NO_WRITE {
+         sta   $C080
+}
+
+!macro   READ_RAM2_WRITE_RAM2 {
+         bit   $C083
+         bit   $C083
+}
+
+!macro   READ_ROM_WRITE_RAM1 {
+         bit   $C089
+         bit   $C089
+}
+
+!macro   READ_ROM_WRITE_RAM2 {
+         bit   $C081
+         bit   $C081
+}
+
+!macro   READ_ROM_NO_WRITE {
+         sta   $C082
+}

@@ -1,0 +1,584 @@
+;license:BSD-3-Clause
+;extended open/read/write binary file in ProDOS filesystem, with random access
+;copyright (c) Peter Ferrie 2013-2020, 2025
+
+!src "src/bootstar/boot.common.2.inc"
+
+.pascal_dir = $8000
+                ldx     #$ff
+                stx     $BF ;partial sector (force mismatch)
+                inx
+                stx     $BE ;byte count for partial sector
+                stx     $fe
+                stx     $3A4 ;track
+                stx     $3A8 ;adrlo
+                inx
+                stx     $3A2 ;drive
+                stx     $3AC ;read
+
+                lda     #4
+                sta     $BD ;block number
+                asl
+                sta     $C3 ;sector count
+                lda     #>.pascal_dir
+                sta     $ff
+                sta     $3A9 ;adrhi
+                jsr     .reloc
+
+--              ldy     #7
+                ldx     #.startup_e - .startup_b
+-               lda     .startup_b - 7, y
+                cmp     ($fe), y
+                beq     +
+                clc
+                lda     $fe
+                adc     #$1a
+                sta     $fe
+                bcc     --
+                inc     $ff
+                bne     -- ;always taken
+
++               iny
+                dex
+                bne     -
+
+                lda     ROMIN
+                lda     ROMIN
+
+                ldy     #0
+                lda     ($fe), y
+                tax
+                iny
+                lda     ($fe), y
+                jsr     .loadpascal
+                lda     $CD
+                sta     $BD
+                lda     #$E0
+                sta     .endadr + 1
+                lda     LCBANK2
+                jsr     .startadr
+                bit     LCBANK1
+                tax
+                tay
+
+.reloc_code1
+                lda     .patch_tbl_hi, x
+                beq     +
+                sta     $ff
+                lda     .patch_tbl_lo, x
+                sta     $fe
+                clc
+                lda     ($fe), y
+                adc     #>(((($D0EC + $23 + .hdddataend - .patch_jsr_swap_zpg) + $ff) & -256) - pas_hddencbuf)
+                sta     ($fe), y
+                inx
+                bne     .reloc_code1 ;always
++
+                lda     .unrcommand3
+                cmp     #$8c ;STY
+.reloc_more
+                php
+.reloc_code2
+                inx
+                lda     .patch_tbl_hi, x
+                beq     +
+                sta     $ff
+                lda     .patch_tbl_lo, x
+                sta     $fe
+                clc
+                lda     ($fe), y
+                adc     #<($D0EC + $23 - .unrelochdd)
+                sta     ($fe), y
+                iny
+                lda     ($fe), y
+                adc     #>($D0EC + $23 - .unrelochdd)
+                sta     ($fe), y
+                dey
+                beq     .reloc_code2 ;always
++               pla
+                and     #1 ;check for carry set previously
+                bne     .reloc_more ;carry is clear now
+
+                ldy     #0
+-               lda     .reloc, y
+                sta     $D0EC + $23, y
+                lda     .reloc + $100, y
+                sta     $D0EC + $23 + $100, y
+                iny
+                bne     -
+
+                ldx     #2
+-               lda     .hook_wipe, x
+                sta     $f29f, x
+                dex
+                bpl     -
+
+                ldx     #(.hidedrive_e-.hidedrive)-1
+-               lda     .hidedrive, x
+                sta     $f329, x ;varies by version
+                dex
+                bpl     -
+
+                txs
+
+.jmpindirect     jmp     ($fff8) ;varies by version
+
+.hook_wipe      jsr      .callback
+
+.hidedrive      asl
+                sta     $BF2C
+                sta     $BF2E
+                ldy     #2
+                sty     $BF2D
+.hidedrive_e
+
+.magic_b
+                inc      $cbe
+                iny
+                lda      ($58), y      ;get volume number
+                bit      $c083
+.patch_sta_curvolidx
+                sta      .curvolidx + 1
+                bit      $c08b
+                jmp      $d27B
+.magic_e
+
+.callback        lda     #$f2
+                sta     $BD
+!if backup_prodos=1 {
+                ldy     #$1e + $25 + 3 ;3 = preserve size
+} else {
+                ldy     #$1e + 3 ;3 = preserve size
+}
+                txa
+                beq     .skippage
+                cpx     #3
+                bne     .nextpage
+!if (.magic_e-.magic_b)>0 {
+                ldy     #(.magic_e-.magic_b) - 1
+-               lda     .magic_b, y
+                sta     $100, y
+                dey
+                bpl     -
+}
+.patch_jsr      lda     .unhook-1, x
+                sta     $680f-1, x ;varies by version
+                dex
+                bne     .patch_jsr
+                stx     $BD
+                ldx     #7
+                stx     $BE
+.nextpage        ldy     #0
+                tya
+.unhook          inc     $BE
+.skippage        inx
+                rts
+
+.loadpascal      lsr
+                txa
+                ror
+                lsr
+                lsr
+                sta     $3A4
+                txa
+                and     #7
+                asl
+                sta     $BD
+.startadr        lda     #$d0
+                sta     $3A9
+                eor     #$ff
+                sec
+                adc     .endadr + 1
+                cmp     #$10
+                bcc     +
+                lda     #$10
+                sec
+                sbc     $BD
++
+-               sta     $C3
+                jsr     .reloc
+                lda     #0
+                sta     $BD
+                lda     $CF
+                sta     $3A9
+                sec
+.endadr          lda     #0
+                sbc     $3A9
+                beq     +
+                inc     $3A4
+                cmp     #$10
+                bcc     -
+                lda     #$10
+                bne     -
++               rts
+
+.startup_b      !text   "SYSTEM.APPLE"
+.startup_e
+
+.patch_tbl_lo
+                !byte   <(.patch_lda_hddencbuf1 + 1)
+                !byte   <(.patch_lda_hddencbuf_29 + 2)
+                !byte   <(.patch_lda_hddencbuf_2a + 2)
+                !byte   <(.patch_ldx_hddencbuf_27 + 2)
+                !byte   <(.patch_lda_hddencbuf_28 + 2)
+                !byte   <(.patch_ldy_hddencbuf + 1)
+                !byte   <(.patch_cmp_hddencbuf_2 + 1)
+                !byte   <(.patch_sta_hdddirbuf1 + 2)
+                !byte   <(.patch_sta_hdddirbuf2 + 2)
+                !byte   <(.patch_lda_hddencbuf2 + 1)
+                !byte   <(.patch_ldx_hdddirbuf1 + 2)
+                !byte   <(.patch_lda_hdddirbuf1 + 2)
+                !byte   <(.patch_ldx_hdddirbuf2 + 2)
+                !byte   <(.patch_lda_hdddirbuf2 + 2)
+                !byte   <(.patch_ora_hdddirbuf + 2)
+                !byte   <(.patch_ldy_hdddirbuf + 1)
+                !byte   0
+
+                !byte   <(.patch_sta_curvolidx + 1)
+                !byte   <(.patch_jsr_swap_zpg + 1)
+                !byte   <(.patch_lda_blokloarray + 1)
+                !byte   <(.patch_lda_blokhiarray + 1)
+                !byte   <(.patch_ora_secttbl + 1)
+                !byte   <(.patch_jsr_seek1 + 1)
+                !byte   <(.patch_jmp_loopsect1 + 1)
+                !byte   <(.patch_jsr_hddwriteenc1 + 1)
+                !byte   <(.patch_ldy_zp_array + 1)
+                !byte   <(.patch_sta_zp_array + 1)
+                !byte   <(.patch_jsr_hddreaddirsec + 1)
+                !byte   <(.patch_jsr_hddseekrd1 + 1)
+                !byte   <(.patch_jsr_hddwriteenc2 + 1)
+                !byte   <(.patch_sta_hddskiptree1_2 + 1)
+                !byte   <(.patch_jsr_hddrdfile + 1)
+                !byte   <(.patch_sta_hddskiptree2_2 + 1)
+                !byte   <(.patch_jsr_hddwritedir + 1)
+                !byte   <(.patch_jsr_savebyte + 1)
+                !byte   <(.patch_jsr_hddseekrdwr + 1)
+                !byte   <(.patch_jmp_loopsect2 + 1)
+                !byte   <(.patch_jsr_hddreaddirsel + 1)
+                !byte   <(.patch_jsr_hddseekrd2 + 1)
+                !byte   <(.patch_sta_paddr + 1)
+                !byte   0
+
+                !byte   <(.unrbloklo2 + 1)
+                !byte   <(.unrblokhi2 + 1)
+                !byte   <(.unrblokhi3 + 1)
+                !byte   <(.unrcommand1 + 1)
+                !byte   <(.unrcommand3 + 1)
+                !byte   <(.unrbloklo1 + 1)
+                !byte   <(.unrblokhi1 + 1)
+                !byte   <(.unrunit1 + 3)
+                !byte   <.unrppacket
+                !byte   0
+
+.patch_tbl_hi
+                !byte   >(.patch_lda_hddencbuf1 + 1)
+                !byte   >(.patch_lda_hddencbuf_29 + 2)
+                !byte   >(.patch_lda_hddencbuf_2a + 2)
+                !byte   >(.patch_ldx_hddencbuf_27 + 2)
+                !byte   >(.patch_lda_hddencbuf_28 + 2)
+                !byte   >(.patch_ldy_hddencbuf + 1)
+                !byte   >(.patch_cmp_hddencbuf_2 + 1)
+                !byte   >(.patch_sta_hdddirbuf1 + 2)
+                !byte   >(.patch_sta_hdddirbuf2 + 2)
+                !byte   >(.patch_lda_hddencbuf2 + 1)
+                !byte   >(.patch_ldx_hdddirbuf1 + 2)
+                !byte   >(.patch_lda_hdddirbuf1 + 2)
+                !byte   >(.patch_ldx_hdddirbuf2 + 2)
+                !byte   >(.patch_lda_hdddirbuf2 + 2)
+                !byte   >(.patch_ora_hdddirbuf + 2)
+                !byte   >(.patch_ldy_hdddirbuf + 1)
+                !byte   0
+
+                !byte   >(.patch_sta_curvolidx + 1)
+                !byte   >(.patch_jsr_swap_zpg + 1)
+                !byte   >(.patch_lda_blokloarray + 1)
+                !byte   >(.patch_lda_blokhiarray + 1)
+                !byte   >(.patch_ora_secttbl + 1)
+                !byte   >(.patch_jsr_seek1 + 1)
+                !byte   >(.patch_jmp_loopsect1 + 1)
+                !byte   >(.patch_jsr_hddwriteenc1 + 1)
+                !byte   >(.patch_ldy_zp_array + 1)
+                !byte   >(.patch_sta_zp_array + 1)
+                !byte   >(.patch_jsr_hddreaddirsec + 1)
+                !byte   >(.patch_jsr_hddseekrd1 + 1)
+                !byte   >(.patch_jsr_hddwriteenc2 + 1)
+                !byte   >(.patch_sta_hddskiptree1_2 + 1)
+                !byte   >(.patch_jsr_hddrdfile + 1)
+                !byte   >(.patch_sta_hddskiptree2_2 + 1)
+                !byte   >(.patch_jsr_hddwritedir + 1)
+                !byte   >(.patch_jsr_savebyte + 1)
+                !byte   >(.patch_jsr_hddseekrdwr + 1)
+                !byte   >(.patch_jmp_loopsect2 + 1)
+                !byte   >(.patch_jsr_hddreaddirsel + 1)
+                !byte   >(.patch_jsr_hddseekrd2 + 1)
+                !byte   >(.patch_sta_paddr + 1)
+                !byte   0
+
+                !byte   >(.unrbloklo2 + 1)
+                !byte   >(.unrblokhi2 + 1)
+                !byte   >(.unrblokhi3 + 1)
+                !byte   >(.unrcommand1 + 1)
+                !byte   >(.unrcommand3 + 1)
+                !byte   >(.unrbloklo1 + 1)
+                !byte   >(.unrblokhi1 + 1)
+                !byte   >(.unrunit1 + 3)
+                !byte   >.unrppacket
+                !byte   0
+
+.c5_parms
+                !byte   2
+                !byte   0
+                !word   $281
+                !byte   $d1
+
+!src "src/bootstar/boot.common.3.inc"
+
+.unrelochdd
+.reloc     = .unrelochdd ;no need to move
+!pseudopc .reloc {
+.patch_jsr_swap_zpg
+                jsr     .swap_zpg
+                lda     $BD
+                sta     $CD
+                lda     $3A8
+                sta     $CE
+                lda     $3A9
+                sta     $CF
+
+.curvolidx
+                ldx     #0 ;SMC
+.patch_lda_blokloarray
+                lda     .blokloarray, x
+                sta     treeblklo
+.patch_lda_blokhiarray
+                lda     .blokhiarray, x
+                sta     treeblkhi
+
+                lda     #9
+                sta     $3AD ;error (drive not ready)
+                lda     $3a2
+                cmp     #2
+                bcs     .swap_zpgi
+
+.loopsect
+                lda     #0
+                sta     sizehi
+                lda     $CD
+                and     #$0f
+                tay
+                lda     $3A4
+                asl
+                asl
+                asl
+                rol     sizehi
+                asl
+                rol     sizehi
+.patch_ora_secttbl
+                ora     .secttbl, y
+                tax
+                lda     sizehi
+                lsr
+                sta     treeidx
+                txa
+                ror
+                php
+.patch_jsr_seek1
+                jsr     .seek1
+                plp
+                ldy     #0
+                tya
+.patch_lda_hddencbuf1
+                adc     #>pas_hddencbuf
+                sta     adrhi
+                lda     $3AC
+                lsr
+                bne     .runinit
+                lda     $BE
+                beq     .copysect
+                ldx     $C3
+                dex
+                bne     .copysect
+                ldx     $CD
+                inx
+                txa
+                sec
+                sbc     $BD
+                cmp     $BF
+                bne     .copysect
+                lda     $CF
+                sta     $C5
+                sty     $CE
+                lda     #2
+                sta     $CF
+
+.copysect        lda     (adrlo),y
+                sta     ($CE),y
+                iny
+                bne     .copysect
+
+.nextsect        inc     $CD
+                inc     $CF
+                dec     $C3
+                beq     .swap_zpg
+.patch_jmp_loopsect1
+                jmp     .loopsect
+
+.runinit
+                lda     sparseblk
+                bne     .writesparse
+-               lda     ($CE),y
+                sta     (adrlo),y
+                iny
+                bne     -
+.patch_jsr_hddwriteenc1
+                jsr     .hddwriteenc
+                bne     .nextsect
+
+.swap_zpg
+                clc
+
+.swap_zpgi       ldx     #(last_zp - first_zp)
+-               lda     first_zp,x
+.patch_ldy_zp_array
+                ldy     .zp_array,x
+.patch_sta_zp_array
+                sta     .zp_array,x
+                sty     first_zp,x
+                dex
+                bpl     -
+                rts
+
+.writesparse     ldx     #2
+                tya
+.patch_jsr_hddreaddirsec
+                jsr     .hddreaddirsec
+                lda     #0
+                sta     namlo
+                sta     namhi
+
+                ;round up to block count
+
+.patch_lda_hddencbuf_29
+                lda     pas_hddencbuf + $29
+                adc     #$ff
+.patch_lda_hddencbuf_2a
+                lda     pas_hddencbuf + $2A
+                adc     #1
+                lsr
+                sta     ldrhi
+.patch_ldx_hddencbuf_27
+                ldx     pas_hddencbuf + $27
+.patch_lda_hddencbuf_28
+                lda     pas_hddencbuf + $28
+.patch_ldy_hddencbuf
+---             ldy     #>pas_hddencbuf
+                sty     adrhi
+.patch_jsr_hddseekrd1
+                jsr     .hddseekrd
+                ldy     #0
+
+                ;scan for a free block
+
+--              lda     #$80
+                sta     ldrlo
+-               lda     (adrlo), y
+                and     ldrlo
+                bne     .foundbit
+                lsr     ldrlo
+                inc     namlo
+                bcc     -
+                bne     +
+                inc     namhi
++               iny
+                bne     --
+                inc     adrhi
+                lda     adrhi
+.patch_cmp_hddencbuf_2
+                cmp     #(>pas_hddencbuf) + 2
+                bne     --
+.unrbloklo2 = .unrelochdd + (* - .patch_jsr_swap_zpg)
+                ldx     bloklo
+                nop ;allow replacing "ldx bloklo" with "ldx pblock" in extended SmartPort mode
+                inx
+                bne     +
+.unrblokhi2 = .unrelochdd + (* - .patch_jsr_swap_zpg)
+                inc     blokhi
+                nop ;allow replacing "inc blokhi" with "inc pblock + 1" in extended SmartPort mode
++
+.unrblokhi3 = .unrelochdd + (* - .patch_jsr_swap_zpg)
+                lda     blokhi
+                nop ;allow replacing "lda blokhi" with "lda pblock + 1" in extended SmartPort mode
+                dec     ldrhi
+                bne     ---
+
+                ;disk full
+
+                beq     .swap_zpg
+
+                ;allocate block and update bitmap
+
+.foundbit        lda     (adrlo), y
+                eor     ldrlo
+                sta     (adrlo), y
+.patch_jsr_hddwriteenc2
+                jsr     .hddwriteenc
+                lda     #$60 ;RTS
+.patch_sta_hddskiptree1_2
+                sta     .hddskiptree + 2
+.patch_jsr_hddrdfile
+                jsr     .hddrdfile
+                lda     #$be ;LDX ,Y
+.patch_sta_hddskiptree2_2
+                sta     .hddskiptree + 2
+                lda     namlo
+.patch_sta_hdddirbuf1
+                sta     pas_hdddirbuf, y
+                lda     namhi
+.patch_sta_hdddirbuf2
+                sta     pas_hdddirbuf + 256, y
+.patch_jsr_hddwritedir
+                jsr     .hddwritedir
+                lda     #0
+.patch_jsr_savebyte
+                jsr     .savebyte
+                ldx     namlo
+                lda     namhi
+                ldy     #cmdwrite
+.patch_jsr_hddseekrdwr
+                jsr     .hddseekrdwr
+.patch_jmp_loopsect2
+                jmp     .loopsect
+
+.hddwriteenc
+.patch_lda_hddencbuf2
+                lda     #>pas_hddencbuf
+                sta     adrhi
+.hddwritedir     ldy     #cmdwrite
+
+.unrcommand1 = .unrelochdd + (* - .patch_jsr_swap_zpg)
+                sty     command
+                nop ;allow replacing "sty command" with "sty pcommand" in extended SmartPort mode
+                bne      .hddwriteimm
+
+.secttbl         !byte   $00, $0e, $0d, $0c, $0b, $0a, $09, $08, $07, $06, $05, $04, $03, $02, $01, $0f
+
+.seek1           sta     blkidx
+                ldy     #cmdread
+                sty     reqcmd
+!src "src/bootstar/boot.common.5.inc"
+} ;reloc
+
+;[music] you can't touch this [music]
+;math magic to determine ideal loading address, and information dump
+!ifdef PAS_PASS2 {
+} else { ;PAS_PASS2 not defined
+  !set PAS_PASS2=1
+      !pseudopc ((.hdddataend + $ff) & -256) {
+        pas_hdddirbuf = *
+      }
+          pas_hddencbuf = pas_hdddirbuf ;writes come from cache
+            pas_hddtreebuf = pas_hdddirbuf
+} ;PAS_PASS2
+
+.readbuff
+!byte $D3,$C1,$CE,$A0,$C9,$CE,$C3,$AE

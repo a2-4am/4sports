@@ -1,0 +1,32 @@
+;license:MIT
+;(c) 2025 by 4am
+;
+
+SELF_MODIFIED_BYTE        = $FD
+SELF_MODIFIED_WORD        = $FDFD
+
+; ProDOS
+PRODOS_MLI                = $BF00
+PRODOS_MACHID             = $BF98
+CMD_QUIT                  = $65
+
+; ROM routines and addresses
+ROM_MACHID                = $FBB3
+ROM_FINALIZE_RESET        = $FB6F
+
+; soft switches
+STOREOFF                  = $C000
+CLEARKBD                  = $C010
+READMAINMEM               = $C002
+READAUXMEM                = $C003
+WRITEMAINMEM              = $C004
+WRITEAUXMEM               = $C005
+RWMAINZPSTACK             = $C008
+RWAUXZPSTACK              = $C009
+
+; application-specific addresses
+!if is_reading=1 {
+  OnReset                 = $0113
+} else {
+  OnReset                 = $0110
+}

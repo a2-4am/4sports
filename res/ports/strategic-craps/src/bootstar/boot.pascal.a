@@ -1,0 +1,125 @@
+;license:BSD-3-Clause
+;extended open/read/write binary file in ProDOS filesystem, with random access
+;copyright (c) Peter Ferrie 2013-2020, 2025
+
+!ct "src/rcase.ct"
+
+!if is_64kb=1 and is_128kb=1 {
+  !error "set only one of is_64kb or is_128kb"
+}
+
+!if (is_apa=1 and (is_uukrul=1 or is_sundog=1 or is_reading=1)) or (is_uukrul=1 and (is_sundog=1 or is_reading=1)) or (is_sundog=1 and is_reading=1) {
+  !error "set at most one of is_apa and is_uukrul and is_sundog and is_reading"
+}
+
+!if is_apa=1 {
+  !if version != 1 {
+    !error "is_apa requires version=1"
+  }
+  !if is_64kb=0 {
+    !error "is_apa requires is_64kb=1"
+  }
+  !if read_only=0 {
+    !error "is_apa requires read_only=1"
+  }
+  !if disks>1 {
+    !error "is_apa requires disks=1"
+  }
+}
+
+!if is_uukrul=1 {
+  !if version != 1 {
+    !error "is_uukrul requires version=1"
+  }
+  !if is_64kb=0 {
+    !error "is_uukrul requires is_64kb=1"
+  }
+  !if read_only=1 {
+    !error "is_uukrul requires read_only=0"
+  }
+  !if disks!=2 {
+    !error "is_uukrul requires disks=2"
+  }
+}
+
+!if is_sundog=1 {
+  !if version != 2 {
+    !error "is_sundog requires version=2"
+  }
+  !if is_64kb=0 {
+    !error "is_sundog requires is_64kb=1"
+  }
+  !if read_only=1 {
+    !error "is_sundog requires read_only=0"
+  }
+  !if disks!=1 {
+    !error "is_sundog requires disks=1"
+  }
+}
+
+!if is_reading=1 {
+  !if version != 2 {
+    !error "is_reading requires version=2"
+  }
+  !if is_64kb=0 {
+    !error "is_reading requires is_64kb=1"
+  }
+  !if read_only=1 {
+    !error "is_reading requires read_only=0"
+  }
+  !if disks!=2 {
+    !error "is_reading requires disks=2"
+  }
+}
+
+!if version=1 {
+  !if is_64kb=0 {
+    !if is_128kb=0 {
+      !src "src/bootstar/boot.pascal.11_48kb.a"
+    } else {
+      !src "src/bootstar/boot.pascal.11_128kb.a"
+    }
+  } else {
+    !if is_apa=1 {
+      !src "src/bootstar/boot.pascal.11_64kb_apa.a"
+    } else {
+      !if is_uukrul=1 {
+          !src "src/bootstar/boot.pascal.11_64kb_uukrul.a"
+      } else {
+        !src "src/bootstar/boot.pascal.11_64kb.a"
+      }
+    }
+  }
+} else {
+  !if version=2 {
+    !if is_64kb=0 {
+      !if is_128kb=0 {
+        !src "src/bootstar/boot.pascal.12_48kb.a"
+      } else {
+        !src "src/bootstar/boot.pascal.12_128kb.a"
+      }
+    } else {
+      !if is_sundog=1 {
+        !src "src/bootstar/boot.pascal.12_64kb_sundog.a"
+      } else {
+        !if is_reading=1 {
+          !src "src/bootstar/boot.pascal.12_64kb_reading.a"
+        } else {
+          !src "src/bootstar/boot.pascal.12_64kb.a"
+        }
+      }
+    }
+  } else {
+    !if is_64kb=0 {
+      !if is_128kb=0 {
+        !error "no known sample of 1.3 48kb"
+        ;;!src "src/bootstar/boot.pascal.13_48kb.a"
+      } else {
+        !error "no known sample of 1.3 128kb"
+        ;;!src "src/bootstar/boot.pascal.13_128kb.a"
+      }
+    } else {
+      !src "src/bootstar/boot.pascal.13_64kb.a"
+    }
+  }
+}
