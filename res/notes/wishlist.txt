@@ -23,6 +23,7 @@ Mockingboard support
 
 //to port
 3-D Skiing (Continential Software) [needs-crack][48K]
+Advanced Blackjack (MUSE) [4am crack][48K]
 Airsim 3 (Mind Systems Corp) [needs-crack]? [Mockingboard] http://tinyurl.com/28zee8ky
 Battleship Commander (Quality Software)
 Bridge Partner (Personal Software)
@@ -42,7 +43,7 @@ Jet [priority][64K][supports-data-disk]
 Joe Thiesmann's Pro Football [4am crack][64K]
 John Elway's Quarterback [HGR-but-128K]
 John Madden Football [needs-crack][offdisk][64K]
-Ken Uston's Professional Blackjack v1.23 [4am crack][48K]
+Ken Uston's Professional Blackjack v1.24 [4am crack][48K]
 Maxi Golf [needs-crack]
 Micro League Baseball (1984 version, not 1980) [needs-crack][64K][supports-data-disk]
 Microsoft Decathlon [priority][needs-crack][48K]
