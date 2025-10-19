@@ -4,13 +4,17 @@
 
 ### New games in v1.0-alpha.5
 
+- Craps
 - Fastgammon
+- Roulette
 - Slide Glide
 - Spinout
+- Strategic Craps
 
 ### Migrated from Total Replay in v1.0-alpha.5
 
 - Bejeweled
+- Retro-Ball
 - Video Vegas
 
 ### Enhancements & bug fixes in v1.0-alpha.5
