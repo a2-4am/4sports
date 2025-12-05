@@ -3,6 +3,7 @@
 ; Double hi-res slideshows
 ;
 ; Public functions
+; - AllDHGRSlideshow
 ; - DHGRTitleSlideshow
 ; - DHGRActionSlideshow
 ; - DHGRSingle
@@ -15,6 +16,26 @@
 ;
 
 ;------------------------------------------------------------------------------
+; AllDHGRSlideshow
+; execute mega-attract mode of all DHGR titles & artwork (and nothing else)
+;
+; safe to call if machine can not display DHGR graphics (clears carry
+; and exits)
+;
+; in:    none
+; out:   C=0 if machine can not display DHGR
+;        otherwise all registers and flags clobbered
+;------------------------------------------------------------------------------
+AllDHGRSlideshow
+         clc
+         lda   MachineStatus         ; only run DHGR slideshow if we have 128K
+         and   #HAS_128K
+         beq   DHGRRTS0
+         lda   #(ATTRACT_DHGR_TITLE|ATTRACT_DHGR_ACTION)
+         sta   gMegaAttractModeFilter
+         jmp   MegaAttractMode
+
+;------------------------------------------------------------------------------
 ; DHGRTitleSlideshow
 ; execute a slideshow of double hi-res title screenshots
 ;
@@ -25,8 +46,9 @@
 ;        graphics mode reset to display hi-res screen, which is blank
 ;------------------------------------------------------------------------------
 DHGRTitleSlideshow
-         bit   MachineStatus         ; only run DHGR slideshow if we have 128K
-         bvc   DHGRRTS0
+         lda   MachineStatus         ; only run DHGR slideshow if we have 128K
+         and   #HAS_128K
+         beq   DHGRRTS0
          jsr   LoadDHGRTransition    ; load transition effect code at $6000
          jsr   BlankDHGR             ; switch to DHGR mode with initial blank screen
          jsr   okvs_iter             ; cycle through all listed DHGR files
@@ -46,8 +68,9 @@ DHGRTitleSlideshow
 ;        graphics mode reset to display hi-res screen, which is blank
 ;------------------------------------------------------------------------------
 DHGRActionSlideshow
-         bit   MachineStatus         ; only run DHGR slideshow if we have 128K
-         bvc   DHGRRTS0
+         lda   MachineStatus         ; only run DHGR slideshow if we have 128K
+         and   #HAS_128K
+         beq   DHGRRTS0
          jsr   LoadDHGRTransition    ; load transition effect code at $6000
          jsr   BlankDHGR             ; switch to DHGR mode with initial blank screen
          jsr   okvs_iter             ; cycle through all listed DHGR files
@@ -67,8 +90,9 @@ DHGRActionSlideshow
 ;        graphics mode reset to display hi-res screen, which is blank
 ;------------------------------------------------------------------------------
 DHGRSingle
-         bit   MachineStatus         ; only show DHGR screenshots if we have 128K
-         bvc   DHGRRTS0
+         lda   MachineStatus         ; only show DHGR screenshots if we have 128K
+         and   #HAS_128K
+         beq   DHGRRTS0
          +ST16 IndexedDHGRFilename
          jsr   BlankDHGR             ; switch to DHGR mode with initial blank screen
          jsr   LoadIndexedDHGRFile   ; load compressed DHGR screenshot at aux $3FF8
