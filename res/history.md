@@ -13,6 +13,8 @@
 
 ### Migrated from Total Replay in v1.0-alpha.5
 
+- Archon
+- Archon II
 - Bejeweled
 - Retro-Ball
 - Video Vegas

@@ -318,6 +318,11 @@
 
 !macro   DISABLE_ACCEL {
          +READ_RAM2_NO_WRITE
+         +DISABLE_ACCEL_LC
+}
+
+; when LC is active already
+!macro   DISABLE_ACCEL_LC {
          jsr   DisableAccelerator
          +READ_ROM_NO_WRITE
 }
