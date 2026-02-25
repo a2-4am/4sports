@@ -29,11 +29,29 @@ hookreset
          stx   $86D
          stx   $1B42
          stx   $FFFF
+         ldx   #(callback2_e-callback2)-1
+-        lda   callback2, x
+         sta   $1b53, x
+         dex
+         bpl   -
          rts
 +        stx   $2029
          inx
          stx   $202E
          rts
+
+callback2
+         ldx   $17e5
+         cpx   #$0c
+         php
+         jsr   $bc03
+         plp
+         bcc   +
+         dex
+         stx   $1eef
+         stx   $1f00
++
+callback2_e
 
 callback
          lda   #$4C
