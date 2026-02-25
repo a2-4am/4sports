@@ -105,6 +105,7 @@ cscript /nologo bin\converthelp.js res\HELPTEXT build\HELPTEXT >>build\log
 cscript /nologo bin\converthelp.js res\CREDITS build\CREDITS >>build\log
 echo|set/p="converting gamehelp..."
 for %%q in (res\GAMEHELP\*) do cscript /nologo bin\converthelp.js %%q build\GAMEHELP\%%~nxq >>build\log
+for %%q in (build\GAMEHELP\*) do %EXOMIZER% %%q@0x900 -o build\GAMEHELP.COMPRESSED\%%~nxq
 echo done
 rem
 rem create a list of all game filenames, without metadata or display names, sorted by game filename
@@ -128,17 +129,17 @@ echo|set/p="indexing titles..."
 cscript /nologo bin\padto.js 512 build\TOTAL.DATA
 cscript /nologo bin\buildss.js res\TITLE.HGR build\TITLE.IDX build\HGR.TITLES.LOG build\TOTAL.DATA build\TOTAL.DATA >>build\log
 cscript /nologo bin\buildss.js res\TITLE.DHGR build\DTITLE.IDX build\DHGR.TITLES.LOG build\TOTAL.DATA build\TOTAL.DATA >>build\log
-cscript /nologo bin\addfile.js res\COVER src\index\res.cover.idx.a
-cscript /nologo bin\addfile.js res\TITLE src\index\res.title.idx.a
-cscript /nologo bin\addfile.js res\HELP src\index\res.help.idx.a
+cscript /nologo bin\addfile.js res\COVER build\index\res.cover.idx.a
+cscript /nologo bin\addfile.js res\TITLE build\index\res.title.idx.a
+cscript /nologo bin\addfile.js res\HELP build\index\res.help.idx.a
 echo done
 rem
 rem precompute indexed files for game help
-rem note: these can be padded because they're loaded into $800 at a time when $800..$1FFF is clobber-able
+rem note: these can not be padded because they are compressed and the decompressor needs the exact size
 rem
 echo|set/p="indexing gamehelp..."
 cscript /nologo bin\makesorted.js
-cscript /nologo bin\buildpre.js build\GAMEHELP build\GAMEHELP.IDX build\TOTAL.DATA pad >>build\log
+cscript /nologo bin\buildpre.js build\GAMEHELP.COMPRESSED build\GAMEHELP.IDX build\TOTAL.DATA pad >>build\log
 echo done
 rem
 rem precompute indexed files for slideshows
@@ -245,67 +246,79 @@ rem create search indexes for each variation of (game-requires-joystick) X (game
 rem in the form of OKVS data structures, plus game counts in the form of source files
 rem
 echo|set/p="indexing search..."
-cscript /nologo bin\buildsearch.js "00" src\index\count00.a build\SEARCH00.IDX
-cscript /nologo bin\buildsearch.js "0" src\index\count01.a build\SEARCH01.IDX
-cscript /nologo bin\buildsearch.js ".0" src\index\count10.a build\SEARCH10.IDX
-cscript /nologo bin\buildsearch.js "." src\index\count11.a build\SEARCH11.IDX
+cscript /nologo bin\buildsearch.js "000" build\index\count000.a build\SEARCH000.IDX
+cscript /nologo bin\buildsearch.js "00" build\index\count001.a build\SEARCH001.IDX
+cscript /nologo bin\buildsearch.js "0.0" build\index\count010.a build\SEARCH010.IDX
+cscript /nologo bin\buildsearch.js "0" build\index\count011.a build\SEARCH011.IDX
+cscript /nologo bin\buildsearch.js ".00" build\index\count100.a build\SEARCH100.IDX
+cscript /nologo bin\buildsearch.js ".0" build\index\count101.a build\SEARCH101.IDX
+cscript /nologo bin\buildsearch.js "..0" build\index\count110.a build\SEARCH110.IDX
+cscript /nologo bin\buildsearch.js "." build\index\count111.a build\SEARCH111.IDX
 echo done
 rem
 rem add IDX files to the combined index file and generate
 rem the index records that callers use to reference them
 rem
 echo|set/p="preparing index file..."
-cscript /nologo bin\addfile.js build\SEARCH00.IDX src\index\search00.idx.a
-cscript /nologo bin\addfile.js res\CACHE00.IDX src\index\cache00.idx.a
-cscript /nologo bin\addfile.js build\SEARCH01.IDX src\index\search01.idx.a
-cscript /nologo bin\addfile.js res\CACHE01.IDX src\index\cache01.idx.a
-cscript /nologo bin\addfile.js build\SEARCH10.IDX src\index\search10.idx.a
-cscript /nologo bin\addfile.js res\CACHE10.IDX src\index\cache10.idx.a
-cscript /nologo bin\addfile.js build\SEARCH11.IDX src\index\search11.idx.a
-cscript /nologo bin\addfile.js res\CACHE11.IDX src\index\cache11.idx.a
-cscript /nologo bin\addfile.js build\PRELAUNCH.IDX src\index\prelaunch.idx.a
-cscript /nologo bin\addfile.js build\ATTRACT.IDX src\index\attract.idx.a
-cscript /nologo bin\addfile.js build\DEMO.IDX src\index\demo.idx.a
-cscript /nologo bin\addfile.js build\XSINGLE.IDX src\index\xsingle.idx.a
-cscript /nologo bin\addfile.js build\FX.IDX src\index\fx.idx.a
-cscript /nologo bin\addfile.js build\DFX.IDX src\index\dfx.idx.a
-cscript /nologo bin\addfile.js build\SFX.IDX src\index\sfx.idx.a
-cscript /nologo bin\addfile.js build\FXCODE.IDX src\index\fxcode.idx.a
-cscript /nologo bin\addfile.js build\FXDATA.IDX src\index\fxdata.idx.a
-cscript /nologo bin\addfile.js build\GAMEHELP.IDX src\index\gamehelp.idx.a
-cscript /nologo bin\addfile.js build\SLIDESHOW.IDX src\index\slideshow.idx.a
-cscript /nologo bin\addfile.js build\MINIATTRACT0.IDX src\index\miniattract0.idx.a
-cscript /nologo bin\addfile.js build\MINIATTRACT1.IDX src\index\miniattract1.idx.a
-cscript /nologo bin\addfile.js build\TITLE.IDX src\index\title.idx.a
-cscript /nologo bin\addfile.js build\DTITLE.IDX src\index\dtitle.idx.a
-cscript /nologo bin\addfile.js build\HGR0.IDX src\index\hgr0.idx.a
-cscript /nologo bin\addfile.js build\HGR1.IDX src\index\hgr1.idx.a
-cscript /nologo bin\addfile.js build\HGR2.IDX src\index\hgr2.idx.a
-cscript /nologo bin\addfile.js build\HGR3.IDX src\index\hgr3.idx.a
-cscript /nologo bin\addfile.js build\HGR4.IDX src\index\hgr4.idx.a
-cscript /nologo bin\addfile.js build\HGR5.IDX src\index\hgr5.idx.a
-cscript /nologo bin\addfile.js build\HGR6.IDX src\index\hgr6.idx.a
-cscript /nologo bin\addfile.js build\DHGR.IDX src\index\dhgr.idx.a
-cscript /nologo bin\addfile.js build\GR.IDX src\index\gr.idx.a
-cscript /nologo bin\addfile.js build\ARTWORK.IDX src\index\artwork.idx.a
+cscript /nologo bin\addfile.js build\SEARCH000.IDX build\index\search000.idx.a
+cscript /nologo bin\addfile.js res\CACHE000.IDX build\index\cache000.idx.a
+cscript /nologo bin\addfile.js build\SEARCH001.IDX build\index\search001.idx.a
+cscript /nologo bin\addfile.js res\CACHE001.IDX build\index\cache001.idx.a
+cscript /nologo bin\addfile.js build\SEARCH010.IDX build\index\search010.idx.a
+cscript /nologo bin\addfile.js res\CACHE010.IDX build\index\cache010.idx.a
+cscript /nologo bin\addfile.js build\SEARCH011.IDX build\index\search011.idx.a
+cscript /nologo bin\addfile.js res\CACHE011.IDX build\index\cache011.idx.a
+cscript /nologo bin\addfile.js build\SEARCH100.IDX build\index\search100.idx.a
+cscript /nologo bin\addfile.js res\CACHE100.IDX build\index\cache100.idx.a
+cscript /nologo bin\addfile.js build\SEARCH101.IDX build\index\search101.idx.a
+cscript /nologo bin\addfile.js res\CACHE101.IDX build\index\cache101.idx.a
+cscript /nologo bin\addfile.js build\SEARCH110.IDX build\index\search110.idx.a
+cscript /nologo bin\addfile.js res\CACHE110.IDX build\index\cache110.idx.a
+cscript /nologo bin\addfile.js build\SEARCH111.IDX build\index\search111.idx.a
+cscript /nologo bin\addfile.js res\CACHE111.IDX build\index\cache111.idx.a
+cscript /nologo bin\addfile.js build\PRELAUNCH.IDX build\index\prelaunch.idx.a
+cscript /nologo bin\addfile.js build\ATTRACT.IDX build\index\attract.idx.a
+cscript /nologo bin\addfile.js build\DEMO.IDX build\index\demo.idx.a
+cscript /nologo bin\addfile.js build\XSINGLE.IDX build\index\xsingle.idx.a
+cscript /nologo bin\addfile.js build\FX.IDX build\index\fx.idx.a
+cscript /nologo bin\addfile.js build\DFX.IDX build\index\dfx.idx.a
+cscript /nologo bin\addfile.js build\SFX.IDX build\index\sfx.idx.a
+cscript /nologo bin\addfile.js build\FXCODE.IDX build\index\fxcode.idx.a
+cscript /nologo bin\addfile.js build\FXDATA.IDX build\index\fxdata.idx.a
+cscript /nologo bin\addfile.js build\GAMEHELP.IDX build\index\gamehelp.idx.a
+cscript /nologo bin\addfile.js build\SLIDESHOW.IDX build\index\slideshow.idx.a
+cscript /nologo bin\addfile.js build\MINIATTRACT0.IDX build\index\miniattract0.idx.a
+cscript /nologo bin\addfile.js build\MINIATTRACT1.IDX build\index\miniattract1.idx.a
+cscript /nologo bin\addfile.js build\TITLE.IDX build\index\title.idx.a
+cscript /nologo bin\addfile.js build\DTITLE.IDX build\index\dtitle.idx.a
+cscript /nologo bin\addfile.js build\HGR0.IDX build\index\hgr0.idx.a
+cscript /nologo bin\addfile.js build\HGR1.IDX build\index\hgr1.idx.a
+cscript /nologo bin\addfile.js build\HGR2.IDX build\index\hgr2.idx.a
+cscript /nologo bin\addfile.js build\HGR3.IDX build\index\hgr3.idx.a
+cscript /nologo bin\addfile.js build\HGR4.IDX build\index\hgr4.idx.a
+cscript /nologo bin\addfile.js build\HGR5.IDX build\index\hgr5.idx.a
+cscript /nologo bin\addfile.js build\HGR6.IDX build\index\hgr6.idx.a
+cscript /nologo bin\addfile.js build\DHGR.IDX build\index\dhgr.idx.a
+cscript /nologo bin\addfile.js build\GR.IDX build\index\gr.idx.a
+cscript /nologo bin\addfile.js build\ARTWORK.IDX build\index\artwork.idx.a
 rem
 rem add additional miscellaneous files
 rem
-cscript /nologo bin\addfile.js build\COVERFADE src\index\coverfade.idx.a
-cscript /nologo bin\addfile.js build\GR.FIZZLE src\index\gr.fizzle.idx.a
-cscript /nologo bin\addfile.js build\HELPTEXT src\index\helptext.idx.a
-cscript /nologo bin\addfile.js build\CREDITS src\index\credits.idx.a
-cscript /nologo bin\addfile.js res\DECRUNCH src\index\decrunch.idx.a
-cscript /nologo bin\addfile.js res\JOYSTICK src\index\joystick.idx.a
+cscript /nologo bin\addfile.js build\COVERFADE build\index\coverfade.idx.a
+cscript /nologo bin\addfile.js build\GR.FIZZLE build\index\gr.fizzle.idx.a
+cscript /nologo bin\addfile.js build\HELPTEXT build\index\helptext.idx.a
+cscript /nologo bin\addfile.js build\CREDITS build\index\credits.idx.a
+cscript /nologo bin\addfile.js res\JOYSTICK build\index\joystick.idx.a
 echo done
 goto :EOF
 
 :md
 2>nul md build
-2>nul md build\X
+2>nul md build\index
 2>nul md build\X.INDEXED
 2>nul md build\FX.INDEXED
 2>nul md build\FXDATA
+2>nul md build\FXDATA.UNCOMPRESSED
 2>nul md build\FXCODE
 2>nul md build\PRELAUNCH
 2>nul md build\PRELAUNCH.INDEXED
@@ -313,6 +326,7 @@ goto :EOF
 2>nul md build\ATTRACT1
 2>nul md build\SS
 2>nul md build\GAMEHELP
+2>nul md build\GAMEHELP.COMPRESSED
 2>nul md build\DEMO
 1>nul copy nul build\log
 goto :EOF
@@ -341,6 +355,12 @@ for %%q in (src\fx\*.a) do (
   for /f "tokens=* usebackq" %%k in (`find "^!to" %%q`) do set _to=%%k
   set _to=!_to:~0,1!
   if !_to!==t %ACME% %%q
+)
+for %%q in (build\FXDATA.UNCOMPRESSED\*) do (
+  set _fx=%%~nxq
+  set _fy=!_fx:~-4!
+  set _fz=!_fx:~0,-5!
+  %EXOMIZER% %%q@0x!_fy! -o build\FXDATA\!_fz!
 )
 echo done
 goto :EOF

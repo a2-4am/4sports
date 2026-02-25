@@ -113,7 +113,7 @@ kGRActionIndexRecord
          !source "build/index/gr.idx.a"
 
 kDGRActionIndexRecord
-         !source "build/index/dgr.idx.a"
+;;         !source "build/index/dgr.idx.a"
 
 kHGRActionIndexLo
          !byte <kHGRActionIndexRecord0
@@ -199,4 +199,4 @@ kGRFizzleRecord
          !source "build/index/gr.fizzle.idx.a"
 
 kDGRFizzleRecord
-         !source "build/index/dgr.fizzle.idx.a"
+;;         !source "build/index/dgr.fizzle.idx.a"
