@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 
+import argparse
 from collections import OrderedDict
-from pprint import pprint
-from string import ascii_lowercase
-from sys import stdin
+from string import ascii_lowercase, digits
+from sys import stdin, stderr
+
+valid_keys = OrderedDict()
+for c in ascii_lowercase + digits:
+    valid_keys[c] = c
 
 def score(inputbuffer, displayname):
     if len(inputbuffer) > len(displayname):
@@ -35,7 +39,7 @@ def best(keys, games):
     bestindex = -1
     bestlikely = False
     for game in games:
-        if game.startswith(keys):
+        if game.replace(' ', '').startswith(keys):
             return gameindex
         gamescore, likely = score(keys, game)
         if (gamescore > bestscore):
@@ -48,26 +52,33 @@ def best(keys, games):
     return bestindex
 
 def main():
-    games = [line.strip().lower() for line in stdin]
+    parser = argparse.ArgumentParser(prog='buildcache')
+    parser.add_argument('--verbose', '-v', action='store_true')
+    args = parser.parse_args()
+    games = [line.lower() for line in stdin]
+    valid_keys[" "] = " "
+    games = ["".join([valid_keys.get(c, "") for c in g]) for g in games]
+    del valid_keys[" "]
+    games = [g.strip() for g in games]
     cache = OrderedDict()
-    for a in ascii_lowercase:
+    for a in valid_keys:
         index1 = best(a, games)
         if index1 < 0: continue
         cache[a] = OrderedDict()
         cache[a][" "] = index1
-        for b in ascii_lowercase:
+        for b in valid_keys:
             index2 = best(a+b, games)
             if index2 < 0: continue
             cache[a][b] = OrderedDict()
             if index2 != index1:
                 cache[a][b][" "] = index2
-            for c in ascii_lowercase:
+            for c in valid_keys:
                 index3 = best(a+b+c, games)
                 if index3 < 0: continue
                 cache[a][b][c] = OrderedDict()
                 if index3 != index2:
                     cache[a][b][c][" "] = index3
-                for d in ascii_lowercase:
+                for d in valid_keys:
                     index4 = best(a+b+c+d, games)
                     if index4 < 0: continue
                     if index4 != index3:
@@ -86,6 +97,8 @@ def main():
             print(f'         !word {cache[a]}')
         else:
             print(f'         !word _{a}')
+            if args.verbose and (" " in cache[a]):
+                stderr.write(f'{a}    {games[cache[a][" "]]}\n')
     print('         !byte 0')
 
     for a in cache:
@@ -97,6 +110,8 @@ def main():
                 print(f'         !word {cache[a][b]}')
             else:
                 print(f'         !word _{a}{b}')
+                if args.verbose and (" " in cache[a][b]):
+                    stderr.write(f'{a}{b}   {games[cache[a][b][" "]]}\n')
         print('         !byte 0')
 
     for a in cache:
@@ -110,6 +125,8 @@ def main():
                     print(f'         !word {cache[a][b][c]}')
                 else:
                     print(f'         !word _{a}{b}{c}')
+                    if args.verbose and (" " in cache[a][b][c]):
+                        stderr.write(f'{a}{b}{c}  {games[cache[a][b][c][" "]]}\n')
             print('         !byte 0')
 
     for a in cache:
@@ -122,6 +139,8 @@ def main():
                 for d in cache[a][b][c]:
                     print(f'         !text "{d}"')
                     print(f'         !word {cache[a][b][c][d]}')
+                    if args.verbose:
+                        stderr.write(f'{a}{b}{c}{d} {games[cache[a][b][c][d]]}\n')
                 print('         !byte 0')
 
 if __name__ == '__main__':

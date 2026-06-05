@@ -44,7 +44,7 @@ HGRActionSlideshow
 ; HGRSingle
 ; display a single hi-res screenshot, with transition effect
 ;
-; in:    none
+; in:    A/Y contains address of filename
 ; out:   everything clobbered
 ;        graphics mode still displaying hi-res screen with last picture visible
 ;------------------------------------------------------------------------------
@@ -174,7 +174,6 @@ HGRTitleCallback
          bmi   HGRRTS
 
          +ST16 @fname
-         +ST16 gLastMegaAttractGame
 
          jsr   FindGame
          ; if game is not found (C will be set here), it means it can't be played on
@@ -182,6 +181,8 @@ HGRTitleCallback
          ; it in slideshows
          bcs   HGRRTS
 
+         +LD16 SRC
+         jsr   SetNextAttractFilename
          +LD16 WINDEX                ; save game index in case user hits RETURN
          +ST16 gGameToLaunch         ; while it's visible (we'll launch it)
          lda   #0
@@ -234,6 +235,8 @@ HGRActionCallback
          ; it from slideshows
          bcs   HGRRTS
 
+         +LD16 SRC
+         jsr   SetNextAttractFilename
          jsr   LoadIndexedHGRFile
          jsr   DecompressHGR
          jmp   DrawGameTitleInActionSlideshow

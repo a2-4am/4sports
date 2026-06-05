@@ -304,20 +304,25 @@
          +READ_ROM_NO_WRITE
 }
 
-!macro   ENABLE_ACCEL_AND_HIDE_ARTWORK {
+; leave LC active on exit
+!macro   ENABLE_ACCEL_AND_HIDE_ARTWORK_LC {
          +ENABLE_ACCEL_LC
          jsr   HideLaunchArtworkLC2
+}
+
+!macro   ENABLE_ACCEL_AND_HIDE_ARTWORK {
+         +ENABLE_ACCEL_AND_HIDE_ARTWORK_LC
          +READ_ROM_NO_WRITE
 }
 
 ; leave LC active on exit
 !macro   ENABLE_ACCEL_LC {
-         +READ_RAM2_NO_WRITE
+         +READ_RAM2_WRITE_RAM2
          jsr   EnableAccelerator
 }
 
 !macro   DISABLE_ACCEL {
-         +READ_RAM2_NO_WRITE
+         +READ_RAM2_WRITE_RAM2
          +DISABLE_ACCEL_LC
 }
 
@@ -327,22 +332,42 @@
          +READ_ROM_NO_WRITE
 }
 
-!macro   DISABLE_ACCEL_AND_HIDE_ARTWORK {
-         +READ_RAM2_NO_WRITE
+; when LC is active already
+!macro   DISABLE_ACCEL_AND_HIDE_ARTWORK_LC {
          jsr   DisableAccelerator
+         +HIDE_ARTWORK_LC
+}
+
+!macro   DISABLE_ACCEL_AND_HIDE_ARTWORK {
+         +READ_RAM2_WRITE_RAM2
+         +DISABLE_ACCEL_AND_HIDE_ARTWORK_LC
+}
+
+; when LC is active already
+!macro   HIDE_ARTWORK_LC {
          jsr   HideLaunchArtworkLC2
          +READ_ROM_NO_WRITE
 }
 
 !macro   HIDE_ARTWORK {
          +READ_RAM2_NO_WRITE
-         jsr   HideLaunchArtworkLC2
-         +READ_ROM_NO_WRITE
+         +HIDE_ARTWORK_LC
+}
+
+; leave LC active on exit
+!macro   GET_MACHINE_STATUS_LC {
+         +READ_RAM2_NO_WRITE
+         lda   MachineStatus
+}
+
+; leave LC active and writable on exit
+!macro   GET_MACHINE_STATUS_LC_RW {
+         +READ_RAM2_WRITE_RAM2
+         lda   MachineStatus
 }
 
 !macro   GET_MACHINE_STATUS {
-         +READ_RAM2_NO_WRITE
-         lda   MachineStatus
+         +GET_MACHINE_STATUS_LC
          +READ_ROM_NO_WRITE
 }
 
@@ -352,30 +377,51 @@
          +READ_ROM_NO_WRITE
 }
 
-!macro   GET_MOCKINGBOARD_SPEECH_AND_MACHINE_STATUS { ;sign set if SC-01, overflow set if SSI-263
-         +READ_RAM2_NO_WRITE
-         lda   MachineStatus
+; leave LC active on exit
+!macro   GET_MOCKINGBOARD_SPEECH_AND_MACHINE_STATUS_LC { ;sign set if SC-01, overflow set if SSI-263
+         +GET_MACHINE_STATUS_LC
          bit   MockingboardStuff
+}
+
+!macro   GET_MOCKINGBOARD_SPEECH_AND_MACHINE_STATUS { ;sign set if SC-01, overflow set if SSI-263
+         +GET_MOCKINGBOARD_SPEECH_AND_MACHINE_STATUS_LC
          +READ_ROM_NO_WRITE
 }
 
-!macro   GET_MOCKINGBOARD_SLOT { ;carry set if present
+; leave LC active on exit
+!macro   GET_MOCKINGBOARD_SLOT_LC {
          +READ_RAM2_NO_WRITE
          lda   MockingboardStuff
          cmp   #1
          and   #7
          ora   #$C0
+}
+
+!macro   GET_MOCKINGBOARD_SLOT { ;carry set if present
+         +GET_MOCKINGBOARD_SLOT_LC
          +READ_ROM_NO_WRITE
 }
 
-!macro   GET_MOCKINGBOARD_SLOT_AND_MACHINE_STATUS { ;carry set if present
-         +READ_RAM2_NO_WRITE
+; leave LC active and writable on exit
+!macro   GET_MOCKINGBOARD_SLOT_AND_MACHINE_STATUS_LC_RW { ;carry set if present
+         +READ_RAM2_WRITE_RAM2
          lda   MockingboardStuff
          cmp   #1
          and   #7
          ora   #$C0
          tax
          lda   MachineStatus
+}
+
+; leave LC active on exit
+!macro   GET_MOCKINGBOARD_SLOT_AND_MACHINE_STATUS_LC { ;carry set if present
+         +GET_MOCKINGBOARD_SLOT_LC
+         tax
+         lda   MachineStatus
+}
+
+!macro   GET_MOCKINGBOARD_SLOT_AND_MACHINE_STATUS { ;carry set if present
+         +GET_MOCKINGBOARD_SLOT_AND_MACHINE_STATUS_LC
          +READ_ROM_NO_WRITE
 }
 
@@ -474,42 +520,65 @@
 }
 
 !macro   NEW_RESET_VECTOR_64K .addr {
-         lda   #$2C
-         sta   .addr
-         lda   #$89
-         sta   .addr+1
-         lda   #$C0
-         sta   .addr+2
-         lda   #$4C       ; JMP $FAA6 to reboot
-         sta   .addr+3
-         lda   #$A6
-         sta   .addr+4
-         lda   #$FA
-         sta   .addr+5
+         ldx   #8
+         bne   +
+--       sta   $C089      ; bank in main
+         inc   $3F4       ; bypass $3F2 check at $FA62
+         jmp   ($FFFC)    ; reboot
++
+-        lda   --, x
+         sta   .addr, x
+         dex
+         bpl   -
+  !if <.addr != 0 {
          lda   #<.addr
          sta   $3F2
          sta   $FFFC
+  } else {
+         inx
+         stx   $3F2
+         stx   $FFFC
+  }
   !if >.addr != 1 {
+    !if >.addr = 0 {
+         inx
+         stx   $3F3
+         stx   $FFFD
+         lda   #$A5
+    } else {
          lda   #>.addr
          sta   $3F3
          sta   $FFFD
          eor   #$A5
+    }
          sta   $3F4
+  } else {
+         lda   #>.addr
+         sta   $FFFD
   }
 }
 
 ; for 64k games on ][+ which either hang or restart
 ; updates reset hook to reboot on ctrl-reset
+!macro   FORCE_REBOOT {
+         ldx   #8
+         !byte $d0
+--       !byte 8          ;bne   +
+         !byte $89, $C0   ; bank in main
+         inc   $3F4       ; bypass $3F2 check at $FA62
+         jmp   ($FFFC)    ; reboot
++
+-        lda   --, x
+         sta   $100, x
+         dex
+         bne   -
+}
+
 !macro   LC_REBOOT {
-         inc   $101       ; (assumes LC is switched in)
-         lda   #$A6
-         sta   $104
-         lda   #$FA
-         sta   $105       ; update reset hook to reboot
-         lda   #1
-         sta   $FFFD
-         lsr
-         sta   $FFFC      ; LC reset vector fix
+         +FORCE_REBOOT
+         stx   $FFFC      ; LC reset vector fix
+         inx
+         stx   $FFFD
 }
 
 ; load an external file by pathname

@@ -9,6 +9,7 @@
 ; e.g. iBuildHGRTables instead of BuildHGRTables.
 ;
 ; Public functions:
+; - ReadyToPaint
 ; - WaitForKeyWithTimeout
 ; - BuildHGRTables
 ; - BuildHGRMirrorTables
@@ -35,6 +36,34 @@
 ; - RippleCoordinates3Bit
 
          !source "src/fx/macros.a"
+
+ReadyToPaint
+; in:    none
+;        LC bank 1 R/W
+;        WRITEAUXMEM may be active if called from certain SHR FX
+;        but this only affects memory 0200-BFFF, not ZP or LC because
+;        those use a different softswitch
+; out:   all flags/registers preserved
+;        unless key has been pressed
+         php
+         bit   KBD
+         bmi   @keyPressed
+         pha
+         tya
+         pha
+         jsr   SetLastAttractFilename ; LC 1
+         pla
+         tay
+         pla
+         plp
+         rts
+@keyPressed
+         plp
+         sta   READMAINMEM
+         sta   WRITEMAINMEM
+         pla
+         pla
+         rts
 
 WaitForKeyWithTimeout
 ; in:    A = timeout length (like standard $FCA8 wait routine)
@@ -663,6 +692,65 @@ ReverseCoordinates3Bit
          bcc   --                    ; always branches
 ++       rts
 
+RippleCoordinates3Bit
+         ldx   #$1B
+-        lda   @ripplezp, x
+         sta   $e0, x
+         dex
+         bpl   -
+
+---      ldx   #$0c
+--       ldy   $ee, x
+         lda   $ef, x
+         jsr   @aslmod
+         sty   $ee, x
+         sta   $ef, x
+         sty   $ec
+         clc
+         adc   #>Coordinates3Bit
+         sta   $ed
+         ldy   #0
+         !byte $24
+-        sec
+         lda   ($ec), y
+         pha
+         lda   $de, x
+         sta   ($ec), y
+         pla
+         sta   $de, x
+         inx
+         iny
+         bcc   -
+         dex
+         dex
+         dex
+         dex
+         bne   --
+         dec   $ee
+         bne   ---
+         dec   $ef
+         bpl   ---
+         bmi   @exit                 ; always branches
+@aslmod  jsr   +
++        cmp   #$28
+         bcc   +
+         iny
++        pha
+         tya
+         asl
+         tay
+         pla
+         rol
+         cmp   #$50
+         bcc   @exit
+         sbc   #$50
+@exit    rts
+@ripplezp
+         !byte $1F,$F3,$20,$F3,$20,$14,$20,$D3
+         !byte $1E,$F3,$1F,$54,$00,$00,$AA,$06
+         !byte $02,$00,$04,$00,$06,$00,$0C,$00
+         !byte $16,$00,$1A,$00
+
 !zone {
 RippleCoordinates1Bit4
          lda   #<aslmod4
@@ -761,62 +849,3 @@ aslmod   cmp   #$1A
          sbc   #$34
 exit     rts
 }
-
-RippleCoordinates3Bit
-         ldx   #$1B
--        lda   @ripplezp, x
-         sta   $e0, x
-         dex
-         bpl   -
-
----      ldx   #$0c
---       ldy   $ee, x
-         lda   $ef, x
-         jsr   @aslmod
-         sty   $ee, x
-         sta   $ef, x
-         sty   $ec
-         clc
-         adc   #>Coordinates3Bit
-         sta   $ed
-         ldy   #0
-         !byte $24
--        sec
-         lda   ($ec), y
-         pha
-         lda   $de, x
-         sta   ($ec), y
-         pla
-         sta   $de, x
-         inx
-         iny
-         bcc   -
-         dex
-         dex
-         dex
-         dex
-         bne   --
-         dec   $ee
-         bne   ---
-         dec   $ef
-         bpl   ---
-         bmi   @exit                 ; always branches
-@aslmod  jsr   +
-+        cmp   #$28
-         bcc   +
-         iny
-+        pha
-         tya
-         asl
-         tay
-         pla
-         rol
-         cmp   #$50
-         bcc   @exit
-         sbc   #$50
-@exit    rts
-@ripplezp
-         !byte $1F,$F3,$20,$F3,$20,$14,$20,$D3
-         !byte $1E,$F3,$1F,$54,$00,$00,$AA,$06
-         !byte $02,$00,$04,$00,$06,$00,$0C,$00
-         !byte $16,$00,$1A,$00

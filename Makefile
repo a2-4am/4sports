@@ -22,7 +22,7 @@ ACME=acme
 
 # https://github.com/mach-kernel/cadius
 # version 1.4.0 or later
-CADIUS=cadius
+CADIUS=TZ=UTC0 cadius
 
 # https://www.gnu.org/software/parallel/
 PARALLEL=parallel
@@ -108,8 +108,14 @@ FINDER.ROOT=res/Finder.Root
 HELP=res/HELP
 JOYSTICK=res/JOYSTICK
 TITLE=res/TITLE
-SOURCE_DATE := $(shell git log -1 --format=%cD | bin/rfc2822_to_touch.py)
-export SOURCE_DATE_EPOCH = $(shell git log -1 --format=%ct)
+SOURCE_DATE := $(shell TZ=UTC0 git show -s --date='format-local:%Y-%m-%dT%H:%M:%SZ' --format="%cd")
+export SOURCE_DATE_EPOCH = $(shell git show -s --format=%ct)
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	MOUNTER=xdg-open
+else
+	MOUNTER=osascript bin/V2Make.scpt "`pwd`" bin/4cade.vii
+endif
 
 .PHONY: compress attract cache clean mount all al
 
@@ -458,7 +464,7 @@ cache: $(GAMES.CONF)
 	    'awk -F= '"'"'/^.00/    { print $$2 }'"'"' < "$(GAMES.CONF)" | bin/buildcache.py > "$(BUILDDIR)"/cache100.a' \
 	    'awk -F= '"'"'/^.0/     { print $$2 }'"'"' < "$(GAMES.CONF)" | bin/buildcache.py > "$(BUILDDIR)"/cache101.a' \
 	    'awk -F= '"'"'/^..0/    { print $$2 }'"'"' < "$(GAMES.CONF)" | bin/buildcache.py > "$(BUILDDIR)"/cache110.a' \
-	    'awk -F= '"'"'!/^$$|^#/ { print $$2 }'"'"' < "$(GAMES.CONF)" | bin/buildcache.py > "$(BUILDDIR)"/cache111.a'
+	    'awk -F= '"'"'!/^$$|^#/ { print $$2 }'"'"' < "$(GAMES.CONF)" | bin/buildcache.py -v > "$(BUILDDIR)"/cache111.a' 2> "$(BUILDDIR)"/cache.log
 	$(PARALLEL) ::: \
 	    '$(ACME) -o res/CACHE000.IDX "$(BUILDDIR)"/cache000.a' \
 	    '$(ACME) -o res/CACHE001.IDX "$(BUILDDIR)"/cache001.a' \
@@ -470,7 +476,7 @@ cache: $(GAMES.CONF)
 	    '$(ACME) -o res/CACHE111.IDX "$(BUILDDIR)"/cache111.a'
 
 mount: $(HDV)
-	osascript bin/V2Make.scpt "`pwd`" bin/4cade.vii "$(HDV)"
+	$(MOUNTER) $(HDV) &
 
 $(MD):
 	@$(ACME) --version | grep -q "ACME, release" || (echo "ACME is not installed" && exit 1)

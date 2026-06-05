@@ -117,7 +117,6 @@ okvs_get
                                      ; PTR -> store
                                      ; Y = 0
          jsr   okvs_len_imm
-         beq   @fail                 ; no keys, fail immediately
          jsr   incptr4
                                      ; PTR -> first record
          +LDPARAMPTR 3, SRC          ; SRC -> key we want to find
@@ -125,6 +124,7 @@ okvs_get
          sty   WINDEX
          sty   WINDEX+1
          lda   (SRC),y
+         beq   @fail                 ; key is empty, fail immediately
          tay
          iny
          sty   KEYLEN

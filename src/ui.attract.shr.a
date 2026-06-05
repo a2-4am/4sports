@@ -61,7 +61,7 @@ SHRSlideshow
 ; safe to call if machine can not display super hi-res graphics (does nothing
 ; and exits)
 ;
-; in:    none
+; in:    A/Y contains address of filename
 ; out:   everything clobbered
 ;        graphics mode reset to display hi-res screen, which is blank
 ;------------------------------------------------------------------------------
@@ -198,7 +198,6 @@ SHRArtworkCallback
          bmi   SHRRTS
 
          +ST16 IndexedSHRFilename
-         +ST16 gLastMegaAttractGame
 
          jsr   FindGame
          ; if game is not found (C will be set here), it means it can't be played on
@@ -206,6 +205,8 @@ SHRArtworkCallback
          ; it in slideshows
          bcs   SHRRTS
 
+         +LD16 SRC
+         jsr   SetNextAttractFilename
          jsr   BlankSHR
          jsr   LoadIndexedSHRFile    ; requires IndexedSHRFilename (set earlier)
          jsr   DecompressSHR

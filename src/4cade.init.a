@@ -86,13 +86,6 @@
          inx
          bne   -
 !cpu 6502
-
-         ; Since we know we are on IIgs, let's also force Mono Mode off
-         lda   NEWVIDEO
-         and   #$DF
-         sta   NEWVIDEO              ; Bit 5=1 for B/W double hi-res
-         lda   #$00
-         sta   MONOCOLOR             ; bit 7=1 disables color
 +
 
          ; accommodate uppercase-only machines (64K ][ and ][+ are supported)
@@ -124,7 +117,7 @@
          ; set up text window so it only covers lower left corner
          lda   #28
          sta   $21
-         lda   #19
+         lda   #18
          sta   $22
 
          ; print machine configuration in lower left corner
@@ -186,18 +179,6 @@
          ; initialize and relocate ProRWTS2 to $D400 in LC RAM bank 2
          +READ_ROM_WRITE_RAM2
          jsr   init                  ; requires RAM2 write
-         bcc   @good_smartport
-
-         ldy   #@noSmartPortlen
--        lda   @s_noSmartPort,y
-         sta   $6AE,y
-         dey
-         bpl   -
-@hang2   bmi   @hang2
-@s_noSmartPort !scrxor $80,"REQUIRES SMARTPORT HARD DISK"
-@noSmartPortlen=(*-@s_noSmartPort)-1
-
-@good_smartport
 
          ; overwrite ProDOS IRQ handler
          sei

@@ -109,7 +109,6 @@ DHIRESOFF =    $C05F      ; double hi-res off switch
 ; (prefixed because so much of the program runs from LC RAM, so don't call
 ; these without thinking about memory banks first)
 ROM_TEXT2COPY =$F962      ; turn on alternate display mode on IIgs
-ROM_REBOOT =   $FAA6
 ROM_TEXT =     $FB2F
 ROM_MACHINEID =$FBB3
 ROM_MACHINE2C =$FBC0
@@ -148,20 +147,21 @@ PrelaunchMax = $1B3
 HideLaunchArtworkLC2 = $DFAE
 ; textrank
 BestMatchIndex = $E5      ; word
-tmpx         = $E7        ; byte
-remainder    = $E8        ; word
-num1         = $EA        ; word
-num2         = $EC        ; byte
-Timeout      = $ED        ; 3 bytes (used by SearchMode)
-zpword   =     $F0        ; word
-zpstring =     $F2        ; word
-runningscore=  $F4        ; word
-startat  =     $F6        ; byte
-i        =     $F7        ; byte
-tmp      =     $F8        ; byte
-gamelength=    $F9        ; byte
-firstletter=   $FA        ; byte
-MatchCount =   $FB        ; byte
+tmpx           = $E7      ; byte
+remainder      = $E8      ; word
+num1           = $EA      ; word
+num2           = $EC      ; byte
+Timeout        = $ED      ; 3 bytes (used by SearchMode)
+skipped        = $EF      ; byte
+zpword         = $F0      ; word
+zpstring       = $F2      ; word
+runningscore   = $F4      ; word
+startat        = $F6      ; byte
+i              = $F7      ; byte
+tmp            = $F8      ; byte
+gamelength     = $F9      ; byte
+firstletter    = $FA      ; byte
+MatchCount     = $FB      ; byte
 BestMatchScore = $FC      ; byte
 
 ; main memory addresses
@@ -340,6 +340,7 @@ iReverseCoordinates3Bit   = iRippleCoordinates2Bit-3
 iRippleCoordinates3Bit    = iReverseCoordinates3Bit-3
 iSetupPrecomputed3Bit     = iRippleCoordinates3Bit-3
 iPrelaunchInit            = iSetupPrecomputed3Bit-3
+iReadyToPaint             = iPrelaunchInit-3
 
 MockingboardStuff  = $FFF8  ; bit 7 = 1 if SC-01 speech chip present (Speech I)
                             ; bit 6 = 1 if SSI-263 speech chip present (Mockingboard "B"-"D")
@@ -392,6 +393,7 @@ ATTRACT_DGR         = %10000000
 ; shared symbols for prelaunch and effects to call ProRWTS2 functions
 iCurBlockLo    = $D601               ; constant
 iCurBlockHi    = $D603               ; constant
+isaveslot      = $D847               ; for accelerator calls after screen holes overwritten
 launchpatch    = $D85C               ; glue.launch.a
 itraverse      = $DB4B               ; Roger Rabbit, avoid, use Infiltrator 2 style instead
                                      ; also Columns (via file in disk image)

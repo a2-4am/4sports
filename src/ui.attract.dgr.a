@@ -84,6 +84,8 @@ DGRActionCallback
          ; it from slideshows
          bcs   DGRRTS
 
+         +LD16 SRC
+         jsr   SetNextAttractFilename
          jsr   LoadIndexedDGRFile
          jmp   ExecuteTransitionAt6000AndWait
 

@@ -29,6 +29,10 @@ kAttractModeFilters
 ;------------------------------------------------------------------------------
 MegaAttractMode
          jsr   SwitchToBank1
+         lda   #$00
+         sta   gLastAttractFilename
+         sta   gNextAttractFilename
+MegaNext
          ldx   #$FF
          txs
 
@@ -68,17 +72,19 @@ MegaAttractMode
          +LD16 @mname                ; A/Y = address of module name
          jsr   RunAttractModule
          lda   KBD
-         bpl   MegaAttractMode
+         bpl   MegaNext
          cmp   #$8D                  ; Enter plays the game shown on screen.
-         bne   +                     ; Any other key switches to Search Mode.
+         bne   jmp_to_search         ; Any other key switches to Search Mode.
          jsr   ReloadSearchIndexOnly
-         +LD16 gLastMegaAttractGame
-         +ST16 @game
+         ldy   gLastAttractFilename
+         beq   jmp_to_search
          jsr   okvs_find
          !word SearchIndexHandle
-@game    !word $FDFD                 ; SMC
-         jsr   PlayGameInAY          ; (might return if user hits Ctrl-Reset)
-+        jmp   SearchMode
+         !word gLastAttractFilename
+         bcs   jmp_to_search         ; Game not found, return to Search Mode
+         jsr   PlayGameInAY          ; (this JSR might return if user hits Ctrl-Reset)
+jmp_to_search
+         jmp   SearchMode
 
 ;------------------------------------------------------------------------------
 ; MiniAttractMode
@@ -206,16 +212,8 @@ RunAttractModule
 ; All demos are strictly 48K / main memory. No demo uses the
 ; language card or auxiliary memory.
 
-         +ST16 PTR
-         ldy   #0
-         lda   (PTR), y
-         tay
--        lda   (PTR), y
-         sta   DemoFilename, y
-         dey
-         bpl   -
-         +LDADDR DemoFilename
-         +ST16 gLastMegaAttractGame  ; save game filename in LC in case user hits Return to launch
+         jsr   SetNextAttractFilename
+         +LDADDR gNextAttractFilename
          +ST16 xfile
 
          jsr   ClearScreens          ; avoid seeing code load into the HGR page
@@ -227,6 +225,7 @@ RunAttractModule
          !word kDemoIndexRecord
 
          jsr   LoadXFile             ; load self-running demo into its default address (varies)
+         jsr   SetLastAttractFilename; demos do not hook into ReadyToPaint so mark this ready at launch
          jmp   Launch                ; will return to caller via |Reenter|
 
 ; not a demo, so maybe a slideshow or single screenshot
@@ -290,5 +289,32 @@ RunAttractModule
          !byte >GRSingle
          !byte >DGRSingle
 
-DemoFilename
+SetNextAttractFilename
+; in:    A/Y -> game filename
+; out:   registers preserved
+;        PTR clobbered
+;        flags clobbered
+         +ST16 PTR
+         ldy   #0
+         lda   (PTR), y
+         tay
+-        lda   (PTR), y
+         sta   gNextAttractFilename, y
+         dey
+         bpl   -
+         +LD16 PTR
+         rts
+
+SetLastAttractFilename
+         ldy   gNextAttractFilename
+         beq   @noGame
+-        lda   gNextAttractFilename, y
+         sta   gLastAttractFilename, y
+         dey
+         bpl   -
+@noGame  rts
+
+gLastAttractFilename
+         !byte 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+gNextAttractFilename
          !byte 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
