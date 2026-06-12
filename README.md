@@ -4,6 +4,8 @@
 
 # Building the code
 
+Skip to [Mac OS X](#mac-os-x) / [Windows](#windows) / [Linux](#linux)
+
 ## Mac OS X
 
 You will need
@@ -11,24 +13,27 @@ You will need
  - [ACME](https://sourceforge.net/projects/acme-crossass/)
  - [Parallel](https://www.gnu.org/software/parallel/)
  - [Cadius](https://github.com/mach-kernel/cadius)
+ - [Exomizer](https://bitbucket.org/magli143/exomizer/wiki/Home)
 
-As of this writing, all of the non-Xcode programs are installable via [Homebrew](https://brew.sh/).
+As of this writing, all of the non-Xcode programs are installable via [Homebrew](https://brew.sh/). Open `Terminal.app` and enter the following:
 
 ``` shell
 $ brew tap lifepillar/appleii
-$ brew install acme parallel mach-kernel-cadius
+$ brew trust lifepillar/appleii
+$ brew install acme parallel mach-kernel-cadius exomizer
 ```
 
-Then open a terminal window and type
+Now you're ready to build Total Replay:
 
 ``` shell
+$ git clone https://github.com/a2-4am/4sports.git
 $ cd 4sports/
 $ make
 ```
 
 If all goes well, the `build/` subdirectory will contain a `4sports.hdv` image which can be mounted in emulators like [OpenEmulator](https://archive.org/details/OpenEmulatorSnapshots), [Ample](https://github.com/ksherlock/ample), or [Virtual II](http://virtualii.com/).
 
-If all does not go well, try doing a clean build (`make clean dsk`)
+If all does not go well, try doing a clean build (`make clean && make`)
 
 If that fails, perhaps you have out-of-date versions of one of the required tools? The [Makefile](https://github.com/a2-4am/4sports/blob/main/Makefile) lists, but does not enforce, the minimum version requirements of each third-party tool.
 
@@ -39,10 +44,11 @@ If that fails, please [file a bug](https://github.com/a2-4am/4sports/issues/new)
 You will need
  - [ACME](https://sourceforge.net/projects/acme-crossass/)
  - [Cadius for Windows](https://www.brutaldeluxe.fr/products/crossdevtools/cadius/)
+ - [Exomizer](https://bitbucket.org/magli143/exomizer/wiki/Home)
 
 (Those tools will need to be added to your command-line PATH.)
 
-Then open a `CMD.EXE` window and type
+Now you're ready to build Total Replay. Open `CMD.EXE` and enter the following:
 
 ```
 C:\> cd 4sports
@@ -58,26 +64,21 @@ If that fails, please [file a bug](https://github.com/a2-4am/4sports/issues/new)
 
 ## Linux
 
-You will need
- - [Cadius](https://github.com/mach-kernel/cadius)
-
-Most of the packages are already available pre-compiled and can be installed with the following
+For Debian (or Ubuntu or other derivatives), you can install some of the prerequisties through `apt` by opening a terminal window and entering the following:
 
 ``` shell
-$ sudo apt-get install git parallel acme
+$ sudo apt install acme git parallel build-essential
 ```
 
-To compile Cadius enter the following
+Other tools are installable via [Homebrew](https://brew.sh/). Open a terminal prompt and enter the following:
 
 ``` shell
-$ git clone https://github.com/mach-kernel/cadius.git
-$ cd cadius
-$ make
-$ cd bin/release
-$ sudo cp cadius /usr/bin
+$ brew tap lifepillar/appleii
+$ brew trust lifepillar/appleii
+$ brew install mach-kernel-cadius exomizer
 ```
 
-Then open a terminal window and type
+Now you're ready to build Total Replay:
 
 ``` shell
 $ git clone https://github.com/a2-4am/4sports.git
@@ -87,9 +88,9 @@ $ make
 
 If all goes well, the `build/` subdirectory will contain a `4sports.hdv` image which can be mounted in emulators like [MAME](http://www.mamedev.org).
 
-If all does not go well, try doing a clean build (`make clean dsk`)
+If all does not go well, try doing a clean build (`make clean && make`)
 
-If that fails, perhaps you have out-of-date versions of one of the required tools? The [winmake](https://github.com/a2-4am/4sports/blob/main/winmake.bat) lists, but does not enforce, the minimum version requirements of each third-party tool.
+If that fails, perhaps you have out-of-date versions of one of the required tools? The [Makefile](https://github.com/a2-4am/4sports/blob/main/Makefile) lists, but does not enforce, the minimum version requirements of each third-party tool.
 
 If that fails, please [file a bug](https://github.com/a2-4am/4sports/issues/new).
 
@@ -125,7 +126,6 @@ The format of the `GAMES.CONF` file has changed as new requirements have appeare
 
 Each game's filename is used as a "foreign key" (in database terms) to build directory paths, to locate files in subdirectories, and to reference the game in other configuration files.
 
-- A game's main executable is always `X/FILENAME/FILENAME`
 - A game's HGR title screenshot is always `TITLE.HGR/FILENAME`
 - A game's super hi-res box art is always `ARTWORK.SHR/FILENAME` (not all games have artwork)
 - A games's help page is always `GAMEHELP/FILENAME` (not all games have help)
@@ -135,7 +135,7 @@ Each game's filename is used as a "foreign key" (in database terms) to build dir
 
 ## `ATTRACT.CONF`
 
-[`ATTRACT.CONF`](https://github.com/a2-4am/4sports/blob/main/res/ATTRACT.CONF) is the master configuration file for Mega-Attract mode. There is up-to-date format information in comments in the file itself, which I will not duplicate here. In general, each record is the name of an attract module, which can be a slideshow, self-running demo, or even a single screenshot. Each attract module corresponds to a file in a separate directory; see format information for details. So the record `FAVORITES.CONF=1` corresponds to [`a real file`](https://github.com/a2-4am/4sports/blob/main/res/SS/FAVORITES.CONF) that contains details about that particular hi-res slideshow. `ATTRACT.CONF` and the linked slideshow configuration files are parsed at build time and stored in a custom format on the final disk image.
+[`ATTRACT.CONF`](https://github.com/a2-4am/4sports/blob/main/res/ATTRACT.CONF) is the master configuration file for Mega-Attract mode. There is up-to-date format information in comments in the file itself, which I will not duplicate here. In general, each record is the name of an attract module, which can be a slideshow, self-running demo, or even a single screenshot. Each attract module corresponds to a file in a separate directory; see format information for details. So the record `FAVORITES2.CONF=1` corresponds to [`a real file`](https://github.com/a2-4am/4sports/blob/main/res/SS/FAVORITES2.CONF) that contains details about that particular hi-res slideshow. `ATTRACT.CONF` and the linked slideshow configuration files are parsed at build time and stored in a custom format on the final disk image.
 
 Attract modules are loosely divided into sets that have a loosely similar mix of hi-res, double hi-res, super hi-res, and self-running demos. The `ATTRACT.CONF` file is maintained by hand and changes frequently as we add games, split up slideshows, or reorder things on a whim.
 
@@ -160,13 +160,11 @@ This file is read and parsed once at program startup, and the parsed data is sto
 
 # Compression
 
-Many files in Total Replay are stored in a compressed format, then decompressed at run-time. The compression and decompression is handled by [Exomizer](https://bitbucket.org/magli143/exomizer/wiki/Home), which targets 8-bit platforms. Compressed files include
+Many graphic files in Total Replay are stored in a compressed format, then decompressed at run-time. The compression and decompression is handled by [Exomizer](https://bitbucket.org/magli143/exomizer/wiki/Home), which targets 8-bit platforms. Compressed files include
 
 - [hi-res action screenshots](https://github.com/a2-4am/4sports/tree/main/res/ACTION.HGR)
 - [double hi-res action screenshots](https://github.com/a2-4am/4sports/tree/main/res/ACTION.DHGR)
 - [super hi-res box art](https://github.com/a2-4am/4sports/tree/main/res/ARTWORK.SHR)
-
-Both the compressed and uncompressed files are stored in the repository, so you do not need Exomizer installed to build Total Replay. You only need it if you add new graphics.
 
 To add a new compressed graphic file, add the uncompressed original file to the appropriate directory ([`ACTION.HGR.UNCOMPRESSED`](https://github.com/a2-4am/4sports/tree/main/res/ACTION.HGR.UNCOMPRESSED), [`ACTION.DHGR.UNCOMPRESSED`](https://github.com/a2-4am/4sports/tree/main/res/ACTION.DHGR.UNCOMPRESSED), or [`ARTWORK.SHR.UNCOMPRESSED`](https://github.com/a2-4am/4sports/tree/main/res/ARTWORK.SHR.UNCOMPRESSED) respectively), then run
 
