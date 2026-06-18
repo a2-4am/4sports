@@ -16,7 +16,8 @@ cat res/SS/ACTDHGR*.CONF |
 
 hgrs=$(mktemp)
 hgrtmp=$(comm -23 <(ls res/SS/ACT*) <(ls res/SS/ACTDHGR*))
-hgrsrcs=$(comm -23 <(echo "$hgrtmp") <(ls res/SS/ACTDGR*))
+hgrtmp2=$(comm -23 <(echo "$hgrtmp") <(ls res/SS/ACTDGR*))
+hgrsrcs=$(comm -23 <(echo "$hgrtmp2") <(ls res/SS/ACTGR*))
 cat $hgrsrcs |
     tr -d "\r" |
     sort |
