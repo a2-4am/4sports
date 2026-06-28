@@ -30,6 +30,15 @@ return {
     apple2.Type("1")
     replay.WaitForGraphicsMode()
   end,
+  ["Flight Simulator II"] = function()
+    replay.WaitForAddressEquals(0x202A, 0x40) --'F' on title
+    apple2.Type("A")
+    emu.wait(2)
+    apple2.Type("A")
+    emu.wait(2)
+    apple2.Type(" ")
+    replay.WaitForAddressEquals(0x2050, 0x53) --demo background
+  end,
   ["Go Four It"] = function()
     replay.WaitForScreenContains("NEW GAME")
     apple2.ReturnKey()
@@ -49,19 +58,18 @@ return {
     apple2.ReturnKey()
     replay.WaitForGraphicsMode()
   end,
-
-
-
---TODO:
--- 13/Card Sharks
--- 28/Flight Simulator II
--- 56/Pitstop II
--- 86/The Dam Busters
--- 89/The Games: Winter Edition
--- 97/World Games
--- 98/Wipeout
--- 99/World Karate Championship
-
-
-
+  ["The Dam Busters"] = function()
+    emu.wait(10)
+    apple2.Type("1")
+    replay.WaitForAddressEquals(0x2000, 0x2A)
+  end,
+  ["The Games: Summer Edition"] = function()
+    replay.WaitForAddressEquals(0x2000, 0x19)
+  end,
+  ["Winter Games"] = function()
+    replay.WaitForAddressEquals(0x2000, 0xDF)
+  end,
+  ["World Games"] = function()
+    replay.WaitForAddressEquals(0x2034, 0x5F)
+  end,
 }
