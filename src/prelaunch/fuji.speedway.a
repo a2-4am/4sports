@@ -1,0 +1,46 @@
+;license:MIT
+;(c) 2026 by Frank M.
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/FUJI.SPEED.WAY",plain
+*=$106
+
+         !source "src/macros.a"
+
+         +ENABLE_ACCEL
+
+         lda   #$60
+         sta   $6C13
+         jsr   $6C00
+
+         lda   #$60
+         sta   $43FD
+         jsr   $43F4
+
+         lda   #$60
+         sta   $6A18
+         jsr   $6A00
+
+         lda   #<delay4
+         sta   $2986
+         lda   #>delay4
+         sta   $2987
+
+         +DISABLE_ACCEL
+         jmp   $2970
+
+delay4   ldx   #$10
+outer    ldy   #$C3
+middle   lda   #$FF
+inner    sec
+         sbc   #1
+         bne   inner
+         dey
+         bne   middle
+         dex
+         bne   outer
+         jmp   $1E50
+
+!if * > PrelaunchMax {
+  !error "code is too large, ends at ", *
+}
