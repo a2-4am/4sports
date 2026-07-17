@@ -8,39 +8,10 @@ local GameDisplayNameAddr = 0x01fd9
 local GameCountAddr = 0x01ff7
 local AttractCounter = 0x0ffe4
 
-local machine_name = manager.machine.system.name
+mem = manager.machine.devices[':maincpu'].spaces['program']
+a2 = { text = true, mixed = false, page2 = false, hires = false }
 
-local is_in_graphics_mode
-local is_in_text_mode
-
-if machine_name == "apple2e" or
-   machine_name == "apple2ee" or
-   machine_name == "apple2gsr0" or 
-   machine_name == "apple2gsr1" or 
-   machine_name == "apple2gs" or 
-   machine_name == "apple2c" or 
-   machine_name == "ace1000" then
-
-  is_in_graphics_mode = function()
-    if apple2.ReadSSW("RDTEXT") < 128 then
-      return true
-    end
-    return false
-  end
-
-  is_in_text_mode = function()
-    if apple2.ReadSSW("RDTEXT") >= 128 then
-      return true
-    end
-    return false
-  end
-
-elseif machine_name == "apple2" or machine_name == "apple2p" then
-
-  local mem = manager.machine.devices[':maincpu'].spaces['program']
-  local a2 = { text = true, mixed = false, page2 = false, hires = false }
-
-  local function handle_softsw(offset, data, mask)
+function handle_softsw(offset, data, mask)
     local addr = offset
     if     addr == 0xC050 then a2.text  = false
     elseif addr == 0xC051 then a2.text  = true
@@ -51,19 +22,17 @@ elseif machine_name == "apple2" or machine_name == "apple2p" then
     elseif addr == 0xC056 then a2.hires = false
     elseif addr == 0xC057 then a2.hires = true
     end
-  end
+end
 
-  local read_tap  = mem:install_read_tap(0xC050, 0xC057, "a2_softsw_r", handle_softsw)
-  local write_tap = mem:install_write_tap(0xC050, 0xC057, "a2_softsw_w", handle_softsw)
+read_tap  = mem:install_read_tap(0xC050, 0xC057, "a2_softsw_r", handle_softsw)
+write_tap = mem:install_write_tap(0xC050, 0xC057, "a2_softsw_w", handle_softsw)
 
-  is_in_graphics_mode = function()
+function is_in_graphics_mode()
     return not a2.text
-  end
+end
 
-  is_in_text_mode = function()
+function is_in_text_mode()
     return a2.text
-  end
-
 end
 
 function replay.ScreenContains(s)
