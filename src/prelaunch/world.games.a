@@ -27,7 +27,7 @@
          jsr   DisableAccelerator
          jsr   HideLaunchArtworkLC2
          inc   $BF0E      ; disable ROM remapping
-         inc   $D6A       ; set power up byte to reboot
+         inc   $D6B       ; set power up byte to reboot
          jmp   $BF5
 
 game     !byte 7
