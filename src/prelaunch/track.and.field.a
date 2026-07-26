@@ -1,0 +1,21 @@
+;license:MIT
+;(c) 2026 by qkumba
+
+!cpu 6502
+!to "build/PRELAUNCH.INDEXED/TRACK.AND.FIELD",plain
+*=$106
+
+         !source "src/macros.a"
+
+         +ENABLE_ACCEL
+         lda   #$60
+         sta   $8B3
+         jsr   $80C     ; decompress
+         lda   #$6C
+         sta   $A648
+         +DISABLE_ACCEL_AND_HIDE_ARTWORK
+         jmp   $800
+
+!if * > PrelaunchMax {
+  !error "code is too large, ends at ", *
+}
